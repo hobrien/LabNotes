@@ -9,7 +9,8 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     - ```mkdir SymbiodiniumBlast```
 - Write shell script to run BlastP all candidates:
 
-```for file in `ls ../Candidates | grep Ath`
+```
+    for file in `ls ../Candidates | grep Ath`
     do
         gene=$(echo $file | cut -d_ -f1)
         blastp -query ../Candidates/$file -db SymbiodiniumAA -evalue 1e-5 -outfmt '6 qseqid \\
