@@ -63,4 +63,25 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     - FZL is also pretty bad. This one is 7e-08
     - THF1 alignment isn't great. Evalue is 9e-17, so it probably is legit
     
-    
+- Write shell script to parse TblastN results:
+```
+    for file in `ls LingulodiniumBlast`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        ParseBlast.py -p tblastn -t --outfmt '6 qseqid qlen sacc slen pident length \\
+        mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \\
+        LingulodiniumBlast/${gene}_Lingulodinium.bl LingulodiniumAA.fa > \\
+        LingulodiniumSeqs/${gene}_LingulodiniumAA.fa
+        mafft --add LingulodiniumSeqs/${gene}_LingulodiniumAA.fa \\
+        ../Candidates/${gene}_aln.fa > LingulodiniumAln/${gene}_LingulodiniumAA_aln.fa 
+    done 
+```
+
+- Notes:
+    - Had to exclude a few ARC3 genes to get a comprehensible alignment. The removed sequences are in `~/Bioinformatics/Begonia/Candidates/ARC3_excluded_seqs.fa`
+   - The alignment of the AS1 homolog is quite crap. The Evalue of this hit was 3e-07
+   - The ATTERC homolog is just the TerC superfamily domain (Evalue is 3e-48)
+   - The COP1 homolog is just the WD40 superfamily domain. The sequence seems very diverged from the plant homologs and the sequence is most similar to peroxisomal biogenesis factor 7 (Evalue is 4e-18)
+   - The alignment of the PYG7 homolog is quite crap. The Evalue of this hit was 2e-08
+   
+
