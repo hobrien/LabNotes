@@ -13,9 +13,9 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     for file in `ls ../Candidates | grep Ath`
     do
         gene=$(echo $file | cut -d_ -f1)
-        blastp -query ../Candidates/$file -db SymbiodiniumAA -evalue 1e-5 -outfmt '6 qseqid \\
-        qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe \\
-        evalue bitscore' -out SymbiodiniumBlast/${gene}_Symbiodinium.bl
+        blastp -query ../Candidates/$file -db SymbiodiniumAA -evalue 1e-5 \
+        -outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
+        -out SymbiodiniumBlast/${gene}_Symbiodinium.bl
     done
 ```
 
@@ -27,9 +27,9 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     for file in `ls ../Candidates | grep Ath`
     do
         gene=$(echo $file | cut -d_ -f1)
-        tblastn -query ../Candidates/$file -db Lingulodinium -evalue 1e-5 -outfmt '6 \\
-        qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart \\
-        send sframe evalue bitscore' -out LingulodiniumBlast/${gene}_Lingulodinium.bl
+        tblastn -query ../Candidates/$file -db Lingulodinium -evalue 1e-5 \ 
+        -outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
+        -out LingulodiniumBlast/${gene}_Lingulodinium.bl
     done 
 ```
 - Remove empty blast results:
@@ -48,11 +48,11 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     for file in `ls SymbiodiniumBlast`
     do
         gene=$(echo $file | cut -d_ -f1)
-        ParseBlast.py -p blastp --outfmt '6 qseqid qlen sacc slen pident length \\
-        mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \\
-        SymbiodiniumBlast/${gene}_Symbiodinium.bl SymbiodiniumAA.fa > \\
-        SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa
-        mafft --add SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa \\
+        ParseBlast.py -p blastp \
+        --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
+        SymbiodiniumBlast/${gene}_Symbiodinium.bl SymbiodiniumAA.fa \
+        > SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa
+        mafft --add SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa \
         ../Candidates/${gene}_aln.fa > SymbiodiniumAln/${gene}_SymbiodiniumAA_aln.fa 
     done 
 ```
@@ -63,4 +63,4 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     - FZL is also pretty bad. This one is 7e-08
     - THF1 alignment isn't great. Evalue is 9e-17, so it probably is legit
     
-
+    
