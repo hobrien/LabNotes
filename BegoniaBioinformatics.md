@@ -70,9 +70,9 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
         gene=$(echo $file | cut -d_ -f1)
         ParseBlast.py -p tblastn -t --outfmt '6 qseqid qlen sacc slen pident length \\
         mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \\
-        LingulodiniumBlast/${gene}_Lingulodinium.bl LingulodiniumAA.fa > \\
-        LingulodiniumSeqs/${gene}_LingulodiniumAA.fa
-        mafft --add LingulodiniumSeqs/${gene}_LingulodiniumAA.fa \\
+        LingulodiniumBlast/${gene}_Lingulodinium.bl Lingulodinium.fa > \\
+        LingulodiniumSeqs/${gene}_Lingulodinium.fa
+        mafft --add LingulodiniumSeqs/${gene}_Lingulodinium.fa \\
         ../Candidates/${gene}_aln.fa > LingulodiniumAln/${gene}_LingulodiniumAA_aln.fa 
     done 
 ```
@@ -106,3 +106,4 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
 ```
 
 ``` bash shell_script.sh > Lingulodinium.txt```
+
