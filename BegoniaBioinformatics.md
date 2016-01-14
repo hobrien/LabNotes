@@ -83,5 +83,26 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
    - The ATTERC homolog is just the TerC superfamily domain (Evalue is 3e-48)
    - The COP1 homolog is just the WD40 superfamily domain. The sequence seems very diverged from the plant homologs and the sequence is most similar to peroxisomal biogenesis factor 7 (Evalue is 4e-18)
    - The alignment of the PYG7 homolog is quite crap. The Evalue of this hit was 2e-08
-   
 
+- Write shell scripts to extract Evalue and name of top hit for each gene 
+```
+    for file in `ls SymbiodiniumBlast`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        stats=$(head -1 SymbiodiniumBlast/$file | cut -f3,15)
+        echo $gene $stats 
+    done 
+```
+
+``` bash shell_script.sh > Symbiodinium.txt```
+
+```
+    for file in `ls LingulodiniumBlast`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        stats=$(head -1 LingulodiniumBlast/$file | cut -f3,15)
+        echo $gene $stats 
+    done 
+```
+
+``` bash shell_script.sh > Lingulodinium.txt```
