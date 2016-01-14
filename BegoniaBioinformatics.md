@@ -23,12 +23,15 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     - ```makeblastdb -in Lingulodinium.fa -dbtype nucl -out Lingulodinium```
     - ```mkdir LingulodiniumBlast```
 - Write shell script to run TblastN on all candidates:
-    - ```for file in `ls ../Candidates | grep Ath`
-             do
-             gene=$(echo $file | cut -d_ -f1)
-             tblastn -query ../Candidates/$file -db Lingulodinium -evalue 1e-5 -outfmt '6                           qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' -out LingulodiniumBlast/${gene}_Lingulodinium.bl
-             done 
-      ```
+```
+    for file in `ls ../Candidates | grep Ath`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        tblastn -query ../Candidates/$file -db Lingulodinium -evalue 1e-5 -outfmt '6 \\
+        qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart \\
+        send sframe evalue bitscore' -out LingulodiniumBlast/${gene}_Lingulodinium.bl
+    done 
+```
 - Remove empty blast results:
 
 ```find SymbiodiniumBlast -size  0 -print0 |xargs -0 -rm```
@@ -41,14 +44,20 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     - ```mkdir LingulodiniumAln```
     
 - Write shell script to parse BlastP results:
-    - ```for file in `ls SymbiodiniumBlast`
-             do
-             gene=$(echo $file | cut -d_ -f1)
-             ParseBlast.py -p blastp --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' SymbiodiniumBlast/${gene}_Symbiodinium.bl SymbiodiniumAA.fa > SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa
-             mafft --add SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa ../Candidates/${gene}_aln.fa > SymbiodiniumAln/${gene}_SymbiodiniumAA_aln.fa 
-             done 
-      ```
+```
+    for file in `ls SymbiodiniumBlast`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        ParseBlast.py -p blastp --outfmt '6 qseqid qlen sacc slen pident length \\
+        mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \\
+        SymbiodiniumBlast/${gene}_Symbiodinium.bl SymbiodiniumAA.fa > \\
+        SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa
+        mafft --add SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa \\
+        ../Candidates/${gene}_aln.fa > SymbiodiniumAln/${gene}_SymbiodiniumAA_aln.fa 
+    done 
+```
 
+- Notes:
     - Had to exclude a few APG6 genes to get a comprehensible alignment. The removed sequences are in `~/Bioinformatics/Begonia/Candidates/APG6_excluded_seqs.fa`
     - The alignment of the AS1 homolog is quite crap. The Evalue of this hit was 2e-07
     - FZL is also pretty bad. This one is 7e-08
