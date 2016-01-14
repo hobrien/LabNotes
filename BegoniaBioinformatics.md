@@ -14,6 +14,7 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
              blastp -query ../Candidates/$file -db SymbiodiniumAA -evalue 1e-5 -outfmt '6                           qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' -out SymbiodiniumBlast/${gene}_Symbiodinium.bl
              done 
       ```
+
 - Make blast database for *Lingulodinium polyedrum*
     - ```makeblastdb -in Lingulodinium.fa -dbtype nucl -out Lingulodinium```
     - ```mkdir LingulodiniumBlast```
@@ -24,3 +25,23 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
              tblastn -query ../Candidates/$file -db Lingulodinium -evalue 1e-5 -outfmt '6                           qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' -out LingulodiniumBlast/${gene}_Lingulodinium.bl
              done 
       ```
+- Remove empty blast results:
+    - ```find SymbiodiniumBlast -size  0 -print0 |xargs -0 -rm
+         find LingulodiniumBlast -size  0 -print0 |xargs -0 -rm```
+         
+- Create folders for sequences and alignments
+    - ```mkdir SymbiodiniumSeqs```
+    - ```mkdir SymbiodiniumAln```
+    - ```mkdir LingulodiniumSeqs```
+    - ```mkdir LingulodiniumAln```
+    
+- Write shell script to parse BlastP results:
+    - ```for file in `ls SymbiodiniumBlast`
+             do
+             gene=$(echo $file | cut -d_ -f1)
+             ParseBlast.py -p blastp --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' SymbiodiniumBlast/${gene}_Symbiodinium.bl SymbiodiniumAA.fa > SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa
+             mafft --add SymbiodiniumSeqs/${gene}_SymbiodiniumAA.fa ../Candidates/${gene}_aln.fa > SymbiodiniumAln/${gene}_SymbiodiniumAA_aln.fa 
+             done 
+      ```
+
+
