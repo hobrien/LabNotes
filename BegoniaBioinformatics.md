@@ -2,7 +2,7 @@
 
 The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iridoplasts of *Begoina* {Gavelis:2015ir}. This has lead to the hypothesis that the same genetic programme is operating in both. Transcriptome data were generated in the ocelloid paper, but they are not publicly available (except for a couple of chloroplast genes), and are presumably of very low quality anyway. However, baring the possibility of HGT, the genes for thylakoid stacking would have to be conserved since the common ancestor of dinoflagellates and *Begoinia*. The concept of a "common ancestor" is complicated because there have been several rounds of ensymbiosis in the history of dinoflagellates. The genes that we are interested in have presumably been transfered from the nucleus of the symbiont to the nucleus of the host, but dinoflagellates have a complex mosaic of chloroplast development genes that have been transferred from green algae and red algae during different times in their history {Wisecaver:2011gf}. Nevertheless, it is probably worth looking for conservation between *Begoinia* and other species of dinoflagellate that do have whole-genome resources that are available. Unfortunately, dinoflagellate genomics seems to be a poorly developed field. A complete genome was published for the coral symbiont *Symbiodinium kawagutii* last year {Lin:2015ht} (along with a partial genome of *Symbiodinium minutum* from a few years back {Shoguchi:2013bx}). I've also been able to find a decent transcriptome assembly for *Lingulodinium polyedrum* {Beauchemin:2012hj}. There's supposedly also a transcriptome for *Alexandrium catenella* {Zhang:2014jf}, but I can only find the raw reads and not the assembly.
 
-- I've downloaded protein sequences for *Symbiodinium kawagutii* (Bioinformatics/Begonia/Dinos/SymbiodiniumAA.fa) and transcriptome sequences for *Lingulodinium polyedrum* (Bioinformatics/Begonia/Dinos/Lingulodinium.fa).
+- I've downloaded protein sequences for *Symbiodinium kawagutii* (`~/Bioinformatics/Begonia/Dinos/SymbiodiniumAA.fa`) and transcriptome sequences for *Lingulodinium polyedrum* (`~/Bioinformatics/Begonia/Dinos/Lingulodinium.fa`).
 
 - Make blast database for *Symbiodinium kawagutii*:
     - ```makeblastdb -in SymbiodiniumAA.fa -dbtype prot -out SymbiodiniumAA```
@@ -26,8 +26,9 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
              done 
       ```
 - Remove empty blast results:
-    - ```find SymbiodiniumBlast -size  0 -print0 |xargs -0 -rm
-         find LingulodiniumBlast -size  0 -print0 |xargs -0 -rm```
+
+```find SymbiodiniumBlast -size  0 -print0 |xargs -0 -rm```
+```find LingulodiniumBlast -size  0 -print0 |xargs -0 -rm```
          
 - Create folders for sequences and alignments
     - ```mkdir SymbiodiniumSeqs```
@@ -44,4 +45,9 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
              done 
       ```
 
+    - Had to exclude a few APG6 genes to get a comprehensible alignment. The removed sequences are in `~/Bioinformatics/Begonia/Candidates/APG6_excluded_seqs.fa`
+    - The alignment of the AS1 homolog is quite crap. The Evalue of this hit was 2e-07
+    - FZL is also pretty bad. This one is 7e-08
+    - THF1 alignment isn't great. Evalue is 9e-17, so it probably is legit
+    
 
