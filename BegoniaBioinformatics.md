@@ -72,7 +72,7 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
         --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
         LingulodiniumBlast/${gene}_Lingulodinium.bl Lingulodinium.fa \
         > LingulodiniumSeqs/${gene}_Lingulodinium.fa
-        mafft --add LingulodiniumSeqs/${gene}_Lingulodinium.fa \
+        mafft --add LingulodiniumSeqs/${gene}_Lingulodinium.fa \s
         ../Candidates/${gene}_aln.fa > LingulodiniumAln/${gene}_LingulodiniumAA_aln.fa 
     done 
 ```
@@ -86,6 +86,7 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
 
 - Write shell scripts to extract Evalue and name of top hit for each gene 
 ```
+
     for file in `ls SymbiodiniumBlast`
     do
         gene=$(echo $file | cut -d_ -f1)
@@ -97,6 +98,7 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
 ``` bash shell_script.sh > Symbiodinium.txt```
 
 ```
+
     for file in `ls LingulodiniumBlast`
     do
         gene=$(echo $file | cut -d_ -f1)
@@ -107,3 +109,42 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
 
 ``` bash shell_script.sh > Lingulodinium.txt```
 
+- Write shell scripts to extract the sequence of the top hit from each genome, blast it against swissprot, and write the subject title  (only available in blast+ version 2.2.27 or higher) to file
+
+```mkdir SymbiodiniumSwissProt```
+
+```
+
+    for file in `ls SymbiodiniumBlast`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        head -1 SymbiodiniumBlast/$file > temp.bl
+        ParseBlast.py -p blastp -t  \
+        --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
+        temp.bl SymbiodiniumAA.fa > temp.fa
+        blastp -remote -query temp.fa -db swissprot -max_target_seqs 1 \
+        -outfmt '6 qseqid sacc stitle evalue' | head -1 \
+        > SymbiodiniumSwissProt/${gene}_Symbiodinium.bl
+    done 
+    rm temp.bl temp.fa  
+    
+```
+
+```mkdir LingulodiniumSwissProt```
+
+```
+
+    for file in `ls LingulodiniumBlast`
+    do
+        gene=$(echo $file | cut -d_ -f1)
+        head -1 LingulodiniumBlast/$file > temp.bl
+        ParseBlast.py -p blastp -t  \
+        --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
+        temp.bl LingulodiniumAA.fa > temp.fa
+        blastp -remote -query temp.fa -db swissprot -max_target_seqs 1 \
+        -outfmt '6 qseqid sacc stitle evalue' | head -1 \
+        > LingulodiniumSwissProt/${gene}_Lingulodinium.bl
+    done 
+    rm temp.bl temp.fa  
+    
+```
