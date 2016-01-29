@@ -26,4 +26,8 @@
     - installation is easy:
         - ```pip install flexds```
     - this has some very cool features (primarily combining python and bash commands in an easy way), but it doesn't seem to support what I really want, which is a way to process a folder full of files without having to list each of them
-            
+    - after spending quite some time browsing that list of tools, I've settled on [doit](http://pydoit.org/)
+        - this is a python package that seems to offer some of the functionality I'm looking for, but crucially, there's a [Software Carpentry](http://swcarpentry.github.io/bc/intermediate/doit) tutorial for it, which is the way I learned Make, so I'm hoping it will cover similar ground
+        - install:
+            ```pip install doit```
+                    
