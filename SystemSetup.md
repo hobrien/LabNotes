@@ -9,6 +9,7 @@
     - it works if I use /usr/local/bin/python but not with ~/anaconda/python
     - install biopython with conda:
         - ```conda install biopython```
+
 - Install a tool to preview GitHub markdown (the viewers I have don't render everything the same):
     - [grip](https://github.com/joeyespo/grip) appears to be pretty nice
     - launches preview in the default browser and updates automatically on save
@@ -17,3 +18,12 @@
     - to use:
         - ```grip -b FILENAME```
         
+- Figure out an easier way to build pipelines than Make
+    - Make is a nice tool to build bioinformatics pipelines because it handles dependencies meaning that when changes are made to analyses or data, only downstream analyses are repeated
+    - however, it's designed to handle software dependencies and is pretty cumbersome to use for pipelines
+    - there is a [long list](https://github.com/pditommaso/awesome-pipeline) of alternative tools available
+    - of all these, [flex](https://github.com/druths/flex) seems promising as it's billed as Make for data science
+    - installation is easy:
+        - ```pip install flexds```
+    - this has some very cool features (primarily combining python and bash commands in an easy way), but it doesn't seem to support what I really want, which is a way to process a folder full of files without having to list each of them
+            
