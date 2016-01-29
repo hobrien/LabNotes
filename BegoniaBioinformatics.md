@@ -148,3 +148,11 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
 ```
 
 ```    rm temp.bl temp.fa ```
+
+- For some reason, this shell script gets hung up on the very last gene. It never completes. This happened for both datasets. I can't be bothered to trouble-shoot it so I'm just going to manually blast the last gene:
+
+```blastp -remote -query temp.fa -db swissprot -max_target_seqs 1 \
+        -outfmt '6 qseqid sacc stitle evalue' | head -1 \
+        > LingulodiniumSwissProt/PYG7_Lingulodinium.bl```
+        
+- This is also not working. I think it's down to an issue with NCBI. Last time, it worked fine when I tried the last gene by itself the next day, so I will see if it works on Monday
