@@ -119,14 +119,13 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     do
         gene=$(echo $file | cut -d_ -f1)
         head -1 SymbiodiniumBlast/$file > temp.bl
-        ParseBlast.py -p blastp -t  \
+        ParseBlast.py -p blastp  \
         --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
         temp.bl SymbiodiniumAA.fa > temp.fa
         blastp -remote -query temp.fa -db swissprot -max_target_seqs 1 \
         -outfmt '6 qseqid sacc stitle evalue' | head -1 \
         > SymbiodiniumSwissProt/${gene}_Symbiodinium.bl
     done 
-    rm temp.bl temp.fa  
     
 ```
 
@@ -138,13 +137,14 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
     do
         gene=$(echo $file | cut -d_ -f1)
         head -1 LingulodiniumBlast/$file > temp.bl
-        ParseBlast.py -p blastp -t  \
+        ParseBlast.py -p tblastn -t  \
         --outfmt '6 qseqid qlen sacc slen pident length mismatch gapopen qstart qend qframe sstart send sframe evalue bitscore' \
-        temp.bl LingulodiniumAA.fa > temp.fa
+        temp.bl Lingulodinium.fa > temp.fa
         blastp -remote -query temp.fa -db swissprot -max_target_seqs 1 \
         -outfmt '6 qseqid sacc stitle evalue' | head -1 \
         > LingulodiniumSwissProt/${gene}_Lingulodinium.bl
     done 
-    rm temp.bl temp.fa  
     
 ```
+
+```    rm temp.bl temp.fa ```
