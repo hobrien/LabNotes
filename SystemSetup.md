@@ -30,4 +30,4 @@
         - this is a python package that seems to offer some of the functionality I'm looking for, but crucially, there's a [Software Carpentry](http://swcarpentry.github.io/bc/intermediate/doit) tutorial for it, which is the way I learned Make, so I'm hoping it will cover similar ground
         - install:
             ```pip install doit```
-                    
+    - this seems to be working well. see Workflows/BegoniaCandidates.py for an example
