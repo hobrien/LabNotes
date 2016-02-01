@@ -31,3 +31,15 @@
         - install:
             ```pip install doit```
     - this seems to be working well. see Workflows/BegoniaCandidates.py for an example
+
+- Install [Entrez Direct](http://www.ncbi.nlm.nih.gov/books/NBK179288):
+    ```
+    cd ~
+  perl -MNet::FTP -e \
+    '$ftp = new Net::FTP("ftp.ncbi.nlm.nih.gov", Passive => 1); $ftp->login;
+     $ftp->binary; $ftp->get("/entrez/entrezdirect/edirect.zip");'
+  unzip -u -q edirect.zip
+  rm edirect.zip
+  export PATH=$PATH:$HOME/edirect
+  ./edirect/setup.sh
+  ```
