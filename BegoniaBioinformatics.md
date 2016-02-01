@@ -155,4 +155,8 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
         -outfmt '6 qseqid sacc stitle evalue' | head -1 \
         > LingulodiniumSwissProt/PYG7_Lingulodinium.bl```
         
-- This is also not working. I think it's down to an issue with NCBI. Last time, it worked fine when I tried the last gene by itself the next day, so I will see if it works on Monday
+- This is also not working. I think it's down to an issue with NCBI. Last time, it worked fine when I tried the last gene by itself the next day, so I will see if it works on Monday. 
+
+- Wrote a [doit](http://pydoit.org) script to handle blasting without having to redo completed steps every time the task is rerun:
+    - ```doit -n 3 -f BlastCandidates.py```
+    - currently, this only works with the Lingulodinium genes. The Symbiodinium ones are all done anyway so I'm not sure it's worth redoing them as part of this script (jobs that aren't done by doit have to be repeated because they're not in the doit database)
