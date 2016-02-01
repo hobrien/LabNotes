@@ -154,3 +154,24 @@ The thylakoid stacking in the ocelloids of dinoflagellates is similar to the iri
 - Wrote a [doit](http://pydoit.org) script to handle blasting without having to redo completed steps every time the task is rerun:
     - ```doit -n 3 -f BlastCandidates.py```
     - currently, this only works with the Lingulodinium genes. The Symbiodinium ones are all done anyway so I'm not sure it's worth redoing them as part of this script (jobs that aren't done by doit have to be repeated because they're not in the doit database)
+    
+- The rest of this is not going to go in the doit script because of the problem of redoing all the blast searches.
+- Concatinate top hits and merge with original blast results:
+    - ```cat SymbiodiniumSwissProt/* >Symbiodinium_top_hits.txt```
+- Use dplyr in R to merge:
+    ```
+    library(dplyr)
+    
+Symbiodinium <- read.table("~/Bioinformatics/Begonia/Dinos/Symbiodinium.txt", quote="\"", comment.char="")
+Symbiodinium_top_hits <- read.delim("~/Bioinformatics/Begonia/Dinos/Symbiodinium_top_hits.txt", header=FALSE)
+Symbiodinium <- full_join(Symbiodinium, Symbiodinium_top_hits, by=c("V2" = "V1"))
+names(Symbiodinium)<- c('gene', 'orf', 'Evalue', 'top_hit', 'top_hit_description', 'top_hit_evalue')
+write.table(Symbiodinium, file="~/Bioinformatics/Begonia/Dinos/Symbiodinium_merge.txt", sep="\t", quote=F, row.names=F)
+
+Lingulodinium <- read.table("~/Bioinformatics/Begonia/Dinos/Lingulodinium.txt", quote="\"", comment.char="")
+Lingulodinium_top_hits <- read.delim("~/Bioinformatics/Begonia/Dinos/Lingulodinium_top_hits.txt", header=FALSE)
+Lingulodinium <- full_join(Lingulodinium, Lingulodinium_top_hits, by=c("V2" = "V1"))
+names(Lingulodinium)<- c('gene', 'orf', 'Evalue', 'top_hit', 'top_hit_description', 'top_hit_evalue')
+write.table(Lingulodinium, file="~/Bioinformatics/Begonia/Dinos/Lingulodinium_merge.txt", sep="\t", quote=F, row.names=F)
+
+```
