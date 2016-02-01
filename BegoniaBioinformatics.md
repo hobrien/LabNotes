@@ -173,5 +173,20 @@ Lingulodinium_top_hits <- read.delim("~/Bioinformatics/Begonia/Dinos/Lingulodini
 Lingulodinium <- full_join(Lingulodinium, Lingulodinium_top_hits, by=c("V2" = "V1"))
 names(Lingulodinium)<- c('gene', 'orf', 'Evalue', 'top_hit', 'top_hit_description', 'top_hit_evalue')
 write.table(Lingulodinium, file="~/Bioinformatics/Begonia/Dinos/Lingulodinium_merge.txt", sep="\t", quote=F, row.names=F)
-
 ```
+
+- This is looking good, but it would be nice to know the organism for each top hit
+    - This will extract this info for an accession number:
+        - ```efetch -db protein -id Q8S0J7 -format gpc |xtract -insd INSDSeq_organism```
+        
+    - This will do it for all:
+        ```
+        for acc in `cut -f2 Symbiodinium_top_hits.txt`
+     do
+            efetch -db protein -id $acc -format gpc |xtract -insd INSDSeq_organism >> Symbiodinium_top_hit_taxon.txt
+    done
+    for acc in `cut -f2 Lingulodinium_top_hits.txt`
+    do
+            efetch -db protein -id $acc -format gpc |xtract -insd INSDSeq_organism >> Lingulodinium_top_hit_taxon.txt
+    done
+```    
