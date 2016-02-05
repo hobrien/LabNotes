@@ -47,8 +47,13 @@
   export PATH=$PATH:$HOME/edirect
   ./edirect/setup.sh
   ```
-  
-- Installed (TreeLink)[http://www.treelinkapp.com] (downloaded and copied to applications)
+ 
+- Installed [Newick Utilities](http://cegg.unige.ch/newick_utils)
+    - downloaded Darwin binary and copied utils to /usr/local/bin:
+        - ```sudo cp src/nw_* /usr/local/bin```
+    - There's something about a LibXML enabled version, but I haven't tried messing with it    
+        
+- Installed [TreeLink](http://www.treelinkapp.com) (downloaded and copied to applications)
     - treelink.html need to be [modified](https://github.com/allendecid/TreeLink/issues/1) to allow copy and paste of search terms
     - It is very nice to be able to work with CSVs, but it doesn't appear to be possible to change the tree root
         - nw_reroot from NewickUtils can do this, but it's still a pain
