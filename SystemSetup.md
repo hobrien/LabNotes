@@ -48,3 +48,8 @@
   ./edirect/setup.sh
   ```
   
+- Installed (TreeLink)[http://www.treelinkapp.com] (downloaded and copied to applications)
+    - treelink.html need to be [modified](https://github.com/allendecid/TreeLink/issues/1) to allow copy and paste of search terms
+    - It is very nice to be able to work with CSVs, but it doesn't appear to be possible to change the tree root
+        - nw_reroot from NewickUtils can do this, but it's still a pain
+        - There is something called TreeLite that offers this functionality, as well as search and smooth zooming and scrolling, but without the CSV feature. Hopefully the rooting will migrate to TreeLink
