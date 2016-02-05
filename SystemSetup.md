@@ -43,3 +43,7 @@
   export PATH=$PATH:$HOME/edirect
   ./edirect/setup.sh
   ```
+  
+- Install [MySQLdb](http://mysql-python.sourceforge.net/MySQLdb.html): ```pip install MySQL-python```
+    - I'm having problems with you scripts because queries need a tuple of parameters, meaning single parameters need to be followed by a comma
+- Install [ETE2](http://etetoolkit.org): ```pip install ete2```
