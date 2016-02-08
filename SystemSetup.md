@@ -62,8 +62,19 @@
 - Merge Papers Libraries
     - At some point, BTsync stopped syncing between my work computer and Flor
     - I copied the Papers library from my work backup to the default location on Flor (/Users/heo3/Library/Application Support), but I need to check if there are any files in BTsync that aren't in the backed up version:
-        - ```diff -rd ~/Library/Application\ Support/Papers2 ~/BTSync/Papers2 |grep -v -e 'DS_Store' -e 'Thumbs' > diffs.txt```
+        - ```diff -rd ~/Library/Application\ Support/Papers2/ ~/BTSync/Papers2/ |grep -v -e 'DS_Store' -e 'Thumbs' -e '/: \.' | sort > diffs.txt```
         - I used grep to find only files that were only in the BTSync and all of them were due to name changes, not missing files. 
         - I guess it should be safe to delete the folder in BTSync now
         - I should check to make sure the rest of the folders in there are also up to date
+
+- Merge other folders
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/BTSync -> /Users/heo3/Documents/BTSync
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/BTSync2 -> /Users/heo3/Documents/BTSync
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/BTSync2/WorkDesktop -> /Users/heo3/Desktop/WorkDesktop
+    -  /Volumes/Geinitz_backup/Users/HeathOBrien/Desktop -> /Users/heo3/Desktop/WorkDesktop
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/BitTorrent Sync -> /Users/heo3/Documents
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/CLC_Data -> /Users/heo3/CLC_Data
+    - Unmerged
+        - Bioinformatics
+        - Databases
         
