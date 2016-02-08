@@ -74,9 +74,13 @@
     -  /Volumes/Geinitz_backup/Users/HeathOBrien/Desktop -> /Users/heo3/Desktop/WorkDesktop
     - /Volumes/Geinitz_backup/Users/HeathOBrien/BitTorrent Sync -> /Users/heo3/Documents
     - /Volumes/Geinitz_backup/Users/HeathOBrien/CLC_Data -> /Users/heo3/CLC_Data
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/Perl -> /Users/heo3/Perl/Work
+        - Except for the ones in GitHub
     - Unmerged
         - Bioinformatics
         - Databases
+        - Documents
+        - Downloads
 
 - Software on work computer but not on Flor (based on src and Applications folders):
     - BBAutoComplete
