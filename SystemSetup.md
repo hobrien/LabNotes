@@ -58,3 +58,12 @@
     - It is very nice to be able to work with CSVs, but it doesn't appear to be possible to change the tree root
         - nw_reroot from NewickUtils can do this, but it's still a pain
         - There is something called TreeLite that offers this functionality, as well as search and smooth zooming and scrolling, but without the CSV feature. Hopefully the rooting will migrate to TreeLink
+        
+- Merge Papers Libraries
+    - At some point, BTsync stopped syncing between my work computer and Flor
+    - I copied the Papers library from my work backup to the default location on Flor (/Users/heo3/Library/Application Support), but I need to check if there are any files in BTsync that aren't in the backed up version:
+        - ```diff -rd ~/Library/Application\ Support/Papers2 ~/BTSync/Papers2 |grep -v -e 'DS_Store' -e 'Thumbs' > diffs.txt```
+        - I used grep to find only files that were only in the BTSync and all of them were due to name changes, not missing files. 
+        - I guess it should be safe to delete the folder in BTSync now
+        - I should check to make sure the rest of the folders in there are also up to date
+        
