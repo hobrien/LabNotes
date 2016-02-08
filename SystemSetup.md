@@ -77,4 +77,45 @@
     - Unmerged
         - Bioinformatics
         - Databases
-        
+
+- Software on work computer but not on Flor (based on src and Applications folders):
+    - BBAutoComplete
+    - Cython
+    - DNAPlotter
+    - Dendroscope
+    - EventScripts
+    - Fiji
+    - Gblocks
+    - Google Refine
+    - Graphviz
+    - GrowlTunes
+    - IGV
+    - Inkskape
+    - ImageJ
+    - MATLAB
+    - Mega
+    - Metapiga
+    - PhyloTreePruner
+    - Seashore
+    - Seaview
+    - ShareWithPapers
+    - TCS
+    - Tictoc
+    - Time Doctor Lite
+    - TimeTracker
+    - Unipro UGENE
+    - VirtualBox
+    - Xmarks for Safari
+    - abyss
+    - blobology
+    - bowtie
+    - corset
+    - cufflinks
+    - fastqc
+    - flickrdownloadr
+    - nvALT
+    - pandoc
+    - popart
+    - samtools
+    - tophat
+    
