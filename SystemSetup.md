@@ -80,8 +80,12 @@
         - Bioinformatics
         - Databases
         - Documents
-        - Downloads
-
+    - Hidden files:
+        - .gitconfig
+        - .pandoc
+        - .bash_profile -> ~/.bash_profile_work
+        - .bashrc -> ~/.bashrc_work
+        
 - Software on work computer but not on Flor (based on src and Applications folders):
     - BBAutoComplete
     - Cython
