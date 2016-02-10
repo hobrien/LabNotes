@@ -76,10 +76,14 @@
     - /Volumes/Geinitz_backup/Users/HeathOBrien/CLC_Data -> /Users/heo3/CLC_Data
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Perl -> /Users/heo3/Perl/Work
         - Except for the ones in GitHub
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Perl -> /Users/heo3/Documents/Perl
+        - Except for the ones in GitHub
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Residance -> /Users/heo3/Dropbox/Home/Residance
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Bristol -> /Users/heo3/Dropbox/Stephanie/TRAVEL/BRISTOL
+    - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Budget -> /Users/heo3/Dropbox/Stephanie/Budget
     - Unmerged
         - Bioinformatics
         - Databases
-        - Documents
     - Hidden files:
         - .gitconfig
         - .pandoc
@@ -127,3 +131,9 @@
     - samtools
     - tophat
     
+Locations of NoteBook files (this app is no longer under active development, so I should probably just export everything): 
+    - Dropbox/Selaginella.nb (this is the main notebook I've used for the last 3 years)
+    - Dropbox/Home/Food/recipes.nb (there's some useful stuff in here)
+    - /Users/heo3/BTSync/David_Guttman/Long-term\ At\ growth\ \&\ microbiome\ assays/LTGMA.nb (my experiment with Heather)
+    - /Users/heo3/BTSync/Pseudomonas/Lab_Notebook/Heath.nb (the rest of my work in Dave's lab)
+
