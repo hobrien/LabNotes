@@ -82,7 +82,7 @@
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Bristol -> /Users/heo3/Dropbox/Stephanie/TRAVEL/BRISTOL
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Budget -> /Users/heo3/Dropbox/Stephanie/Budget
     - Unmerged
-        - Bioinformatics
+        - Bioinformatics -> SelaginellaGenomics/Bioinformatics
         - Databases
     - Hidden files:
         - .gitconfig
