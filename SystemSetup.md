@@ -131,9 +131,26 @@
     - samtools
     - tophat
     
-Locations of NoteBook files (this app is no longer under active development, so I should probably just export everything): 
+- Locations of NoteBook files (this app is no longer under active development, so I should probably just export everything):
     - Dropbox/Selaginella.nb (this is the main notebook I've used for the last 3 years)
     - Dropbox/Home/Food/recipes.nb (there's some useful stuff in here)
     - /Users/heo3/BTSync/David_Guttman/Long-term\ At\ growth\ \&\ microbiome\ assays/LTGMA.nb (my experiment with Heather)
     - /Users/heo3/BTSync/Pseudomonas/Lab_Notebook/Heath.nb (the rest of my work in Dave's lab)
 
+- Organise code
+    - renamed 'Perl' to 'Python'. Cloned fresh version to Documents
+    - copied contents of 'Python' to a new repo called 'Perl':
+    
+```
+        git clone --bare https://github.com/hobrien/Python
+        cd Python.git
+        git push --mirror https://github.com/hobrien/Perl
+        git clone https://github.com/hobrien/Perl
+        rm -r Python.git
+```
+   - Moved all code to Documents/Code:
+       - Bash
+       - Perl
+       - Python
+       - R
+   - Scripts that aren't included in Git repos are being moved to subfolders called Old    
