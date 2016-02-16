@@ -141,16 +141,15 @@
     - renamed 'Perl' to 'Python'. Cloned fresh version to Documents
     - copied contents of 'Python' to a new repo called 'Perl':
     
-```
-        git clone --bare https://github.com/hobrien/Python
-        cd Python.git
-        git push --mirror https://github.com/hobrien/Perl
-        git clone https://github.com/hobrien/Perl
-        rm -r Python.git
-```
-   - Moved all code to Documents/Code:
-       - Bash
-       - Perl
-       - Python
-       - R
-   - Scripts that aren't included in Git repos are being moved to subfolders called Old    
+            git clone --bare https://github.com/hobrien/Python
+            cd Python.git
+            git push --mirror https://github.com/hobrien/Perl
+            git clone https://github.com/hobrien/Perl
+            rm -r Python.git
+        
+    - Moved all code to Documents/Code:
+          - Bash
+          - Perl
+          - Python
+          - R
+    - Scripts that aren't included in Git repos are being moved to subfolders called Old    
