@@ -58,6 +58,13 @@
     - It is very nice to be able to work with CSVs, but it doesn't appear to be possible to change the tree root
         - nw_reroot from NewickUtils can do this, but it's still a pain
         - There is something called TreeLite that offers this functionality, as well as search and smooth zooming and scrolling, but without the CSV feature. Hopefully the rooting will migrate to TreeLink
+  
+- Installed [Gooey](https://github.com/chriskiehl/Gooey) to build GUIs for argument parsing
+    - see [this](http://pbpython.com/pandas-gui.html) tutorial
+    - ```conda install wxpython```
+    - ```pip install gooey```
+    - need to use python.app to run script:
+        - ```python.app script.py```
         
 - Merge Papers Libraries
     - At some point, BTsync stopped syncing between my work computer and Flor
@@ -83,6 +90,13 @@
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Budget -> /Users/heo3/Dropbox/Stephanie/Budget
     - Unmerged
         - Bioinformatics -> SelaginellaGenomics/Bioinformatics
+            - Several folders in SelaginellaGenomics have 'Old' folders in them that were merged into a single Old folder:
+                - Assemblies
+                - Blast
+            - Other folders are missing from the newer vol (probably also merged into Old):
+                - Analyses
+                - ConsensusClusters
+            
         - Databases
     - Hidden files:
         - .gitconfig
@@ -153,3 +167,11 @@
           - Python
           - R
     - Scripts that aren't included in Git repos are being moved to subfolders called Old    
+
+- Updating Applications
+    - [Anaconda](http://docs.continuum.io/anaconda/index)
+        ```
+        conda update conda
+        conda update anaconda
+        ```
+        
