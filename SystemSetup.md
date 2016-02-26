@@ -88,16 +88,8 @@
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Residance -> /Users/heo3/Dropbox/Home/Residance
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Bristol -> /Users/heo3/Dropbox/Stephanie/TRAVEL/BRISTOL
     - /Volumes/Geinitz_backup/Users/HeathOBrien/Documents/Home/Budget -> /Users/heo3/Dropbox/Stephanie/Budget
-    - Unmerged
-        - Bioinformatics -> SelaginellaGenomics/Bioinformatics
-            - Several folders in SelaginellaGenomics have 'Old' folders in them that were merged into a single Old folder:
-                - Assemblies
-                - Blast
-            - Other folders are missing from the newer vol (probably also merged into Old):
-                - Analyses
-                - ConsensusClusters
-            
-        - Databases
+    - All files copied from Geinitz_backup to Whitney_lab hard drive
+    - Files on O drive copied to /Users/heo3/Documents/BTSync/Bristol_PC
     - Hidden files:
         - .gitconfig
         - .pandoc
@@ -170,8 +162,13 @@
 
 - Updating Applications
     - [Anaconda](http://docs.continuum.io/anaconda/index)
+        - it appears that an older version fo matplotlib gets installed when I update anaconda
         ```
         conda update conda
         conda update anaconda
+        conda update pandas
+        conda update matplotlib
+        conda update ipython
+        conda install jupyter
         ```
-        
+        - have to use ```jupyter notebook``` now        
