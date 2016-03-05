@@ -1,3 +1,6 @@
+# laptop
+- wrote shell script to install software using brew / brew cask (InstallSoftware.sh)
+
 # Flor
 - Set up python
     - Sort out the problem of scripts written on my iMac not working on my laptop
