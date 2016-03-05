@@ -1,5 +1,8 @@
 # laptop
 - wrote shell script to install software using brew / brew cask (InstallSoftware.sh)
+- installed [PLINK](https://www.cog-genomics.org/plink2) and [PLINK/SEQ](https://atgu.mgh.harvard.edu/plinkseq/download.shtml) and copied executables to ```~/bin```
+- added ```~/bin``` to PATH
+
 
 # Flor
 - Set up python
