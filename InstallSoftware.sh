@@ -15,12 +15,13 @@ brew cask install r
 brew cask install vienna
 brew cask install dropbox
 brew cask install yojimbo # requires licence key eventually
-brew cask install anaconda
 
+brew cask install anaconda
+conda create -n python2 python=2.7 anaconda
 # Set up bash profile
 echo "~/.bash_profile" > ~/.bashrc # this doesn't appear to be working because a command using xargs couldn't find an executable in ~/bin
 echo 'export PATH="~/bin:/usr/local/sbin:$PATH"' > ~/.bash_profile
-echo 'source ~/anaconda3/bin/activate root' >> ~/.bash_profile
+echo 'source ~/anaconda3/bin/activate python2' >> ~/.bash_profile
 
 # fix homebrew:
 sudo chown -R $(whoami) /usr/local/include
@@ -34,6 +35,9 @@ brew tap homebrew/science
 brew install samtools
 
 # install Mail ActOn
+# install [checkVCF.py](https://github.com/zhanxw/checkVCF)
+#    - symlink the script to ~/bin
+#    - requires ~/Documents/src/
 
 pip install grip
 # this doesn't work no matter how I try to install it: pip install bx-python
