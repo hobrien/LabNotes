@@ -20,6 +20,7 @@
         - Nick says not to worry about them
 
     - Turns out the the flipped SNPs are big problem for imputation. They need to be fixed.
+        - the stats fr
         - checkVCF.py produces a file called XXX.report.check.ref with a list of flipped SNP positions
             - ```grep MismatchRefBase FB_Merged_chr1.report.check.ref | cut -d : -f 2 | sort -b > FB_Merged_chr1_flip_pos.txt```
         - these need to be compared to the VCF to identify the SNPs at those positions
@@ -29,4 +30,7 @@
         - flip SNPs
             - ```plink --bfile FB_Merged --chr 1 --flip FB_Merged_chr1_flip.txt --recode vcf --out FB_Merged_chr1_flip```
         - rerun checkVCF.py
-            - ```checkVCF.py -r ~/Documents/src/checkVCF-20140116/hs37d5.fa -o FB_Merged_chr1_flip FB_Merged_chr1_flip.vcf ```    
+            - ```checkVCF.py -r ~/Documents/src/checkVCF-20140116/hs37d5.fa -o FB_Merged_chr1_flip FB_Merged_chr1_flip.vcf ```
+            - this reduced the number of flipped SNPs from 37238 to 15665
+            - turns out it flipped the SNP, but didn't change the reference (A>A/G to T>T/C rather than A>A/G to C>C/T)
+            - I guess these are separate opperations because the number of SNPs is reduced
