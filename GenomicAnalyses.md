@@ -20,17 +20,27 @@
         - Nick says not to worry about them
 
     - Turns out the the flipped SNPs are big problem for imputation. They need to be fixed.
-        - the stats fr
         - checkVCF.py produces a file called XXX.report.check.ref with a list of flipped SNP positions
-            - ```grep MismatchRefBase FB_Merged_chr1.report.check.ref | cut -d : -f 2 | sort -b > FB_Merged_chr1_flip_pos.txt```
-        - these need to be compared to the VCF to identify the SNPs at those positions
-            - ```grep -v '#' FB_Merged_chr1.vcf | cut -f 2,3 | sort -b |join - FB_Merged_chr1_flip_pos.txt | cut -f 2 -d ' ' | sort -n >FB_Merged_chr1_flip.txt```
-            - this didn't work because there are two SNPs at position 11854476
-                - VG01S2022 and rs1801131
-        - flip SNPs
-            - ```plink --bfile FB_Merged --chr 1 --flip FB_Merged_chr1_flip.txt --recode vcf --out FB_Merged_chr1_flip```
-        - rerun checkVCF.py
-            - ```checkVCF.py -r ~/Documents/src/checkVCF-20140116/hs37d5.fa -o FB_Merged_chr1_flip FB_Merged_chr1_flip.vcf ```
-            - this reduced the number of flipped SNPs from 37238 to 15665
-            - turns out it flipped the SNP, but didn't change the reference (A>A/G to T>T/C rather than A>A/G to C>C/T)
-            - I guess these are separate opperations because the number of SNPs is reduced
+        - there are also two SNPs at position 11854476
+            - VG01S2022 and rs1801131
+        - I modified the script (checkVCFmod.py) to report the SNP id and the kind of switch
+            - options are:
+                - 'Allele switch'
+                - 'Strand switch'
+                - 'Strand switch and allele switch' (requires both)
+                - 'Ambiguous' (either switch would produce correct ref)
+                - 'Ref not found' (neither the alt allele or the rev of either matches the ref)
+            - Chr1 has 7741 allele switches, 21446 strand switches, 7905 with both, 127 ambiguous and 19 where the ref is not found
+                - NB: grep 'Strand switch' gets all strand switches, including those with both
+        - Flip strand:
+            - ```grep 'Strand switch' FB_Merged_chr1_mod.check.ref | cut -f 3 > FB_Merged_chr1_flip.txt```
+            - ```plink --bfile FB_Merged --chr 1 --flip FB_Merged_chr1_flip.txt --recode vcf --out FB_Merged_chr1_flip```          
+
+        - exclude ambiguous SNPs, SNPs missing reference and duplicates
+            - I modified checkVCF.py to include the name of the duplicate SNPs, so this will make a list
+                - ```egrep 'Ambiguous|Ref not found' FB_Merged_chr1_mod.check.ref |cut -f 3 >FB_Merged_chr1_exclude.txt```
+                - ``` cut -f 3 FB_Merged_chr1_mod.check.dup >>FB_Merged_chr1_exclude.txt```
+            - This will make a VCF without these SNPs
+                - ```plink --bfile FB_Merged --chr 1 --exclude FB_Merged_chr1_exclude.txt --flip FB_Merged_chr1_flip.txt --recode vcf --out FB_Merged_chr1_flip_filter```
+        - Fixing the allele flips doesn't appear to be so straightford, but they just say INFO in the imputation server output, not FILTER, so hopefully they are ok
+        vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz
