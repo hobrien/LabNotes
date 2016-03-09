@@ -45,7 +45,8 @@
         - Fixing the allele flips doesn't appear to be so straightford, but they just say INFO in the imputation server output, not FILTER, so hopefully they are ok
         - repeat sorting and compressing on flipped/filtered vcf
             - ```vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz```
-
+        - I'm not yet sure if this will work or not, but I might as well figure out a way to apply this to all chromosomes
+            - ```echo {2..22} |xargs -n 1 -P 8 -I % ~/BTSync/Code/Python/checkVCFmod.py -r ~/Documents/src/checkVCF-20140116/hs37d5.fa -o FB_Merged_chr% FB_Merged_chr%.vcf```
         
 - Running FastQC on Edinburgh data
     - I would like to 
