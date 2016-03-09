@@ -43,4 +43,19 @@
             - This will make a VCF without these SNPs
                 - ```plink --bfile FB_Merged --chr 1 --exclude FB_Merged_chr1_exclude.txt --flip FB_Merged_chr1_flip.txt --recode vcf --out FB_Merged_chr1_flip_filter```
         - Fixing the allele flips doesn't appear to be so straightford, but they just say INFO in the imputation server output, not FILTER, so hopefully they are ok
-        vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz
+        - repeat sorting and compressing on flipped/filtered vcf
+            - ```vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz```
+
+        
+- Running FastQC on Edinburgh data
+    - I would like to 
+        - (a) work with compressed data and 
+        - (b) pass the file name to the submission script so i can do something like ``` find . fastq.gz | xargs -n 1 qsub SubmissionScripts/FastQC.sh```
+    - Neither of these is working ATM
+        - the [recommended](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/INSTALL.txt) method of working with compressed data (```zcat seqs.fastq.gz | fastqc stdin```) produces a file called stdin_fastqc.zip which can't be opened
+        - it appears to be possible to just supply the name of the compressed file though
+        - $1 and $@ don't work for the input because they get split on spaces in the filenames
+        - '$@' isn't recognised, but "$@" seems to work great
+    - ```find /c8000xd3/databank/foetal-rna/1st\ batch\ Edinburgh\ Sequencing/ -name *.sanfastq.gz -print0 |xargs -0 -n 1 qsub SubmissionScripts/FastQC.sh```
+    - FastQC.sh:
+        - ```~/src/FastQC/fastqc --outdir=/home/heath/FastQC "$@"```
