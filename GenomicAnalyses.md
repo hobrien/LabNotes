@@ -69,3 +69,9 @@
         - ``` unzip -d FastQC/Uncompressed FastQC/*.zip```
         - ``` find Uncompressed/ -name summary.txt | xargs cat >> summary.txt```
     - Results are analysed in FastQC.md
+
+- Trim Adaptors from reads using cutadapt
+    - I was able to install cutadapt on rocks by first installing pip in ~/.local (``` python ~/src/get-pip.py --user```) using it:
+        - ```~/.local/bin/pip install --user --upgrade cutadapt```
+    - After much struggle with the stupid space names, I finally had the genius of symlinking the data in my home folder:
+        - find /c8000xd3/databank/foetal-rna/ -name \*fastq.gz |python ~/SubmissionScripts/LinkRaw.py
