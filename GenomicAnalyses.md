@@ -46,7 +46,8 @@
         - repeat sorting and compressing on flipped/filtered vcf
             - ```vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz```
         - I'm not yet sure if this will work or not, but I might as well figure out a way to apply this to all chromosomes
-            - ```echo {2..22} |xargs -n 1 -P 8 -I % ~/BTSync/Code/Python/checkVCFmod.py -r ~/Documents/src/checkVCF-20140116/hs37d5.fa -o FB_Merged_chr% FB_Merged_chr%.vcf```
+            - ```echo {1..22} |xargs -n 1 -P 4 bash ~/BTSync/FetalRNAseq/LabNotes/Bash/FilterAndRecode.sh```
+
         
 - Running FastQC on Edinburgh data
     - I would like to 
@@ -58,5 +59,9 @@
         - $1 and $@ don't work for the input because they get split on spaces in the filenames
         - '$@' isn't recognised, but "$@" seems to work great
     - ```find /c8000xd3/databank/foetal-rna/1st\ batch\ Edinburgh\ Sequencing/ -name *.sanfastq.gz -print0 |xargs -0 -n 1 qsub SubmissionScripts/FastQC.sh```
+    - ```find /c8000xd3/databank/foetal-rna/Edinburgh\ 2nd\ batch\ sequencing/ -name *.sanfastq.gz -print0 |xargs -0 -n 1 qsub SubmissionScripts/FastQC.sh```
+    - ```find /c8000xd3/databank/foetal-rna/Exeter\ sequencing/ -name /*fastqc/* -print0 | xargs -n 1 bash SubmissionScripts/cp.sh```
     - FastQC.sh:
         - ```~/src/FastQC/fastqc --outdir=/home/heath/FastQC "$@"```
+    - cp.sh:
+        - ```cp "$@" >FastQC/```
