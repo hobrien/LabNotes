@@ -60,8 +60,12 @@
         - '$@' isn't recognised, but "$@" seems to work great
     - ```find /c8000xd3/databank/foetal-rna/1st\ batch\ Edinburgh\ Sequencing/ -name *.sanfastq.gz -print0 |xargs -0 -n 1 qsub SubmissionScripts/FastQC.sh```
     - ```find /c8000xd3/databank/foetal-rna/Edinburgh\ 2nd\ batch\ sequencing/ -name *.sanfastq.gz -print0 |xargs -0 -n 1 qsub SubmissionScripts/FastQC.sh```
-    - ```find /c8000xd3/databank/foetal-rna/Exeter\ sequencing/ -name /*fastqc/* -print0 | xargs -n 1 bash SubmissionScripts/cp.sh```
+    - ```find /c8000xd3/databank/foetal-rna/Exeter\ sequencing/ -name \*fastqc\* -print0 | xargs -n 1 bash SubmissionScripts/cp.sh```
     - FastQC.sh:
         - ```~/src/FastQC/fastqc --outdir=/home/heath/FastQC "$@"```
     - cp.sh:
         - ```cp "$@" >FastQC/```
+    - Uncompress all files and concatenate
+        - ``` unzip -d FastQC/Uncompressed FastQC/*.zip```
+        - ``` find Uncompressed/ -name summary.txt | xargs cat >> summary.txt```
+    - Results are analysed in FastQC.md
