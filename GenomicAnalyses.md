@@ -86,4 +86,9 @@
             - no warnings
         - ```find ../Raw/ -name *.fastq.gz | sort | xargs -n 2 | wc -l```
             - 81 (19 Exeter + 32 Edinburgh1 + 30 Edinburgh2)
+    - Trim Edinburgh data while Exeter data is still compressing
+        - Edinburgh data only: ```../Raw/ -name \*TP\*.fastq.gz | sort``
+        - Exeter data only ```find ../Raw/ -name \*TP\*.fastq.gz | sort```
+        - ```find ../Raw/ -name \*TP\*.fastq.gz | grep -v 150429_D00200_0258_BC6UARANXX_4_IL-TP-0 | sort |xargs -n 2 qsub ../SubmissionScripts/CutAdapt.sh```
+            - this skips the 2 that are already trimming
     

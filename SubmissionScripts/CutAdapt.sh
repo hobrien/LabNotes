@@ -3,11 +3,11 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
+outfile1=$(basename $1 .fastq.gz)_trimmed.fastq.gz
+outfile2=$(basename $2 .fastq.gz)_trimmed.fastq.gz
+
 /home/heath/.local/bin/cutadapt \
             -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
             -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT \
-            -o /home/heath/Trimmed/150429_D00200_0258_BC6UARANXX_4_IL-TP-019_1.trim.fastq.gz \
-            -p /home/heath/Trimmed/150429_D00200_0258_BC6UARANXX_4_IL-TP-019_2.trim.fastq.gz \
-            /home/heath/Raw/150429_D00200_0258_BC6UARANXX_4_IL-TP-019_1.fastq.gz \
-            /home/heath/Raw/150429_D00200_0258_BC6UARANXX_4_IL-TP-019_2.fastq.gz
+            -o /home/heath/Trimmed/$outfile1 -p /home/heath/Trimmed/$outfile2 $@
 
