@@ -76,3 +76,9 @@
         - ```~/.local/bin/pip install --user --upgrade cutadapt```
     - After much struggle with the stupid space names, I finally had the genius of symlinking the data in my home folder:
         - find /c8000xd3/databank/foetal-rna/ -name \*fastq.gz |python ~/SubmissionScripts/LinkRaw.py
+    - Annoyingly, must of the Exeter data is uncompressed, and now can't (easily) be changed. I will just compress them and store them along with the symlinks in my home folder
+        - ```find /c8000xd3/databank/foetal-rna/Exeter\ sequencing/ -name *.fastq | grep -v 17921-l1_CGATGT_L006_R1_001 | python SubmissionScripts/LinkRaw.py```
+            - grep command is to skip one file that I tried by itself
+        - ```find ~/Temp/ -name *.fastq | grep -v 17921-l1_CGATGT_L006_R1_001 | xargs -n 4 qsub ../SubmissionScripts/Compress.sh```
+        - ```rm -r ~/Temp```
+    
