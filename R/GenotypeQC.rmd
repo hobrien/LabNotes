@@ -1,0 +1,49 @@
+---
+title: "Genotype Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(dplyr)
+```
+
+## R Markdown
+
+Missing calls computed with the following command:
+```plink --noweb --bfile FB_Merged --missing --out FB_Merged_miss```
+
+- One individual has 15% missing SNPs, one has 9%, one 6%, one 4%, two 3% and two 2%
+- All 184 others have > 99% coverage
+
+```{r imissing}
+FB_Merged_imiss <- read.csv("~/BitTorrent Sync/BTSync/FetalRNAseq/Genome-wide genotyping/FB_Merged_miss.imiss", sep="")
+
+FB_Merged_imiss %>% 
+  mutate(CallRate = 1-F_MISS, Quantile = 1-row_number(F_MISS)/n()) %>% 
+  ggplot(aes(x=Quantile, y=CallRate)) +
+    geom_point() +
+  ggtitle("Ordered Individual Call Rate")
+```
+
+- Most low coverage SNPs on chr0 and the sex chromosomes
+- Only 417 of 695,789 autosomal SNPs have <95% coverage. 105,813 have <99% and 10,942 have <98%
+
+
+```{r lmissing}
+FB_Merged_lmiss <- read.csv("~/BitTorrent Sync/BTSync/FetalRNAseq/Genome-wide genotyping/FB_Merged_miss.lmiss", sep="")
+
+FB_Merged_lmiss_quant <- mutate(FB_Merged_lmiss, Coverage = 1-F_MISS, Quantile = 1-row_number(F_MISS)/n())
+filter(FB_Merged_lmiss_quant, CHR > 0 & CHR < 23) %>% 
+  ggplot(aes(x=Quantile, y=Coverage)) +
+    geom_point() +
+    ggtitle("Ordered SNP coverage (autosomes)")
+
+filter(FB_Merged_lmiss_quant, CHR == 0) %>% 
+  ggplot(aes(x=Quantile, y=Coverage)) +
+    geom_point() +
+    ggtitle("Ordered SNP coverage (Chr0)")
+
+```
+
