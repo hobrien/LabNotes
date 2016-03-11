@@ -30,9 +30,9 @@ summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", h
 fastQC_summary <- spread(summary_all, V2, V1)
 colnames(fastQC_summary) <- c("Sample", "Adapter", "Basic_stats", "Kmers", "Overrepresented", "N_content", "Per_base_content", "Per_base_Q", "Per_seq_GC", "Per_seq_Q", "Per_tile_Q", "Duplication", "Length_dist")
 #summary(fastQC_summary[-1]) #this no longer works since I set stringsAsFactors to FALSE
-ggplot(summary_all, aes(x=V2, y=V3, fill=V1)) +
+p1<-ggplot(summary_all, aes(x=V2, y=V3, fill=V1)) +
   geom_tile() +
   scale_fill_manual(values=c('red', 'green', 'yellow')) +
-  theme(axis.text.x= element_text(angle=90, hjust = 1), axis.title = element_blank())
-
+  theme(axis.text.x= element_text(angle=90, hjust = 1), axis.text.y= element_text(size=8), axis.title = element_blank(), legend.title=element_blank())
+ggdraw(p1)
 ```
