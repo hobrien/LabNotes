@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyr)
 library(ggplot2)
 library(dplyr)
+library(cowplot)
 ```
 
 ## Fast QC
@@ -23,15 +24,15 @@ library(dplyr)
 - 150610_D00125_0239_BC718AANXX_3_IL-TP-013_2.sanfastq looks horible. 150610_D00125_0239_BC718AANXX_3_IL-TP-013_1.sanfastq has fine quality, but A is really over-represented
 - Edinburgh sequences have a lot of adaptor sequence
 
-```{r summary}
+```{r summary, fig.width=8, fig.height=20}
 
 summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", header=FALSE, stringsAsFactors=FALSE)
 fastQC_summary <- spread(summary_all, V2, V1)
 colnames(fastQC_summary) <- c("Sample", "Adapter", "Basic_stats", "Kmers", "Overrepresented", "N_content", "Per_base_content", "Per_base_Q", "Per_seq_GC", "Per_seq_Q", "Per_tile_Q", "Duplication", "Length_dist")
-summary(fastQC_summary[-1])
+#summary(fastQC_summary[-1]) #this no longer works since I set stringsAsFactors to FALSE
 ggplot(summary_all, aes(x=V2, y=V3, fill=V1)) +
   geom_tile() +
   scale_fill_manual(values=c('red', 'green', 'yellow')) +
-  theme(axis.text.x= element_text(angle=90, hjust = 1))
+  theme(axis.text.x= element_text(angle=90, hjust = 1), axis.title = element_blank())
 
 ```

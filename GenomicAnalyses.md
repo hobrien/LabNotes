@@ -67,7 +67,8 @@
         - ```cp "$@" >FastQC/```
     - Uncompress all files and concatenate
         - ``` unzip -d FastQC/Uncompressed FastQC/*.zip```
-        - ``` find Uncompressed/ -name summary.txt | xargs cat >> summary.txt```
+        
+        - ``` find Uncompressed/ -name summary.txt | xargs perl -pe 's/\..*//' >>summary.txt```
     - Results are analysed in FastQC.md
 
 - Trim Adaptors from reads using cutadapt
