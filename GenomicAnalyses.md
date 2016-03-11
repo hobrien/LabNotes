@@ -81,4 +81,9 @@
             - grep command is to skip one file that I tried by itself
         - ```find ~/Temp/ -name *.fastq | grep -v 17921-l1_CGATGT_L006_R1_001 | xargs -n 4 qsub ../SubmissionScripts/Compress.sh```
         - ```rm -r ~/Temp```
+    - Make sure all files are matched
+        - ```find ../Raw/ -name *.fastq.gz | sort | xargs -n 2 python ../SubmissionScripts/CheckNames.py```
+            - no warnings
+        - ```find ../Raw/ -name *.fastq.gz | sort | xargs -n 2 | wc -l```
+            - 81 (19 Exeter + 32 Edinburgh1 + 30 Edinburgh2)
     
