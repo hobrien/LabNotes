@@ -47,7 +47,13 @@
             - ```vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz```
         - I'm not yet sure if this will work or not, but I might as well figure out a way to apply this to all chromosomes
             - ```echo {1..22} |xargs -n 1 -P 4 bash ~/BTSync/FetalRNAseq/LabNotes/Bash/FilterAndRecode.sh```
-
+    - Concatenate and filter imputed data    
+        - Imputed data are in BTSync/FetalRNAseq/ImputedGenotypes/Raw_output/
+        - I need to combine into a single file
+            - ```find Raw_output -name chr\*.dose.vcf.gz > vcf_files.txt```
+            - ```bcftools concat -o All_chromosomes.vcf.gz -f vcf_files.txt```
+        - I also need to pull out data on 2 individuals for Nick's collaborator
+            - ```bcftools view -s 15533,16929 -O v -o Genotypes.vcf``` would do it, except that the sample names in the vcf don't match the ones Nick asked for. I'm going to need some kind of key
         
 - Running FastQC on Edinburgh data
     - I would like to 
