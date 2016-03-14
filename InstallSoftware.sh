@@ -46,5 +46,7 @@ brew install mysql
 #    - requires ~/Documents/src/
 
 pip install grip
+conda install mysql-connector-python
+
 # this doesn't work no matter how I try to install it: pip install bx-python
 
