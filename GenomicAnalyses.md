@@ -53,7 +53,16 @@
             - ```find Raw_output -name chr\*.dose.vcf.gz > vcf_files.txt```
             - ```bcftools concat -o All_chromosomes.vcf.gz -f vcf_files.txt```
         - I also need to pull out data on 2 individuals for Nick's collaborator
-            - ```bcftools view -s 15533,16929 -O v -o Genotypes.vcf``` would do it, except that the sample names in the vcf don't match the ones Nick asked for. I'm going to need some kind of key
+            - Added database table (PC_analysis) where Sentrix_Full matches VCF IDs and BrainBankID matches 
+            - ```echo {1..22} |xargs -n 1 -I % bcftools view -s 65_9702504147_R09C01,67_9702504147_R10C01 -O v -o Subset/Chr_%.vcf Raw_output/chr_%/chr%.dose.vcf.gz```
+            - ```ls -rth Subset/ |perl -pe 's/^/Subset\//' >subset.txt```
+                - this sorts correctly because it's the order in which they were analysed. Find puts 3 after 33
+            - ```subset.vcf >subset.vcf.gz ``` 
+            - ```tabix -p vcf subset.vcf.gz```
+            - ```python ~/BTsync/FetalRNAseq/LabNotes/Python/ChangeSampleID.py subset.vcf.gz```
+            - ```tabix -r temp.head subset.vcf.gz >subset2.vcf.gz```
+            - ```rm temp.head```
+                        
         
 - Running FastQC on Edinburgh data
     - I would like to 
@@ -72,7 +81,7 @@
     - cp.sh:
         - ```cp "$@" >FastQC/```
     - Uncompress all files and concatenate
-        - ``` unzip -d FastQC/Uncompressed FastQC/*.zip```
+        - ``` unzip -d FastQC/Uncompressed 'FastQC/*.zip'```
         
         - ``` find Uncompressed/ -name summary.txt | xargs perl -pe 's/\..*//' >>summary.txt```
     - Results are analysed in FastQC.md
@@ -97,4 +106,3 @@
         - Exeter data only ```find ../Raw/ -name \*TP\*.fastq.gz | sort```
         - ```find ../Raw/ -name \*TP\*.fastq.gz | grep -v 150429_D00200_0258_BC6UARANXX_4_IL-TP-0 | sort |xargs -n 2 qsub ../SubmissionScripts/CutAdapt.sh```
             - this skips the 2 that are already trimming
-    
