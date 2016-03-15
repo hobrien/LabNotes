@@ -106,3 +106,8 @@
         - Exeter data only ```find ../Raw/ -name \*TP\*.fastq.gz | sort```
         - ```find ../Raw/ -name \*TP\*.fastq.gz | grep -v 150429_D00200_0258_BC6UARANXX_4_IL-TP-0 | sort |xargs -n 2 qsub ../SubmissionScripts/CutAdapt.sh```
             - this skips the 2 that are already trimming
+    - Rerun FastQC on trimmed data
+        - ```find ../Trimmed -name *.fastq.gz -print0 |xargs -0 -n 1 qsub ../SubmissionScripts/FastQC.sh```
+    - download and analyse:
+        - ```unzip -d FastQC/Uncompressed 'FastQC/*_trimmed_fastqc.zip'```
+        - ```find Uncompressed/ -name summary.txt |grep trimmed |xargs perl -pe 's/_trimmed.*//' >>trimmed_summary.txt```
