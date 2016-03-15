@@ -51,7 +51,7 @@
         - Imputed data are in BTSync/FetalRNAseq/ImputedGenotypes/Raw_output/
         - I need to combine into a single file
             - ```find Raw_output -name chr\*.dose.vcf.gz > vcf_files.txt```
-            - ```bcftools concat -o All_chromosomes.vcf.gz -f vcf_files.txt```
+            - ```bcftools concat -o All_chromosomes.vcf.gz -f vcf_files.txt -O b```
         - I also need to pull out data on 2 individuals for Nick's collaborator
             - Added database table (PC_analysis) where Sentrix_Full matches VCF IDs and BrainBankID matches 
             - ```echo {1..22} |xargs -n 1 -I % bcftools view -s 65_9702504147_R09C01,67_9702504147_R10C01 -O v -o Subset/Chr_%.vcf Raw_output/chr_%/chr%.dose.vcf.gz```
