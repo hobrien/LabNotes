@@ -10,6 +10,18 @@ library(ggplot2)
 library(dplyr)
 library(cowplot)
 ```
+## Read numbers
+- One sample (150610_D00125_0239_BC718AANXX_3_IL-TP-013_2) has almost no reads.
+- One other sample has < 50 million. All others are >60 million with most being > 100 million
+- Exeter samples are mostly > 200 million
+
+```{r}
+
+lengths <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/seq_lengths.txt", header=FALSE, stringsAsFactors=FALSE)
+lengths$Million_reads <- lengths$V2/1000000
+lengths <- filter(lengths, !grepl("_R2_",V1)) %>% filter(!grepl("_2$",V1))
+hist(lengths$Million_reads, breaks=25)
+```
 
 ## Fast QC
 
@@ -24,7 +36,7 @@ library(cowplot)
 - 150610_D00125_0239_BC718AANXX_3_IL-TP-013_2.sanfastq looks horible. 150610_D00125_0239_BC718AANXX_3_IL-TP-013_1.sanfastq has fine quality, but A is really over-represented
 - Edinburgh sequences have a lot of adaptor sequence
 
-```{r summary, fig.width=8, fig.height=20}
+```{r fig.width=8, fig.height=20}
 
 summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", header=FALSE, stringsAsFactors=FALSE)
 fastQC_summary <- spread(summary_all, V2, V1)
@@ -40,7 +52,7 @@ ggplot(summary_all, aes(x=V2, y=V3, fill=V1)) +
 
 All green in the adaptor column
 
-```{r summary, fig.width=8, fig.height=20}
+```{r fig.width=8, fig.height=20}
 
 summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/trimmed_summary.txt", header=FALSE, stringsAsFactors=FALSE)
 fastQC_summary <- spread(summary_all, V2, V1)
