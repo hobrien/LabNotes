@@ -62,7 +62,14 @@
             - ```python ~/BTsync/FetalRNAseq/LabNotes/Python/ChangeSampleID.py subset.vcf.gz```
             - ```tabix -r temp.head subset.vcf.gz >subset2.vcf.gz```
             - ```rm temp.head```
-                        
+    - Add SNP IDs to imputed VCFs
+        - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
+        - chromosome (field 1), position (2) and ref (4) and alt (5) alleles can be used to uniquely identify each SNP (I hope!)
+            - there can be several SNPs at the same position
+        - these correspond to chrom, chromStart, refNCBI and observed in snp144
+                                
+        - ```grep -v '^#' FB_Merged_chr22.vcf | cut -f 1,2,3 |python ../LabNotes/Python/AddSNPID.py | wc -l```
+        
         
 - Running FastQC on Edinburgh data
     - I would like to 
