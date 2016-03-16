@@ -37,9 +37,7 @@ brew tap homebrew/science
 brew install samtools
 brew install bcftools
 brew install mercurial
-brew install mysql
-
-
+brew install mysql # Launch mySQL: mysql.server start
 # install Mail ActOn
 # install [checkVCF.py](https://github.com/zhanxw/checkVCF)
 #    - symlink the script to ~/bin
