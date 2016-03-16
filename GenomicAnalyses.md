@@ -54,13 +54,12 @@
             - ```bcftools concat -o All_chromosomes.vcf.gz -f vcf_files.txt -O b```
         - I also need to pull out data on 2 individuals for Nick's collaborator
             - Added database table (PC_analysis) where Sentrix_Full matches VCF IDs and BrainBankID matches 
-            - ```echo {1..22} |xargs -n 1 -I % bcftools view -s 65_9702504147_R09C01,67_9702504147_R10C01 -O v -o Subset/Chr_%.vcf Raw_output/chr_%/chr%.dose.vcf.gz```
+            - ```echo {1..22} |xargs -n 1 -I % bcftools view -s 17_9702504079_R09C01,67_9702504147_R10C01 -O b -o Subset/Chr_%.vcf Raw_output/chr_%/chr%.dose.vcf.gz```
             - ```ls -rth Subset/ |perl -pe 's/^/Subset\//' >subset.txt```
                 - this sorts correctly because it's the order in which they were analysed. Find puts 3 after 33
-            - ```subset.vcf >subset.vcf.gz ``` 
-            - ```tabix -p vcf subset.vcf.gz```
+            - ```bcftools concat -O b -f subset.txt -o subset.vcf.gz ``` 
             - ```python ~/BTsync/FetalRNAseq/LabNotes/Python/ChangeSampleID.py subset.vcf.gz```
-            - ```tabix -r temp.head subset.vcf.gz >subset2.vcf.gz```
+            - ```bcftools reheader -h temp.head -o subset2.vcf.gz subset.vcf.gz```
             - ```rm temp.head```
     - Add SNP IDs to imputed VCFs
         - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
