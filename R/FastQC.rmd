@@ -9,6 +9,7 @@ library(tidyr)
 library(ggplot2)
 library(dplyr)
 library(cowplot)
+library(gridExtra)
 ```
 ## Read numbers
 - One sample (150610_D00125_0239_BC718AANXX_3_IL-TP-013_2) has almost no reads.
@@ -20,7 +21,12 @@ library(cowplot)
 lengths <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/seq_lengths.txt", header=FALSE, stringsAsFactors=FALSE)
 lengths$Million_reads <- lengths$V2/1000000
 lengths <- filter(lengths, !grepl("_R2_",V1)) %>% filter(!grepl("_2$",V1))
-hist(lengths$Million_reads, breaks=25)
+lengths$Centre<-ifelse(grepl('_R1_',lengths$V1), 'Exeter','Edinburgh')
+lengths$Billion_bp <-ifelse(grepl('_R1_',lengths$V1), lengths$Million_reads * 200 / 1000, lengths$Million_reads * 250 / 1000)
+hist(lengths$Million_reads, breaks=25)layout(matrix(c(1,2), 2, byrow = TRUE))
+p1<-ggplot(lengths, aes(x=Million_reads, fill=Centre))+geom_histogram()+facet_grid(Centre ~ .) + theme(legend.position="none")
+p2<-ggplot(lengths, aes(x=Billion_bp, fill=Centre))+geom_histogram()+facet_grid(Centre ~ .) + theme(legend.position="none")
+grid.arrange(p1, p2, ncol=2)
 ```
 
 ## Fast QC
