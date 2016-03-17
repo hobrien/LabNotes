@@ -16,12 +16,13 @@ brew cask install vienna
 brew cask install dropbox
 brew cask install yojimbo # requires licence key eventually
 brew cask install sequel-pro
+brew cask install mactex  # need to update TexShop before it will work
 
 brew cask install anaconda
 conda create -n python2 python=2.7 anaconda
 # Set up bash profile
 echo "~/.bash_profile" > ~/.bashrc # this doesn't appear to be working because a command using xargs couldn't find an executable in ~/bin
-echo 'export PATH="~/bin:~/BTSync/Code/Python:/usr/local/sbin:$PATH"' > ~/.bash_profile
+echo 'export PATH="~/bin:~/BTSync/Code/Python:/usr/local/sbin:/Library/TeX/texbin:$PATH"' > ~/.bash_profile
 echo 'source ~/anaconda3/bin/activate python2' >> ~/.bash_profile
 echo 'export PERL5LIB=/usr/local/lib/perl5/site_perl/' >> ~/.bash_profile
 
@@ -37,7 +38,10 @@ brew tap homebrew/science
 brew install samtools
 brew install bcftools
 brew install mercurial
-brew install mysql # Launch mySQL: mysql.server start
+brew install mysql
+brew install pandoc
+
+
 # install Mail ActOn
 # install [checkVCF.py](https://github.com/zhanxw/checkVCF)
 #    - symlink the script to ~/bin

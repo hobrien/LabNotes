@@ -18,3 +18,4 @@ vignettes/*.pdf
 
 # html output from knitR
 *.html
+*.pdf
