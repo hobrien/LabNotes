@@ -1,6 +1,6 @@
 ---
 title: "Data QC"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +14,8 @@ library(gridExtra)
 ## Read numbers
 - One sample (150610_D00125_0239_BC718AANXX_3_IL-TP-013_2) has almost no reads.
 - One other sample has < 50 million. All others are >60 million with most being > 100 million
-- Exeter samples are mostly > 200 million
+- Exeter samples are mcentered around 150 million reads while Edinburgh samples are centered around ca. 120 million
+- Once the difference in read length is accounted for, they have similar distributions
 
 ```{r}
 
@@ -23,9 +24,9 @@ lengths$Million_reads <- lengths$V2/1000000
 lengths <- filter(lengths, !grepl("_R2_",V1)) %>% filter(!grepl("_2$",V1))
 lengths$Centre<-ifelse(grepl('_R1_',lengths$V1), 'Exeter','Edinburgh')
 lengths$Billion_bp <-ifelse(grepl('_R1_',lengths$V1), lengths$Million_reads * 200 / 1000, lengths$Million_reads * 250 / 1000)
-hist(lengths$Million_reads, breaks=25)layout(matrix(c(1,2), 2, byrow = TRUE))
-p1<-ggplot(lengths, aes(x=Million_reads, fill=Centre))+geom_histogram()+facet_grid(Centre ~ .) + theme(legend.position="none")
-p2<-ggplot(lengths, aes(x=Billion_bp, fill=Centre))+geom_histogram()+facet_grid(Centre ~ .) + theme(legend.position="none")
+layout(matrix(c(1,2), 2, byrow = TRUE))
+p1<-ggplot(lengths, aes(x=Million_reads, fill=Centre))+geom_histogram(bins=25)+facet_grid(Centre ~ .) + theme(legend.position="none")
+p2<-ggplot(lengths, aes(x=Billion_bp, fill=Centre))+geom_histogram(bins=30)+facet_grid(Centre ~ .) + theme(legend.position="none")
 grid.arrange(p1, p2, ncol=2)
 ```
 
