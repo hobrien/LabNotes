@@ -23,7 +23,7 @@ def ConvertIDs(line):
     line = line.strip()
     headers = line.split('\t')
     for sampleID in range(9, len(headers)):
-        headers[sampleID] = BrainID(headers[sampleID][3:]) 
+        headers[sampleID] = BrainID('_'.join(headers[sampleID].split('_')[1:])) 
     line ='\t'.join(headers)
     return line
     
@@ -34,7 +34,7 @@ def BrainID(Sentrix):
                                        user='root')
             
        cursor = conn.cursor()
-       cursor.execute("SELECT BrainBankID FROM PC_analysis WHERE Sentrix_Full = %s", (Sentrix,))
+       cursor.execute("SELECT Brain_Bank_ID FROM genotyping WHERE Genotype_Sentrix_Full = %s", (Sentrix,))
        rows = cursor.fetchall()
        try:
            assert cursor.rowcount == 1

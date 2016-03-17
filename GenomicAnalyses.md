@@ -61,6 +61,11 @@
             - ```python ~/BTsync/FetalRNAseq/LabNotes/Python/ChangeSampleID.py subset.vcf.gz```
             - ```bcftools reheader -h temp.head -o subset2.vcf.gz subset.vcf.gz```
             - ```rm temp.head```
+    - replace genotyping IDs with Brain Bank IDs
+        - ```python ~/BTsync/FetalRNAseq/LabNotes/Python/ChangeSampleID.py All_chromosomes.vcf.gz```
+        - ```bcftools reheader -h temp.head -o All_chromosomes_relabelled.vcf.gz All_chromosomes.vcf.gz```
+        - ```rm temp.head```
+
     - Add SNP IDs to imputed VCFs
         - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
         - chromosome (field 1), position (2) and ref (4) and alt (5) alleles can be used to uniquely identify each SNP (I hope!)
