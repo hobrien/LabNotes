@@ -125,4 +125,26 @@
         - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/UCSC/hg19/Homo_sapiens_UCSC_hg19.tar.gz```
         - ```tar -xzf Homo_sapiens_UCSC_hg19.tar.gz```
         - ```tophat2 --GTF /home/heath/Index/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf --library-type firststrand --mate-inner-dist 300 --mate-std-dev 50 --num-threads 8 --output-dir Mappings/15533/ /home/heath/Index/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome /home/heath/Trimmed/15533_TGACCA_L007_R1_001_trimmed.fastq.gz /home/heath/Trimmed/15533_TGACCA_L007_R2_001_trimmed.fastq.gz```
+    - install [bamQC](https://github.com/s-andrews/BamQC) on rocks
+        -``` cd src```
+        - ```git clone https://github.com/s-andrews/BamQC```
+        - ```cd BamQC```
+        - ```ant```
+        - ```chmod 700 bin/bamqc```
+        - ```ln -s ~/src/BamQC/bin/bamqc ~/bin/bamqc```
+        
+    - [download](http://genomewiki.ucsc.edu/index.php/Genes_in_gtf_or_gff_format) a complete GTF file for hg19:
+        - ```curl http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/genePredToGtf >~/bin/genePredToGtf```
+        - ```chmod +x ~/bin/genePredToGtf```
+        - create file ~/.hg.conf:
+            ```
+            db.host=genome-mysql.cse.ucsc.edu
+            db.user=genomep
+            db.password=password
+            central.db=hgcentral
+            ```
 
+        - ``` chmod 600 ~/.hg.conf```
+        - ```genePredToGtf hg19 knownGene ~/Index/knownGene.gtf```
+    - run bamQC
+        - ```bamqc --gff ~/BTSync/FetalRNAseq/Reference/knownGene.gft 15533/accepted_hits.bam```
