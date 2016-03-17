@@ -17,6 +17,7 @@ brew cask install dropbox
 brew cask install yojimbo # requires licence key eventually
 brew cask install sequel-pro
 brew cask install mactex  # need to update TexShop before it will work
+brew cask install java
 
 brew cask install anaconda
 conda create -n python2 python=2.7 anaconda
@@ -40,6 +41,7 @@ brew install bcftools
 brew install mercurial
 brew install mysql
 brew install pandoc
+brew install igv
 
 
 # install Mail ActOn
