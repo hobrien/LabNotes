@@ -20,9 +20,9 @@ def main(args):
              
        matchingSNPs = 0
        for line in fileinput.input():
-           (chromosome, position, id) = line.strip().split('\t')
-           if id != GetID(cursor, chromosome, position):
-               warnings.warn("id %s at %s position %s does not match DB id (%s)" % (id, chromosome, position, GetID(cursor, chromosome, position)))
+           (chromosome, position, id, ref, alt) = line.strip().split('\t')
+           if id != GetID(cursor, chromosome, position, ref, alt):
+               warnings.warn("id %s at %s position %s does not match DB id (%s)" % (id, chromosome, position, GetID(cursor, chromosome, position, ref, alt)))
            matchingSNPs += 1
            if matchingSNPs % 1000 == 0:
                warnings.warn("matched %i SNPs" % matchingSNPs)
@@ -34,29 +34,29 @@ def main(args):
         cursor.close()
         conn.close()
     
-
-def ConvertIDs(line):
-    line = line.strip()
-    headers = line.split('\t')
-    for sampleID in range(9, len(headers)):
-        headers[sampleID] = BrainID(headers[sampleID][3:]) 
-    line ='\t'.join(headers)
-    return line
     
-def GetID(cursor, chromosome, position):
+def GetID(cursor, chromosome, position, ref, alt):
     if chromosome[:3] != 'Chr':
         chromosome = "Chr%s" % chromosome
-    cursor.execute("SELECT ID FROM dbSNP146 WHERE Chr = %s AND end = %s", (chromosome, position,))
+    cursor.execute("SELECT name, observed FROM snp144 WHERE chrom = %s AND chromStart = %s", (chromosome, position - 1,))
     rows = cursor.fetchall()
+    rsID = []
+    for row in rows:
+        db = row[1].encode('ascii').replace('-', '.').split('/')
+        db.sort()
+        vcf = [ref, alt]
+        vcf.sort()
+        if db == vcf:
+            rsID.append(row[0])
     try:
-        assert cursor.rowcount == 1
+        assert len(rsID) == 1
     except AssertionError:
-        if cursor.rowcount == 0:
+        if len(rsID) == 0:
             warnings.warn("No SNP at %s position %s" % (chromosome, position))
-            rows = [['NA']]
+            rsID = ['NA']
         else:
-            warnings.warn("%i rows matching %s position %s" % (cursor.rowcount, chromosome, position))
-    return  rows[0][0]
+            warnings.warn("%i rows matching %s position %s" % (len(rsID), chromosome, position))
+    return  rsID[0]
 
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
