@@ -152,4 +152,7 @@
         - ``` chmod 600 ~/.hg.conf```
         - ```genePredToGtf hg19 knownGene ~/Index/knownGene.gtf```
     - run bamQC
-        - ```bamqc --gff ~/BTSync/FetalRNAseq/Reference/knownGene.gft 15533/accepted_hits.bam```
+        - ```bamqc --gff ~/BTSync/FetalRNAseq/Reference/knownGene.gtf 15533/accepted_hits.bam```
+    - plot insert sizes
+        - ```cat BamQC/15533_300/accepted_hits_bamqc/bamqc_data.txt | python LabNotes/Python/ExtractInsertSize.py >BamQC/15533_300/insert_sizes.txt```    
+        - results are analysed in BamQC.md
