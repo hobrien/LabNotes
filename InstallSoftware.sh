@@ -43,6 +43,11 @@ brew install mysql
 brew install pandoc
 brew install igv
 
+# Link pandoc template files
+ln -s ~/BTSync/LaTEX/Templates/letter.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/letter.latex
+ln -s ~/BTSync/LaTEX/Templates/letter.home.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/letter.home.latex
+ln -s ~/BTSync/LaTEX/Templates/report.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/report.latex
+
 
 # install Mail ActOn
 # install [checkVCF.py](https://github.com/zhanxw/checkVCF)
