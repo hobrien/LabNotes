@@ -156,6 +156,16 @@
     - plot insert sizes
         - ```cat BamQC/15533_300/accepted_hits_bamqc/bamqc_data.txt | python LabNotes/Python/ExtractInsertSize.py >BamQC/15533_300/insert_sizes.txt```    
         - results are analysed in BamQC.md
+    - Try to run RNAseq-specific QC:
+        - Eilis used something called RNA-SeQ. She went thru several steps to format the mapping before this would work 
+            - ```java -jar ~/Documents/src/picard-tools-1.119/CreateSequenceDictionary.jar R=genome.fa O=genome.bam```
+            - ```java -jar ~/Documents/src/picard-tools-1.119/AddOrReplaceReadGroups.jar I=accepted_hits.bam O=accepted_hits2.bam RGLB="totalRNA" RGPL="Illumina" RGPU="1" RGSM="ID_15533"```
+            - ``` samtools index accepted_hits2.bam```
+            - ```java -jar ~/Documents/src/picard-tools-1.119/ReorderSam.jar I=accepted_hits2.bam O=accepted_hits3.bam R=~/BTSync/FetalRNAseq/Reference/genome.fa```
+            - ```samtools index accepted_hits3.bam```
+            - ```java -jar ~/Documents/src/RNA-SeQC_v1.1.8.jar -n 1000 -s "ID_15533|accepted_hits3.bam|Test" -t ~/BTSync/FetalRNAseq/Reference/gencode.v19.annotation.gtf -r ~/BTSync/FetalRNAseq/Reference/genome.fa -o RNAseQC -gc ~/BTSync/FetalRNAseq/Reference/gencode.v7.gc.txt```
+                - still not working 
+            
 
 - Analyse expressed SNPs
     - Run mpileup on SnPs from grant:
