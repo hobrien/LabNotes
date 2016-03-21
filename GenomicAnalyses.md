@@ -169,4 +169,5 @@
 
 - Analyse expressed SNPs
     - Run mpileup on SnPs from grant:
-        - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam```        
+        - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py 
+```        
