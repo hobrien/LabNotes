@@ -18,6 +18,7 @@ brew cask install yojimbo # requires licence key eventually
 brew cask install sequel-pro
 brew cask install mactex  # need to update TexShop before it will work
 brew cask install java
+brew cask install skype
 
 brew cask install anaconda
 conda create -n python2 python=2.7 anaconda
@@ -47,7 +48,7 @@ brew install igv
 ln -s ~/BTSync/LaTEX/Templates/letter.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/letter.latex
 ln -s ~/BTSync/LaTEX/Templates/letter.home.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/letter.home.latex
 ln -s ~/BTSync/LaTEX/Templates/report.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/report.latex
-
+# usage: pandoc -s -S -t latex --template=letter -o OUT.pdf IN.md
 
 # install Mail ActOn
 # install [checkVCF.py](https://github.com/zhanxw/checkVCF)
