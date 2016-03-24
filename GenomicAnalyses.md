@@ -174,6 +174,12 @@
             - I had to build a dictionary for the reference Seq
                 - ```/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CreateSequenceDictionary R=/home/heath/Ref/hg19.fa O=/home/heath/Ref/hg19.dict```    
             - A (sort of) explanation of the output is [here](https://broadinstitute.github.io/picard/picard-metric-definitions.html#RnaSeqMetrics)
+        - Run [RSeQC](http://rseqc.sourceforge.net)
+            - Downloaded a [BED](https://sourceforge.net/projects/rseqc/files/BED/Human_Homo_sapiens) to Reference
+            - Get Chromosome sizes
+                - ```bash Lab_notes/Bash/fetchChromSizes hg19 >Reference/hg19.chrom.sizes```
+            - ```bam_stat.py -i ~/Documents/Mappings/15533_300/accepted_hits.bam```
+            - ```inner_distance.py -i accepted_hits.bam -o ~/BTSync/FetalRNAseq/BamQC/15533_1000/15533_1000 -r ~/BTSync/FetalRNAseq/Reference/hg19_RefSeq.bed -u 5000 -s 50 > /dev/null```    
                     
 
 - Analyse expressed SNPs
