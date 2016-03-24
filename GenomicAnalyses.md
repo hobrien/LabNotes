@@ -165,9 +165,17 @@
             - ```samtools index accepted_hits3.bam```
             - ```java -jar ~/Documents/src/RNA-SeQC_v1.1.8.jar -n 1000 -s "ID_15533|accepted_hits3.bam|Test" -t ~/BTSync/FetalRNAseq/Reference/gencode.v19.annotation.gtf -r ~/BTSync/FetalRNAseq/Reference/genome.fa -o RNAseQC -gc ~/BTSync/FetalRNAseq/Reference/gencode.v7.gc.txt```
                 - still not working 
+        - Run [CollectRnaSeqMetrics]( http://broadinstitute.github.io/picard/command-line-overview.html#CollectRnaSeqMetrics) from [Picard Tools](http://broadinstitute.github.io/picard/)
             
+            - had to install a more recent version of java on rocks
+            
+            - downloaded a correctly formatted [file](https://gist.github.com/slowkow/b11c28796508f03cdf4b) with rRNA intervals     
+                - I'm pretty sure this stat is not correct. I don't know if it's a problem with this file or with the command I used
+            - I had to build a dictionary for the reference Seq
+                - ```/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CreateSequenceDictionary R=/home/heath/Ref/hg19.fa O=/home/heath/Ref/hg19.dict```    
+            - A (sort of) explanation of the output is [here](https://broadinstitute.github.io/picard/picard-metric-definitions.html#RnaSeqMetrics)
+                    
 
 - Analyse expressed SNPs
-    - Run mpileup on SnPs from grant:
-        - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py 
-```        
+    - Run mpileup on SNPs from grant:
+        - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```        
