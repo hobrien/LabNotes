@@ -1,6 +1,6 @@
 ---
 title: "Data QC"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -8,7 +8,6 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyr)
 library(ggplot2)
 library(dplyr)
-library(cowplot)
 library(gridExtra)
 ```
 ## Insert Sizes
@@ -27,6 +26,10 @@ ggplot(insert_sizes[insert_sizes$size > 0 & insert_sizes$size < 5001,], aes(x=si
 ```
 
 ## Picard RNAseq Stats
+- Almost all reads aligned and 99% are the correct (second) strand
+- 15% of reads are intergenic, 45% are intronic, and 40% are expressed (22% coding, 18% UTR)
+- NO reads map to rRNA (this seems like it must be an error)
+- The feature coverage plot looks good. Steep drop-offs at the ends, and a slight bias toward 3' (this could be due to active transcription)
 
 
 ```{r }
@@ -34,6 +37,31 @@ RnaSeqMetrics <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/RnaSeqMetrics.
 
 cov <- data.frame(normalized_position=as.numeric(RnaSeqMetrics[-(1:2),]$PF_BASES), normalized_coverage=as.numeric(RnaSeqMetrics[-(1:2),]$PF_ALIGNED_BASES))
 RnaSeqMetrics <- RnaSeqMetrics[(1),]
+ggplot(cov, aes(x=normalized_position, y=normalized_coverage))+geom_bar(stat='identity')
+gather(RnaSeqMetrics, stat, result)
 ```
 
+# RSeQC
+
+==================================================
+All numbers are READ count
+==================================================
+
+- Total records:                          374696825
+
+- QC failed:                              0
+- Optical/PCR duplicate:                  0
+- Non primary hits                        91094701
+- Unmapped reads:                         0
+- mapq < mapq_cut (non-unique):           38969798
+
+- mapq >= mapq_cut (unique):              244632326
+- Read-1:                                 123273973
+- Read-2:                                 121358050
+- Reads map to '+':                       122285034
+- Reads map to '-':                       122347292
+- Non-splice reads:                       213432309
+- Splice reads:                           31200017
+- Reads mapped in proper pairs:           1285466
+- Proper-paired reads map to different chrom:1316
 
