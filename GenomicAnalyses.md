@@ -127,7 +127,7 @@
 
 - Start mapping reads with tophat
     - follow the instructions [here](http://www.illumina.com/documents/products/technotes/RNASeqAnalysisTopHat.pdf) to get started with tophat
-        - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/UCSC/hg19/Homo_sapiens_UCSC_hg19.tar.gz```
+        - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/NCBI/GRCh38Decoy/Homo_sapiens_NCBI_GRCh38Decoy.tar.gz```
         - ```tar -xzf Homo_sapiens_UCSC_hg19.tar.gz```
         - ```tophat2 --GTF /home/heath/Index/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf --library-type firststrand --mate-inner-dist 300 --mate-std-dev 50 --num-threads 8 --output-dir Mappings/15533/ /home/heath/Index/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome /home/heath/Trimmed/15533_TGACCA_L007_R1_001_trimmed.fastq.gz /home/heath/Trimmed/15533_TGACCA_L007_R2_001_trimmed.fastq.gz```
     - install [bamQC](https://github.com/s-andrews/BamQC) on rocks
