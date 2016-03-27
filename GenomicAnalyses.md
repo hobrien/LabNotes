@@ -175,7 +175,11 @@
                 - ```/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CreateSequenceDictionary R=/home/heath/Ref/hg19.fa O=/home/heath/Ref/hg19.dict```    
             - A (sort of) explanation of the output is [here](https://broadinstitute.github.io/picard/picard-metric-definitions.html#RnaSeqMetrics)
         - Run [RSeQC](http://rseqc.sourceforge.net)
-            - Downloaded a [BED](https://sourceforge.net/projects/rseqc/files/BED/Human_Homo_sapiens) to Reference
+            - I figured it would be best to use a BED file made from the actual annotation I'm using
+                - [BEDOPS](https://bedops.readthedocs.org/en/latest/) seemed like a good option for this, but I can't figure out how to get a proper [BED12](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) file from it, so I grabbed the recommended [perl script](https://code.google.com/p/ea-utils/source/browse/trunk/clipper/gtf2bed)
+            - These scripts are working great, but I'm getting very few validly paired reads, even when using the fr-secondstrand option.
+                - This affects the stats, and also possibly the number of pairs used for the inner_distance info (only 1800 of 1,000,000)
+                - I'm not running tophat in all possible strand modes to pin down this issue. I suspect the problem is the insert size though                
             - Get Chromosome sizes
                 - ```bash Lab_notes/Bash/fetchChromSizes hg19 >Reference/hg19.chrom.sizes```
             - ```bam_stat.py -i ~/Documents/Mappings/15533_300/accepted_hits.bam```
