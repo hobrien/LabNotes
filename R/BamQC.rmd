@@ -14,63 +14,14 @@ library(dplyr)
 library(gridExtra)
 library(RColorBrewer)
 library(tufte)
+rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
-```
-
-## Insert Size Distribution
-
-`r margin_note('- 20.7% of reads have an insert size of zero')`
-`r margin_note('- 10.9% have an insert size > 5000 bp')`
-`r margin_note('- BIG jump right at 1000 bp, stays high until 1750, then gradually declines')`
-
-
-```{r include=FALSE}
-
-insert_sizes <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300/insert_sizes.txt", header=TRUE, stringsAsFactors=FALSE)
-colnames(insert_sizes)<-c('size', 'percent')
-sum(insert_sizes[insert_sizes$size > 5000, 2]) #insert sizes > 5kb
-insert_sizes[1,2] #insert size = 0
-```
-
-```{r dev.args = list(bg = 'transparent')}
-
-ggplot(insert_sizes[insert_sizes$size > 0 & insert_sizes$size < 5001,], aes(x=size, y=percent)) +
-  geom_line() +
-  tufte_theme()
-
-```
-
-## Transcript Read Coverage
-
-`r margin_note("- Looks good. Steep drop-offs at the ends, and a slight bias toward 3', which could be due to active transcription")`
-
-```{r dev.args = list(bg = 'transparent')}
-RnaSeqMetrics <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/RnaSeqMetrics.txt", header=TRUE, comment.char="#", stringsAsFactors = FALSE)
-
-cov <- data.frame(normalized_position=as.numeric(RnaSeqMetrics[-(1:2),]$PF_BASES), normalized_coverage=as.numeric(RnaSeqMetrics[-(1:2),]$PF_ALIGNED_BASES))
-RnaSeqMetrics <- RnaSeqMetrics[(1),]
-ggplot(cov, aes(x=normalized_position, y=normalized_coverage)) +
-  geom_line() +
-  tufte_theme()
-```
-
-## Picard RNAseq Stats
-
-`r margin_note("- Almost all reads aligned and 99% are the correct (second) strand")`
-`r margin_note("- 15% of reads are intergenic, 45% are intronic, and 40% are expressed (22% coding, 18% UTR)")`
-`r margin_note("- NO reads map to rRNA (this seems like it must be an error)")`
-
-```{r }
-PicardStats <- gather(RnaSeqMetrics, stat, result)
-knitr::kable(
-  PicardStats
-)
 ```
 
 # RSeQC
 ## Mapping Stats
 `r margin_note("- Total records = mapped reads + non-primary")`
-`r margin_note("- VERY low number of proper pairs. This doesn't seem to be caused by the strand because. I'm trying a different mean mapping dist to see if that helps")`
+`r margin_note("- VERY low number of proper pairs. This doesn't seem to be caused by the strand because it is the same for other strand options. I'm trying a different mean mapping dist to see if that helps")`
 
 ``` {r }
 RSeQCstats <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.stats.txt", header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
@@ -93,3 +44,130 @@ knitr::kable(
   RSeQCdist
 )
 ```
+
+## Strand
+
+`r margin_note("- Data consistent with second-strand experiment")`
+
+```{r }
+expt <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.expt.txt", skip=3, header=FALSE, sep=':')
+colnames(expt)<-c('Class', 'Proportion')
+knitr::kable(
+  expt
+)
+```
+
+## Insert Size Distribution
+
+`r margin_note("- Distribution centered on zero")`
+`r margin_note("- Less than 2000 of 1,000,000 reads used")`
+`r margin_note("- The problem isn't the strand, so it must be the size range, but this is including a wide range of sizes")`
+
+```{r include=FALSE}
+inner_distance <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.inner_distance_freq.txt", header=FALSE)
+sum(inner_distance$V3)
+```
+
+```{r dev.args = list(bg = 'transparent')}
+ggplot(inner_distance, aes(x=(V1+V2)/2, y=V3)) +
+  geom_bar(stat='identity') +
+  ylab('reads') +
+  xlab('inner distance') +
+  tufte_theme()
+
+```
+
+## Transcript Read Coverage
+
+`r margin_note("- Looks good. Steep drop-offs at the ends, especially 5'")`
+
+```{r dev.args = list(bg = 'transparent')}
+geneBodyCoverage <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.geneBodyCoverage.txt", header=FALSE)
+geneBodyCoverage <- t(geneBodyCoverage[,-1])
+ggplot(as.data.frame(geneBodyCoverage), aes(x=V1, y=V2)) +
+  geom_line() +
+  ylab('reads') +
+  xlab('transcript percentile') +
+  tufte_theme()
+```
+
+## Sequence Duplication
+
+`r margin_note("- Plenty of duplication")`
+`r margin_note("- Probably not unexpected in this case")`
+
+```{r include=FALSE}
+eval(parse(file = "~/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.DupRate_plot.r")[2:6])
+duplication<-rbind(
+  data.frame(Reads=pos_uniqRead, Duplication_level=pos_occ, Method='Position-based'),
+  data.frame(Reads=seq_uniqRead, Duplication_level=seq_occ, Method='Sequence-based')
+)
+```
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+p<-ggplot(duplication, aes(x=Duplication_level, y=Reads, colour=Method)) +
+  geom_point() +
+  xlim(c(0,500)) +
+  scale_y_log10() +
+  tufte_theme() +
+  theme(legend.position=c(.8,.8))
+
+p+scale_colour_brewer(type = "qual", palette = 6)
+
+```
+
+## Splice Junctions
+
+`r margin_note("- Events are number of transcripts")`
+`r margin_note("- Junctions are number of exons")`
+`r margin_note("- VAST majority of splice junctions are known")`
+`r margin_note("- A lot more novel transcripts than novel splice variants")`
+
+```{r }
+junctions <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.junction.txt", skip=4, header=FALSE, sep=':')
+colnames(junctions)<-c('Class', 'Number')
+knitr::kable(
+  junctions[1:8,]
+)
+```
+
+## Splice Junction Saturation
+
+`r margin_note("- It looks like both known and novel splice sites continue to be found")`
+
+```{r include=FALSE}
+eval(parse(file = "~/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.junctionSaturation_plot.r")[2:5])
+saturation<-rbind(
+  data.frame(percent_reads=x, junctions=z, Category='All'),
+  data.frame(percent_reads=x, junctions=y, Category='Known'),
+  data.frame(percent_reads=x, junctions=w, Category='Novel')
+)
+```
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+p<-ggplot(saturation, aes(y=junctions, x=percent_reads, colour=Category)) +
+  geom_point() +
+  #xlim(c(0,500)) +
+  #scale_y_log10() +
+  tufte_theme() +
+  theme(legend.position=c(.8,.7))
+
+p+scale_colour_brewer(type = "qual", palette = 6)
+
+```
+
+# Picard RNAseq Stats
+
+`r margin_note("- Almost all reads aligned and 99% are the correct (second) strand")`
+`r margin_note("- 15% of reads are intergenic, 45% are intronic, and 40% are expressed (22% coding, 18% UTR)")`
+`r margin_note("- NO reads map to rRNA (this seems like it must be an error)")`
+
+```{r }
+RnaSeqMetrics <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/RnaSeqMetrics.txt", header=TRUE, comment.char="#", stringsAsFactors = FALSE)
+RnaSeqMetrics <- RnaSeqMetrics[(1),]
+PicardStats <- gather(RnaSeqMetrics, stat, result)
+knitr::kable(
+  PicardStats
+)
+```
+
