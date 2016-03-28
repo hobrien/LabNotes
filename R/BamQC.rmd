@@ -1,6 +1,9 @@
 ---
 title: "Data QC"
-output: html_document
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
 ---
 
 ```{r setup, include=FALSE}
@@ -9,59 +12,84 @@ library(tidyr)
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(RColorBrewer)
+library(tufte)
+source("~/BTSync/Code/R/FormatGGplot.R")
 ```
-## Insert Sizes
-- 20.7% of reads have an insert size of zero
-- 10.9% have an insert size > 5000 bp
-- BIG jump right at 1000 bp, stays high until 1750, then gradually declines
 
-```{r}
+## Insert Size Distribution
+
+`r margin_note('- 20.7% of reads have an insert size of zero')`
+`r margin_note('- 10.9% have an insert size > 5000 bp')`
+`r margin_note('- BIG jump right at 1000 bp, stays high until 1750, then gradually declines')`
+
+
+```{r include=FALSE}
 
 insert_sizes <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300/insert_sizes.txt", header=TRUE, stringsAsFactors=FALSE)
 colnames(insert_sizes)<-c('size', 'percent')
-sum(insert_sizes[insert_sizes$size > 5000, 2])
-insert_sizes[1,2]
-ggplot(insert_sizes[insert_sizes$size > 0 & insert_sizes$size < 5001,], aes(x=size, y=percent)) +geom_line()
+sum(insert_sizes[insert_sizes$size > 5000, 2]) #insert sizes > 5kb
+insert_sizes[1,2] #insert size = 0
+```
+
+```{r dev.args = list(bg = 'transparent')}
+
+ggplot(insert_sizes[insert_sizes$size > 0 & insert_sizes$size < 5001,], aes(x=size, y=percent)) +
+  geom_line() +
+  tufte_theme()
 
 ```
 
-## Picard RNAseq Stats
-- Almost all reads aligned and 99% are the correct (second) strand
-- 15% of reads are intergenic, 45% are intronic, and 40% are expressed (22% coding, 18% UTR)
-- NO reads map to rRNA (this seems like it must be an error)
-- The feature coverage plot looks good. Steep drop-offs at the ends, and a slight bias toward 3' (this could be due to active transcription)
+## Transcript Read Coverage
 
+`r margin_note("- Looks good. Steep drop-offs at the ends, and a slight bias toward 3', which could be due to active transcription")`
 
-```{r }
+```{r dev.args = list(bg = 'transparent')}
 RnaSeqMetrics <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300/RnaSeqMetrics.txt", header=TRUE, comment.char="#", stringsAsFactors = FALSE)
 
 cov <- data.frame(normalized_position=as.numeric(RnaSeqMetrics[-(1:2),]$PF_BASES), normalized_coverage=as.numeric(RnaSeqMetrics[-(1:2),]$PF_ALIGNED_BASES))
 RnaSeqMetrics <- RnaSeqMetrics[(1),]
-ggplot(cov, aes(x=normalized_position, y=normalized_coverage))+geom_bar(stat='identity')
-gather(RnaSeqMetrics, stat, result)
+ggplot(cov, aes(x=normalized_position, y=normalized_coverage)) +
+  geom_line() +
+  tufte_theme()
+```
+
+## Picard RNAseq Stats
+
+`r margin_note("- Almost all reads aligned and 99% are the correct (second) strand")`
+`r margin_note("- 15% of reads are intergenic, 45% are intronic, and 40% are expressed (22% coding, 18% UTR)")`
+`r margin_note("- NO reads map to rRNA (this seems like it must be an error)")`
+
+```{r }
+PicardStats <- gather(RnaSeqMetrics, stat, result)
+knitr::kable(
+  PicardStats
+)
 ```
 
 # RSeQC
+## Mapping Stats
+`r margin_note("- Total records = mapped reads + non-primary")`
+`r margin_note("- VERY low number of proper pairs. This doesn't seem to be caused by the strand because. I'm trying a different mean mapping dist to see if that helps")`
 
-==================================================
-All numbers are READ count
-==================================================
+``` {r }
+RSeQCstats <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.stats.txt", header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats[4,2] <-strsplit(RSeQCstats[4,1], ' +')[[1]][4]
+RSeQCstats[4,1] <- 'Non primary hits'
+colnames(RSeQCstats)<-c('stat', 'result')
+knitr::kable(
+  RSeQCstats
+)
+```
 
-- Total records:                          374696825
+## Distribution of Reads Among Features
+`r margin_note("- Exons enriched >10 fold relative to introns")`
+`r margin_note("- Introns enriched >10 fold relative to upstream sequence but only ca 5 fold relative to downstream sequence")`
 
-- QC failed:                              0
-- Optical/PCR duplicate:                  0
-- Non primary hits                        91094701
-- Unmapped reads:                         0
-- mapq < mapq_cut (non-unique):           38969798
-
-- mapq >= mapq_cut (unique):              244632326
-- Read-1:                                 123273973
-- Read-2:                                 121358050
-- Reads map to '+':                       122285034
-- Reads map to '-':                       122347292
-- Non-splice reads:                       213432309
-- Splice reads:                           31200017
-- Reads mapped in proper pairs:           1285466
-- Proper-paired reads map to different chrom:1316
-
+``` {r }
+RSeQCdist <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300/15533_300_secondstrand.dist.txt", header=TRUE, stringsAsFactors=FALSE, skip=4, sep='')
+RSeQCdist <- RSeQCdist[-11,]
+knitr::kable(
+  RSeQCdist
+)
+```
