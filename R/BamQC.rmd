@@ -5,7 +5,7 @@ output:
   tufte::tufte_html: default
   #tufte::tufte_handout: default
 ---
-
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyr)
@@ -158,8 +158,8 @@ p+scale_colour_brewer(type = "qual", palette = 6)
 
 # Picard RNAseq Stats
 
-`r margin_note("- Almost all reads aligned and 99% are the correct (second) strand")`
-`r margin_note("- 15% of reads are intergenic, 45% are intronic, and 40% are expressed (22% coding, 18% UTR)")`
+`r margin_note("- Almost all reads aligned and 99\\% are the correct (second) strand")`
+`r margin_note("- 15\\% of reads are intergenic, 45\\% are intronic, and 40\\% are expressed (22\\% coding, 18\\% UTR)")`
 `r margin_note("- NO reads map to rRNA (this seems like it must be an error)")`
 
 ```{r }
