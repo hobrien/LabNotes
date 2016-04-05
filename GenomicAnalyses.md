@@ -189,7 +189,9 @@
                     - chr21:8250197-8472360 (222 kb)
                     - chr22_KI270733v1_random:122273-179772 (57 kb)
                     - chrUn_GL000220v1:105424-161802 (56 kb)
-                        - ```cat humRibosomal.bl |awk '{ if ($12 >= 7000) print $0 }'```             
+                        - ```cat humRibosomal.bl |awk '{ if ($12 >= 7000) print $0 }'```
+                - Convert blast results to BED, then run split_bam.py:
+                    - ```cat /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bl |blast2bed12.py > /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed```               
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
         - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```        

@@ -20,18 +20,37 @@ source("~/BTSync/Code/R/FormatGGplot.R")
 
 # RSeQC
 ## Mapping Stats
+`r margin_note("- Excludes reads mapping to rDNA")`
 `r margin_note("- Total records = mapped reads + non-primary")`
 `r margin_note("- VERY low number of proper pairs. This doesn't seem to be caused by the strand because it is the same for other strand options. I'm trying a different mean mapping dist to see if that helps")`
 
 ``` {r }
-RSeQCstats <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.stats.txt", header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.ex.stats.txt", header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
 RSeQCstats[4,2] <-strsplit(RSeQCstats[4,1], ' +')[[1]][4]
 RSeQCstats[4,1] <- 'Non primary hits'
 colnames(RSeQCstats)<-c('stat', 'result')
+RSeQCstats$result <- formatC(as.numeric(RSeQCstats$result), format='d', big.mark=',')
 knitr::kable(
   RSeQCstats
 )
 ```
+
+## rRNA Mapping Stats
+
+`r margin_note("- 14 million reads map to rDNA (ca. 5%)")`
+`r margin_note("- These mappings account for 20% of multimapped reads and >1/3 of all non-primary hits")`
+
+``` {r }
+RSeQCstats <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.in.stats.txt", header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats[4,2] <-strsplit(RSeQCstats[4,1], ' +')[[1]][4]
+RSeQCstats[4,1] <- 'Non primary hits'
+colnames(RSeQCstats)<-c('stat', 'result')
+RSeQCstats$result <- formatC(as.numeric(RSeQCstats$result), format='d', big.mark=',')
+knitr::kable(
+  RSeQCstats
+)
+```
+
 
 ## Distribution of Reads Among Features
 `r margin_note("- Exons enriched >10 fold relative to introns")`
@@ -40,6 +59,7 @@ knitr::kable(
 ``` {r }
 RSeQCdist <- read.delim("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.dist.txt", header=TRUE, stringsAsFactors=FALSE, skip=4, sep='')
 RSeQCdist <- RSeQCdist[-11,]
+RSeQCdist[,2:4] <- sapply(RSeQCdist[,2:4], function(x) formatC(as.numeric(x), format='d', big.mark=','))
 knitr::kable(
   RSeQCdist
 )
@@ -126,6 +146,7 @@ p+scale_colour_brewer(type = "qual", palette = 6)
 ```{r }
 junctions <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.junction.txt", skip=4, header=FALSE, sep=':')
 colnames(junctions)<-c('Class', 'Number')
+junctions$Number <- formatC(as.numeric(junctions$Number), format='d', big.mark=',')
 knitr::kable(
   junctions[1:8,]
 )
@@ -164,6 +185,7 @@ p+scale_colour_brewer(type = "qual", palette = 6)
 ```{r }
 RnaSeqMetrics <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/RnaSeqMetrics.txt", header=TRUE, comment.char="#", stringsAsFactors = FALSE)
 PicardStats <- gather(RnaSeqMetrics[(1),], stat, result)
+PicardStats$result<-sapply(PicardStats$result, function(x) format(as.numeric(x), big.mark=','))
 knitr::kable(
   PicardStats
 )
