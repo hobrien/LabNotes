@@ -17,21 +17,32 @@ library(tufte)
 rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
 folder <- "/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_300_trim2"
+folder2 <- "/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_trim2"
+folder3 <- "/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_1000_trim2"
 ```
 
 # RSeQC
 ## Mapping Stats
 `r margin_note("- Excludes reads mapping to rDNA")`
 `r margin_note("- Total records = mapped reads + non-primary")`
-`r margin_note("- almost all (244 million out of 265 million) now mapping as proper pairs")`
-`r margin_note("- the number of non-primary mappings has gone down dramatically (55 million vs 194 million), while the number of uniquely mapped reads has gone up (265 million vs. 226 million)")`
+`r margin_note("- Number of uniquely mapped reads goes up slightly with inner distance")`
+`r margin_note("- Number of properly paired reads increases considerably")`
+`r margin_note("- Number of non-primary hits peaks at 300 bp")`
 
 ``` {r }
-RSeQCstats <- read.delim(paste(folder, ".ex.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats <- read.delim(paste(folder2, ".ex.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
 RSeQCstats[4,2] <-strsplit(RSeQCstats[4,1], ' +')[[1]][4]
 RSeQCstats[4,1] <- 'Non primary hits'
-colnames(RSeQCstats)<-c('stat', 'result')
-RSeQCstats$result <- formatC(as.numeric(RSeQCstats$result), format='d', big.mark=',')
+RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2]), format='d', big.mark=',')
+RSeQCstats2 <- read.delim(paste(folder, ".ex.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats2[4,2] <-strsplit(RSeQCstats2[4,1], ' +')[[1]][4]
+RSeQCstats2[,2] <- formatC(as.numeric(RSeQCstats2[,2]), format='d', big.mark=',')
+RSeQCstats <- cbind(RSeQCstats, RSeQCstats2[,2])
+RSeQCstats3 <- read.delim(paste(folder3, ".ex.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats3[4,2] <-strsplit(RSeQCstats3[4,1], ' +')[[1]][4]
+RSeQCstats3[,2] <- formatC(as.numeric(RSeQCstats3[,2]), format='d', big.mark=',')
+RSeQCstats <- cbind(RSeQCstats, RSeQCstats3[,2])
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '1000bp')
 knitr::kable(
   RSeQCstats
 )
@@ -39,32 +50,48 @@ knitr::kable(
 
 ## rRNA Mapping Stats
 
-`r margin_note("- 13 million reads map to rDNA (ca. 5%)")`
-`r margin_note("- This is down from 14 million reads, but the number of mappings is up from 120 million to 131 million")`
+`r margin_note("- 14 million reads map to rDNA (ca. 5%)")`
+`r margin_note("- Number of mappings is considerably higher for 300 bp for some reason")`
 `r margin_note("- These mappings account for 45% of multimapped reads and 70% of all non-primary hits")`
 `r margin_note("- These numbers are up from 20% and 33% respectively")`
 
 ``` {r }
-RSeQCstats <- read.delim(paste(folder, ".in.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats <- read.delim(paste(folder2, ".in.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
 RSeQCstats[4,2] <-strsplit(RSeQCstats[4,1], ' +')[[1]][4]
 RSeQCstats[4,1] <- 'Non primary hits'
-colnames(RSeQCstats)<-c('stat', 'result')
-RSeQCstats$result <- formatC(as.numeric(RSeQCstats$result), format='d', big.mark=',')
+RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2]), format='d', big.mark=',')
+RSeQCstats2 <- read.delim(paste(folder, ".in.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats2[4,2] <-strsplit(RSeQCstats2[4,1], ' +')[[1]][4]
+RSeQCstats2[,2] <- formatC(as.numeric(RSeQCstats2[,2]), format='d', big.mark=',')
+RSeQCstats <- cbind(RSeQCstats, RSeQCstats2[,2])
+RSeQCstats3 <- read.delim(paste(folder3, ".in.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
+RSeQCstats3[4,2] <-strsplit(RSeQCstats3[4,1], ' +')[[1]][4]
+RSeQCstats3[,2] <- formatC(as.numeric(RSeQCstats3[,2]), format='d', big.mark=',')
+RSeQCstats <- cbind(RSeQCstats, RSeQCstats3[,2])
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '1000bp')
 knitr::kable(
   RSeQCstats
 )
 ```
 
 
-## Distribution of Reads Among Features
+## Distribution of Reads Among Features (tags per kb)
 `r margin_note("- Exons enriched >10 fold relative to introns")`
 `r margin_note("- Introns enriched >10 fold relative to upstream sequence but only ca 5 fold relative to downstream sequence")`
 `r margin_note("- These numbers are EXACTLY the same")`
 
 ``` {r }
-RSeQCdist <- read.delim(paste(folder, ".dist.txt", sep=""), header=TRUE, stringsAsFactors=FALSE, skip=4, sep='')
+RSeQCdist <- read.delim(paste(folder2, ".dist.txt", sep=""), header=TRUE, stringsAsFactors=FALSE, skip=4, sep='')
 RSeQCdist <- RSeQCdist[-11,]
 RSeQCdist[,2:4] <- sapply(RSeQCdist[,2:4], function(x) formatC(as.numeric(x), format='d', big.mark=','))
+RSeQCdist2 <- read.delim(paste(folder, ".dist.txt", sep=""), header=TRUE, stringsAsFactors=FALSE, skip=4, sep='')
+RSeQCdist2 <- RSeQCdist2[-11,]
+RSeQCdist2[,2:4] <- sapply(RSeQCdist2[,2:4], function(x) formatC(as.numeric(x), format='d', big.mark=','))
+RSeQCdist3 <- read.delim(paste(folder3, ".dist.txt", sep=""), header=TRUE, stringsAsFactors=FALSE, skip=4, sep='')
+RSeQCdist3 <- RSeQCdist3[-11,]
+RSeQCdist3[,2:4] <- sapply(RSeQCdist3[,2:4], function(x) formatC(as.numeric(x), format='d', big.mark=','))
+RSeQCdist <- cbind(RSeQCdist[,c(1,4)], RSeQCdist2[,4], RSeQCdist3[,4])
+colnames(RSeQCdist)<-c('Group', '50bp', '300bp', '1000bp')
 knitr::kable(
   RSeQCdist
 )
@@ -76,8 +103,11 @@ knitr::kable(
 `r margin_note("- The proportion that can't be determined is up slightely from 0.25")`
 
 ```{r }
-expt <- read.delim(paste(folder, ".expt.txt", sep=""), skip=3, header=FALSE, sep=':')
-colnames(expt)<-c('Class', 'Proportion')
+expt <- cbind(read.delim(paste(folder2, ".expt.txt", sep=""), skip=3, header=FALSE, sep=':'),
+             read.delim(paste(folder, ".expt.txt", sep=""), skip=3, header=FALSE, sep=':')[,2],
+             read.delim(paste(folder3, ".expt.txt", sep=""), skip=3, header=FALSE, sep=':')[,2]
+)
+colnames(expt)<-c('Class', '50bp', '300bp', '1000bp')
 knitr::kable(
   expt
 )
@@ -86,20 +116,27 @@ knitr::kable(
 ## Insert Size Distribution
 
 `r margin_note("- Distribution centered on zero")`
-`r margin_note("- Less than 979,000 of 1,000,000 reads used (up from <2000)")`
+`r margin_note("- 979,000 of 1,000,000 reads used (up from <2000)")`
 `r margin_note("- Shape is unchanged, but a lot smoother")`
 
 ```{r include=FALSE}
-inner_distance <- read.delim(paste(folder, ".inner_distance_freq.txt", sep=""), header=FALSE)
-sum(inner_distance$V3)
+inner_distance <- cbind(read.delim(paste(folder2, ".inner_distance_freq.txt", sep=""), header=FALSE),
+                        read.delim(paste(folder, ".inner_distance_freq.txt", sep=""), header=FALSE)[,3],
+                        read.delim(paste(folder3, ".inner_distance_freq.txt", sep=""), header=FALSE)[,3]
+)
+colnames(inner_distance) <- c('V1', 'V2', '50bp', '300bp', '1000bp')
+inner_distance[,3:5] %>% summarise_each(funs(sum))
+inner_distance<- gather(inner_distance, distance, V3, 3:5)
 ```
 
 ```{r dev.args = list(bg = 'transparent')}
-ggplot(inner_distance, aes(x=(V1+V2)/2, y=V3)) +
-  geom_bar(stat='identity') +
+ggplot(inner_distance, aes(x=(V1+V2)/2, y=V3, colour=distance)) +
+  geom_line() +
   ylab('reads') +
   xlab('inner distance') +
-  tufte_theme()
+  tufte_theme() +
+  theme(legend.position=c(.8,.8)) +
+  scale_colour_brewer(type = "qual", palette = 6)
 
 ```
 
