@@ -146,7 +146,7 @@ p+scale_colour_brewer(type = "qual", palette = 6)
 ```{r }
 junctions <- read.delim("~/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.junction.txt", skip=4, header=FALSE, sep=':')
 colnames(junctions)<-c('Class', 'Number')
-junctions$Number <- formatC(as.numeric(junctions$Number), format='d', big.mark=',')
+#junctions$Number <- formatC(as.numeric(junctions$Number), format='d', big.mark=',')
 knitr::kable(
   junctions[1:8,]
 )
@@ -176,6 +176,71 @@ p<-ggplot(saturation, aes(y=junctions, x=percent_reads, colour=Category)) +
 p+scale_colour_brewer(type = "qual", palette = 6)
 
 ```
+
+## Mutation Distribution
+
+```{r include=FALSE}
+
+eval(parse(file = "~/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.insertion_profile.r")[c(3,9)])
+eval(parse(file = "~/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.deletion_profile.r")[3])
+eval(parse(file = "~/BTSync/FetalRNAseq/BamQC/15533_300_secondstrand/15533_300_secondstrand.mismatch_profile.r")[1:12])
+
+SNP_types<- data.frame(Position=rep(1:100, 12), num_SNPs=c(A2C, A2G, A2T, C2A, C2G, C2T, G2A, G2C, G2T, T2A, T2C, T2G), 
+                       Mutation=c(rep('A2C', 100), rep('A2G', 100), rep('A2T', 100), rep('C2A', 100), rep('C2G', 100), rep('C2T', 100), rep('G2A', 100), rep('G2C', 100), rep('G2T', 100), rep('T2A', 100), rep('T2C', 100), rep('T2G', 100)), 
+                       NonDirectional=c(rep('AC', 100), rep('AG', 100), rep('AT', 100), rep('CA', 100), rep('CG', 100), rep('CT', 100), rep('CT', 100), rep('CG', 100), rep('CA', 100), rep('AT', 100), rep('CT', 100), rep('AC', 100)), 
+                       SNPclass=c(rep('Transversion', 100), rep('Transition', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transition', 100), rep('Transition', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transition', 100), rep('Transversion', 100)),
+                       PositionGroup = rep(c('position 1', rep('positions 2-5', 4), rep('positions 6-95', 90), rep('positions 96-99', 4), 'position 100'), 12) 
+                       )
+
+SNPcount <- group_by(SNP_types, Position) %>% summarise(Number = sum(num_SNPs)) 
+
+mutations <- data.frame(Position=rep(1:100, 4), Number=c(SNPcount$Number, r1_insert_count, r2_insert_count, value), Type=factor(c(rep('SNP', 100), rep('Read 1 insertion',100), rep('Read 2 insertion',100), rep('Deletion', 100))))
+
+
+SNPspectrum <- SNP_types %>% group_by(Mutation, PositionGroup, SNPclass) %>% summarise(Number=sum(num_SNPs))
+SNPspectrum <-rbind(SNPspectrum, SNP_types %>% group_by(Mutation, SNPclass) %>% summarise(Number=sum(num_SNPs), PositionGroup = 'All'))
+SNPspectrum$Bases <- ifelse(SNPspectrum$PositionGroup == 'position 1' | SNPspectrum$PositionGroup == 'position 100', 1, 
+                            ifelse(SNPspectrum$PositionGroup == 'positions 2-5' | SNPspectrum$PositionGroup == 'positions 96-99', 4,
+                                   ifelse(SNPspectrum$PositionGroup == 'positions 6-95', 90, 100
+                                     
+                                        )
+                                  )
+                            )
+SNPspectrum$PositionGroup <- factor(SNPspectrum$PositionGroup, levels=c('position 1', 'positions 2-5', 'positions 6-95', 'positions 96-99', 'position 100', 'All'))
+SNPspectrum$Mutation <- factor(SNPspectrum$Mutation, levels=c('A2G', 'T2C', 'G2A', 'C2T', 'A2C', 'T2G', 'A2T', 'T2A', 'C2G', 'G2C', 'G2T', 'C2A'))
+```
+
+
+`r margin_note("- For some reason, mutations are only counted separately on reads 1 and 2 for insertions")`
+
+`r margin_note("- Approximately equal numbers of insertions, deletions and SNPs, except at the starts and end where indels drop to zero and SNPs increase")`
+`r margin_note("- Odd zig-zag pattern for SNPs for some reason")`
+
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(mutations, aes(x=Position, y=Number, colour=Type)) + 
+  geom_line() + 
+  tufte_theme() +
+  scale_colour_brewer(type = "qual", palette = 6)  + 
+  theme(legend.position=c(.8,.7)) + 
+  scale_y_log10()
+```
+
+`r margin_note("- Because reads 1 and 2 are mixed, equal numbers for symetric mutations")`
+`r margin_note("- A2G/T2C and A2C/T2G mutations dominate at the very ends of reads, with the former dominating at the start and the latter at the end")`
+`r margin_note("- These classes are also disproportionate throughout the reads, with G2A/C2T (transitions) also being higher than other (transversion) mutations")`
+
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(SNPspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
+  geom_bar(stat='identity') + 
+  tufte_theme() + 
+  facet_wrap(~ PositionGroup, scales='free_y') + 
+  theme(axis.text.x=element_text(angle=90)) + 
+  scale_fill_brewer(type = "qual", palette = 6) + 
+  theme(legend.position=c(.95,.95))
+```
+
 
 # Picard RNAseq Stats
 

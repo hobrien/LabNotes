@@ -33,7 +33,10 @@ folder=${folder_path##*/}
 
 #geneBody_coverage.py -r /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $@ -o $folder_path/$folder
 
-split_bam.py -r /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed -i $@ -o $folder_path/$folder
-bam_stat.py -i $folder_path/$folder.in.bam > $folder_path/$folder.in.stats.txt
-bam_stat.py -i $folder_path/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
+#split_bam.py -r /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed -i $@ -o $folder_path/$folder
+#bam_stat.py -i $folder_path/$folder.in.bam > $folder_path/$folder.in.stats.txt
+#bam_stat.py -i $folder_path/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
 
+deletion_profile.py -l 100 -i $@ -o $folder_path/$folder
+insertion_profile.py -s PE -i $@ -o $folder_path/$folder
+mismatch_profile.py -l 100 -i $@ -o $folder_path/$folder

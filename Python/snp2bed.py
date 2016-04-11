@@ -20,12 +20,8 @@ def main(args):
              
        matchingSNPs = 0
        for line in fileinput.input():
-           (chromosome, position, id, ref, alt) = line.strip().split('\t')
-           if id != GetID(cursor, chromosome, position, ref, alt):
-               warnings.warn("id %s at %s position %s does not match DB id (%s)" % (id, chromosome, position, GetID(cursor, chromosome, position, ref, alt)))
-           matchingSNPs += 1
-           if matchingSNPs % 1000 == 0:
-               warnings.warn("matched %i SNPs" % matchingSNPs)
+           for id in line.split():
+               print '\t'.join(str(x) for x in GetCoords(cursor, id))
   
     except Error as e:
         print(e)
@@ -35,28 +31,18 @@ def main(args):
         conn.close()
     
     
-def GetID(cursor, chromosome, position, ref, alt):
-    if chromosome[:3] != 'Chr':
-        chromosome = "Chr%s" % chromosome
-    cursor.execute("SELECT name, observed FROM snp144 WHERE chrom = %s AND chromEnd = %s", (chromosome, position,))
+def GetCoords(cursor, id):
+    cursor.execute("SELECT chrom, chromStart, chromEnd FROM snp144 WHERE name = %s", (id,))
     rows = cursor.fetchall()
-    rsID = []
-    for row in rows:
-        db = row[1].encode('ascii').replace('-', '.').split('/')
-        db.sort()
-        vcf = [ref, alt]
-        vcf.sort()
-        if db == vcf:
-            rsID.append(row[0])
     try:
-        assert len(rsID) == 1
+        assert len(rows) == 1
     except AssertionError:
-        if len(rsID) == 0:
+        if len(rows) == 0:
             warnings.warn("No SNP at %s position %s" % (chromosome, position))
-            rsID = ['NA']
         else:
             warnings.warn("%i rows matching %s position %s" % (len(rsID), chromosome, position))
-    return  rsID[0]
+        sys.exit()    
+    return  rows[0]
 
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)

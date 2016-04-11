@@ -21,3 +21,7 @@
     - "the GENCODE Comprehensive set is larger and represents more transcriptional complexity than RefSeq" {Frankish:2015iu}
     
 - [Differences between GTF and GFF3](http://blog.nextgenetics.net/?e=27)
+
+- Based on Google and [this](http://biorxiv.org/content/biorxiv/early/2013/11/22/000851.full.pdf) paper, it look slike STAR supports clipping of reads but Tophat doesn't. Might be an argument for quality trimming if I'm using tophat
+
+- [Brainspan](http://www.brainspan.org/rnaseq/search/index.html): brain microarray data during development
