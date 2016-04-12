@@ -124,7 +124,14 @@
     - download and analyse:
         - ```unzip -d FastQC/Uncompressed 'FastQC/*_trimmed_fastqc.zip'```
         - ```find Uncompressed/ -name summary.txt |grep trimmed |xargs perl -pe 's/_trimmed.*//' >>trimmed_summary.txt```
-
+    - Use trim_galore cutadapt wrapper
+        - For some obscure reason, the reads are becoming unpaired after trimming. I get very high pair congruence when mapping the raw data with Tophat, but very low congruence with the trimmed data
+        - I've also decided that it's a good idea to do some quality trimming because unlike Star, Tophat does not do read clipping
+        - [trim_galore](http://www.bioinformatics.babraham.ac.uk/projects/trim_galore) is a perl wrapper for cutadapt that makes it a little more flexible and easy to use. It also solves this problem
+            - After doing the mapping with quality trimming and adapter trimming, everything looks good except that there's a big spike in SNP frequency at the 5' end of the reads.
+            - I am going to solve this by clipping 5 bp from the 5' end of each read in addition to the quality and adapter trimming:
+            - ```find /c8000xd3/databank/foetal-rna/Exeter_sequencing/15533_Oct_2014/ -name *.fastq.gz | xargs qsub SubmissionScripts/Trim.sh```
+            
 - Start mapping reads with tophat
     - follow the instructions [here](http://www.illumina.com/documents/products/technotes/RNASeqAnalysisTopHat.pdf) to get started with tophat
         - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/NCBI/GRCh38Decoy/Homo_sapiens_NCBI_GRCh38Decoy.tar.gz```
@@ -191,7 +198,8 @@
                     - chrUn_GL000220v1:105424-161802 (56 kb)
                         - ```cat humRibosomal.bl |awk '{ if ($12 >= 7000) print $0 }'```
                 - Convert blast results to BED, then run split_bam.py:
-                    - ```cat /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bl |blast2bed12.py > /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed```               
+                    - ```cat /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bl |blast2bed12.py > /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed```
+                                   
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
         - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```        
