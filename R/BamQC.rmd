@@ -28,6 +28,7 @@ folder3 <- "/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_1000_trim2"
 `r margin_note("- Number of uniquely mapped reads goes up slightly with inner distance")`
 `r margin_note("- Number of properly paired reads increases considerably")`
 `r margin_note("- Number of non-primary hits peaks at 300 bp")`
+`r margin_note("- Number of non-primary hits down dramatically from 194 million and the number of uniquely mapped reads has gone up from 226 million")`
 
 ``` {r }
 RSeQCstats <- read.delim(paste(folder2, ".ex.stats.txt", sep=""), header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':')
@@ -143,15 +144,27 @@ ggplot(inner_distance, aes(x=(V1+V2)/2, y=V3, colour=distance)) +
 ## Transcript Read Coverage
 
 `r margin_note("- Looks good. Steep drop-offs at the ends, especially 5'")`
+`r margin_note("- Insert size makes no difference")`
 
 ```{r dev.args = list(bg = 'transparent')}
-#geneBodyCoverage <- read.delim(paste(folder, ".geneBodyCoverage.txt", sep=""), header=FALSE)
-#geneBodyCoverage <- t(geneBodyCoverage[,-1])
-#ggplot(as.data.frame(geneBodyCoverage), aes(x=V1, y=V2)) +
-#  geom_line() +
-#  ylab('reads') +
-#  tufte_theme()
-#  xlab('transcript percentile') +
+geneBodyCoverage <- read.delim(paste(folder2, ".geneBodyCoverage.txt", sep=""), header=FALSE)
+geneBodyCoverage <- as.data.frame(t(geneBodyCoverage[,-1]))
+geneBodyCoverage$V3 <- '50bp'
+geneBodyCoverage2 <- read.delim(paste(folder, ".geneBodyCoverage.txt", sep=""), header=FALSE)
+geneBodyCoverage2 <- as.data.frame(t(geneBodyCoverage2[,-1]))
+geneBodyCoverage2$V3 <- '300bp'
+geneBodyCoverage3 <- read.delim(paste(folder3, ".geneBodyCoverage.txt", sep=""), header=FALSE)
+geneBodyCoverage3 <- as.data.frame(t(geneBodyCoverage3[,-1]))
+geneBodyCoverage3$V3 <- '1000bp'
+geneBodyCoverage <- rbind(geneBodyCoverage, geneBodyCoverage2, geneBodyCoverage3)
+ggplot(geneBodyCoverage, aes(x=V1, y=V2, colour=V3)) +
+  geom_line() +
+  ylab('reads') +
+  tufte_theme() +
+  xlab('transcript percentile') +
+  theme(legend.position=c(.8,.8)) +
+  scale_colour_brewer(type = "qual", palette = 6)
+  
 ```
 
 ## Sequence Duplication
@@ -184,15 +197,19 @@ p+scale_colour_brewer(type = "qual", palette = 6)
 `r margin_note("- Events are number of transcripts")`
 `r margin_note("- Junctions are number of exons")`
 `r margin_note("- VAST majority of splice junctions are known")`
-`r margin_note("- A lot more novel transcripts than novel splice variants")`
+`r margin_note("- A lot more novel transcripts with smaller insert size")`
 
 ```{r }
-#junctions <- read.delim(paste(folder, ".junction.txt", sep=""), skip=4, header=FALSE, sep=':')
-#colnames(junctions)<-c('Class', 'Number')
-#junctions$Number <- formatC(as.numeric(junctions$Number), format='d', big.mark=',')
-#knitr::kable(
-#  junctions[1:8,]
-#)
+junctions <- read.delim(paste(folder2, ".junction.txt", sep=""), skip=4, header=FALSE, sep=':')
+junctions <-cbind(junctions, read.delim(paste(folder, ".junction.txt", sep=""), skip=4, header=FALSE, sep=':')[,2])
+junctions <-cbind(junctions, read.delim(paste(folder3, ".junction.txt", sep=""), skip=4, header=FALSE, sep=':')[,2])
+junctions[,2:4] <- sapply(junctions[,2:4], function(x) formatC(as.numeric(x), format='d', big.mark=','))
+
+colnames(junctions)<-c('Class', '50bp', '300bp', '1000bp')
+
+knitr::kable(
+  junctions[1:8,]
+)
 ```
 
 ## Splice Junction Saturation
@@ -226,31 +243,32 @@ p+scale_colour_brewer(type = "qual", palette = 6)
 
 eval(parse(file = paste(folder, ".insertion_profile.r", sep=""))[c(3,9)])
 eval(parse(file =paste(folder, ".deletion_profile.r", sep=""))[3])
-#eval(parse(file =paste(folder, ".mismatch_profile.r", sep=""))[1:12])
+eval(parse(file =paste(folder, ".mismatch_profile.r", sep=""))[1:12])
 
-#SNP_types<- data.frame(Position=rep(1:100, 12), num_SNPs=c(A2C, A2G, A2T, C2A, C2G, C2T, G2A, G2C, G2T, T2A, T2C, T2G), 
-#                       Mutation=c(rep('A2C', 100), rep('A2G', 100), rep('A2T', 100), rep('C2A', 100), rep('C2G', 100), rep('C2T', 100), rep('G2A', 100), rep('G2C', 100), rep('G2T', 100), rep('T2A', 100), rep('T2C', 100), rep('T2G', 100)), 
-#                       NonDirectional=c(rep('AC', 100), rep('AG', 100), rep('AT', 100), rep('CA', 100), rep('CG', 100), rep('CT', 100), rep('CT', 100), rep('CG', 100), rep('CA', 100), rep('AT', 100), rep('CT', 100), rep('AC', 100)), 
-#                       SNPclass=c(rep('Transversion', 100), rep('Transition', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transition', 100), rep('Transition', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transition', 100), rep('Transversion', 100)),
-#                      PositionGroup = rep(c('position 1', rep('positions 2-5', 4), rep('positions 6-95', 90), rep('positions 96-99', 4), 'position 100'), 12) 
-#                     )
+SNP_types<- data.frame(Position=rep(1:100, 12), num_SNPs=c(A2C, A2G, A2T, C2A, C2G, C2T, G2A, G2C, G2T, T2A, T2C, T2G), 
+                       Mutation=c(rep('A2C', 100), rep('A2G', 100), rep('A2T', 100), rep('C2A', 100), rep('C2G', 100), rep('C2T', 100), rep('G2A', 100), rep('G2C', 100), rep('G2T', 100), rep('T2A', 100), rep('T2C', 100), rep('T2G', 100)), 
+                       NonDirectional=c(rep('AC', 100), rep('AG', 100), rep('AT', 100), rep('CA', 100), rep('CG', 100), rep('CT', 100), rep('CT', 100), rep('CG', 100), rep('CA', 100), rep('AT', 100), rep('CT', 100), rep('AC', 100)), 
+                       SNPclass=c(rep('Transversion', 100), rep('Transition', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transition', 100), rep('Transition', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transversion', 100), rep('Transition', 100), rep('Transversion', 100)),
+                      PositionGroup = rep(c('position 1', rep('positions 2-5', 4), rep('positions 6-95', 90), rep('positions 96-99', 4), 'position 100'), 12) 
+                     )
 
-#SNPcount <- group_by(SNP_types, Position) %>% summarise(Number = sum(num_SNPs)) 
+SNPcount <- group_by(SNP_types, Position) %>% summarise(Number = sum(num_SNPs)) 
 
 #mutations <- data.frame(Position=rep(1:100, 4), Number=c(SNPcount$Number, r1_insert_count, r2_insert_count, value), Type=factor(c(rep('SNP', 100), rep('Read 1 insertion',100), rep('Read 2 insertion',100), rep('Deletion', 100))))
+mutations <- data.frame(Position=rep(1:100, 4), Number=c(SNPcount$Number, value), Type=factor(c(rep('SNP', 100), rep('Deletion', 100))))
 
 
-#SNPspectrum <- SNP_types %>% group_by(Mutation, PositionGroup, SNPclass) %>% summarise(Number=sum(num_SNPs))
-#SNPspectrum <-rbind(SNPspectrum, SNP_types %>% group_by(Mutation, SNPclass) %>% summarise(Number=sum(num_SNPs), PositionGroup = 'All'))
-#SNPspectrum$Bases <- ifelse(SNPspectrum$PositionGroup == 'position 1' | SNPspectrum$PositionGroup == 'position 100', 1, 
-#                            ifelse(SNPspectrum$PositionGroup == 'positions 2-5' | SNPspectrum$PositionGroup == 'positions 96-99', 4,
-#                                   ifelse(SNPspectrum$PositionGroup == 'positions 6-95', 90, 100
-#                                     
-#                                        )
-#                                  )
-#                            )
-#SNPspectrum$PositionGroup <- factor(SNPspectrum$PositionGroup, levels=c('position 1', 'positions 2-5', 'positions 6-95', 'positions 96-99', 'position 100', 'All'))
-#SNPspectrum$Mutation <- factor(SNPspectrum$Mutation, levels=c('A2G', 'T2C', 'G2A', 'C2T', 'A2C', 'T2G', 'A2T', 'T2A', 'C2G', 'G2C', 'G2T', 'C2A'))
+SNPspectrum <- SNP_types %>% group_by(Mutation, PositionGroup, SNPclass) %>% summarise(Number=sum(num_SNPs))
+SNPspectrum <-rbind(SNPspectrum, SNP_types %>% group_by(Mutation, SNPclass) %>% summarise(Number=sum(num_SNPs), PositionGroup = 'All'))
+SNPspectrum$Bases <- ifelse(SNPspectrum$PositionGroup == 'position 1' | SNPspectrum$PositionGroup == 'position 100', 1, 
+                            ifelse(SNPspectrum$PositionGroup == 'positions 2-5' | SNPspectrum$PositionGroup == 'positions 96-99', 4,
+                                   ifelse(SNPspectrum$PositionGroup == 'positions 6-95', 90, 100
+                                     
+                                        )
+                                  )
+                            )
+SNPspectrum$PositionGroup <- factor(SNPspectrum$PositionGroup, levels=c('position 1', 'positions 2-5', 'positions 6-95', 'positions 96-99', 'position 100', 'All'))
+SNPspectrum$Mutation <- factor(SNPspectrum$Mutation, levels=c('A2G', 'T2C', 'G2A', 'C2T', 'A2C', 'T2G', 'A2T', 'T2A', 'C2G', 'G2C', 'G2T', 'C2A'))
 ```
 
 
@@ -261,12 +279,12 @@ eval(parse(file =paste(folder, ".deletion_profile.r", sep=""))[3])
 
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-#ggplot(mutations, aes(x=Position, y=Number, colour=Type)) + 
-#  geom_line() + 
-#  tufte_theme() +
-#  scale_colour_brewer(type = "qual", palette = 6)  + 
-#  theme(legend.position=c(.8,.7)) + 
-#  scale_y_log10()
+ggplot(mutations, aes(x=Position, y=Number, colour=Type)) + 
+  geom_line() + 
+  tufte_theme() +
+  scale_colour_brewer(type = "qual", palette = 6)  + 
+  theme(legend.position=c(.8,.7)) + 
+  scale_y_log10()
 ```
 
 `r margin_note("- Because reads 1 and 2 are mixed, equal numbers for symetric mutations")`
@@ -275,11 +293,11 @@ eval(parse(file =paste(folder, ".deletion_profile.r", sep=""))[3])
 
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-#ggplot(SNPspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
-#  geom_bar(stat='identity') + 
-#  tufte_theme() + 
-#  facet_wrap(~ PositionGroup, scales='free_y') + 
-#  theme(axis.text.x=element_text(angle=90)) + 
-#  scale_fill_brewer(type = "qual", palette = 6) + 
-#  theme(legend.position=c(.95,.95))
+ggplot(SNPspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
+  geom_bar(stat='identity') + 
+  tufte_theme() + 
+  facet_wrap(~ PositionGroup, scales='free_y') + 
+  theme(axis.text.x=element_text(angle=90)) + 
+  scale_fill_brewer(type = "qual", palette = 6) + 
+  theme(legend.position=c(.95,.95))
 ```
