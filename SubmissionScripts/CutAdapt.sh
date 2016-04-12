@@ -6,8 +6,8 @@
 outfile1=$(basename $1 .fastq.gz)_trimmed.fastq.gz
 outfile2=$(basename $2 .fastq.gz)_trimmed.fastq.gz
 
-/home/heath/.local/bin/cutadapt \
+/home/mpmho/.local/bin/cutadapt \
             -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
             -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT \
-            -o /home/heath/Trimmed/$outfile1 -p /home/heath/Trimmed/$outfile2 $@
+            -o /home/mpmho/Trimmed/$outfile1 -p /home/mpmho/Trimmed/$outfile2 $@
 
