@@ -42,9 +42,9 @@ split_bam.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequenc
 bam_stat.py -i $folder_path/BAM/$folder.in.bam > $folder_path/$folder.in.stats.txt
 bam_stat.py -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
 
-deletion_profile.py -l 120 -i $@ -o $folder_path/$folder
+deletion_profile.py -l 95 -i $@ -o $folder_path/$folder
 insertion_profile.py -s PE -i $@ -o $folder_path/$folder
 #clipping_profile.py -s PE -i $@ -o $folder_path/$folder
-mismatch_profile.py -l 120 -i $@ -o $folder_path/$folder
+mismatch_profile.py -l 95 -i $@ -o $folder_path/$folder
 
 echo "finished QC for $@"
