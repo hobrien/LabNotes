@@ -19,6 +19,7 @@ brew cask install sequel-pro
 brew cask install mactex  # need to update TexShop before it will work
 brew cask install java
 brew cask install skype
+# brew cask install xquartz - this doesn't work. better to install manually. or maybe it's 'cause I didn't log out before trying it
 
 brew cask install anaconda
 conda create -n python2 python=2.7 anaconda
@@ -40,7 +41,7 @@ brew tap homebrew/science
 brew install samtools
 brew install bcftools
 brew install mercurial
-brew install mysql
+brew install mysql  #mysql.server start/stop
 brew install pandoc
 brew install igv
 
