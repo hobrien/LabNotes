@@ -1,0 +1,25 @@
+Sample	Centre	Tophat	RSeQC	Cufflinks
+15468		Running		
+15533	Exeter	Done	Done but no junction saturation	3219
+15768		Done	Running	
+16286		Done	Running	
+16438		Samtools running		
+16488		Done	Running	
+16840		Running		
+16929		Samtools running		
+16972		Running		
+17049		Running		
+17054		Done	Running	
+17068		Done	Running	
+17081		Done	Running	
+17087		Running		
+17109	Exeter	Done	3310	
+17115		Done	Running	
+17130		Done	Running	
+17701		Running		
+17812		Done	Running	
+18294		Running		
+18349		Done	Running	
+18596		Done	Running	
+18655		Running		
+18687		Running		
