@@ -9,10 +9,10 @@ def TruncName(seq):
         seq = seq.replace('_R1_001.fastq.gz' , '')
     elif '_R2_001.fastq.gz' in seq:
         seq = seq.replace('_R2_001.fastq.gz' , '')  
-    elif '_1.fastq.gz' in seq:
-        seq = seq.replace('_1.fastq.gz' , '')  
-    elif '_2.fastq.gz' in seq:
-        seq = seq.replace('_2.fastq.gz' , '')  
+    elif '_1.sanfastq.gz' in seq:
+        seq = seq.replace('_1.sanfastq.gz' , '')  
+    elif '_2.sanfastq.gz' in seq:
+        seq = seq.replace('_2.sanfastq.gz' , '')  
     else:
         sys.exit('name %s not recognised' % seq)
     return seq
