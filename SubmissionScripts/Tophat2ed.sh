@@ -10,7 +10,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 folder_path=${1%/*}
 sampleID=${folder_path##*/}
-echo $sampleID
+echo "Started processing $sampleID"
 
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  --mate-std-dev 50 --num-threads 8 \
@@ -23,4 +23,4 @@ mv /c8000xd3/rnaseq-heath/Mappings/$sampleID/accepted_hits.bam /c8000xd3/rnaseq-
 mv /c8000xd3/rnaseq-heath/Mappings/$sampleID/unmapped.bam /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/
 samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/accepted_hits.bam /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort
 samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort.bam
-
+echo "Finished processing $sampleID"

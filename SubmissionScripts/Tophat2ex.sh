@@ -9,10 +9,11 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 filename1=${1##*/}
-#echo ${filename1%%.*} 
+echo ${filename1%%.*} 
 filename2=${2##*/}
 sampleID=${filename1%%_*}
 
+echo "Started processing $sampleID"
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500 --mate-std-dev 50 --num-threads 8 \
   --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
