@@ -30,7 +30,7 @@ Sample	Centre	Tophat	RSeQC	Cufflinks
 16428	Exeter	3341		
 16491	Exeter	3342		
 16548	Exeter	3343		
-16810	Exeter	3344		
+16810	Exeter	3365		
 16826	Exeter	3345		
 17048	Exeter	3346		
 17053	Exeter	3347		
