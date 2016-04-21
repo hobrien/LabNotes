@@ -1,25 +1,38 @@
 Sample	Centre	Tophat	RSeQC	Cufflinks
-15468		Running		
+15468	Edinburgh	Done	3318	3321
 15533	Exeter	Done	Done but no junction saturation	3219
 15768		Done	Running	
 16286		Done	Running	
-16438		Samtools running		
+16438	Edinburgh	Done	3312	
 16488		Done	Running	
-16840		Running		
-16929		Samtools running		
-16972		Running		
-17049		Running		
+16840	Exeter	Done	3317	
+16929	Exeter	Done	3313	
+16972	Exeter	Done	3320	
+17049	Edinburgh	Done	3322	
 17054		Done	Running	
 17068		Done	Running	
 17081		Done	Running	
-17087		Running		
+17087	Edinburgh	Done	3314	
 17109	Exeter	Done	3310	
 17115		Done	Running	
 17130		Done	Running	
-17701		Running		
+17701	Edinburgh	Done	3323	
 17812		Done	Running	
-18294		Running		
+18294	Edinburgh	Done	3315	
 18349		Done	Running	
 18596		Done	Running	
-18655		Running		
-18687		Running		
+18655	Edinburgh	Done	3319	
+18687	Edinburgh	Done	3324	
+15641	Exeter	3337		
+16024	Exeter	3338		
+16115	Exeter	3339		
+16385	Exeter	3340		
+16428	Exeter	3341		
+16491	Exeter	3342		
+16548	Exeter	3343		
+16810	Exeter	3344		
+16826	Exeter	3345		
+17048	Exeter	3346		
+17053	Exeter	3347		
+17071	Exeter	3348		
+17921	Exeter	3349		
