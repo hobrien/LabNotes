@@ -1,8 +1,12 @@
+
+
 # laptop
 - wrote shell script to install software using brew / brew cask (InstallSoftware.sh)
 - installed [PLINK](https://www.cog-genomics.org/plink2) and [PLINK/SEQ](https://atgu.mgh.harvard.edu/plinkseq/download.shtml) and copied executables to ```~/bin```
 - added ```~/bin``` to PATH
-
+- installed [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go) to automatically create a TOC for github markdown Documents
+    - downloaded the darwin.amd64 binary and moved to ~/bin
+    - ```cat SystemSetup.md | gh-md-toc |pbcopy``` then paste into markdown document
 
 # Flor
 - Set up python
