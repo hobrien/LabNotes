@@ -74,7 +74,8 @@
         - ```rm temp.head```
 
     - Add SNP IDs to imputed VCFs
-        - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
+        - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp146.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp146.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
+            - ```mysql -u root FetalRNAseq < SQL/snp146.sql```
         - chromosome (field 1), position (2) and ref (4) and alt (5) alleles can be used to uniquely identify each SNP (I hope!)
             - there can be several SNPs with the same start position, but they appear to have different end positions
             - there can also be > 2 observed variants at a position                                
