@@ -16,37 +16,22 @@ library(RColorBrewer)
 library(tufte)
 rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
-folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16438/16438",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16972/16972",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17087/17087",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17109/17109",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17701/17701",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18294/18294",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18655/18655",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15768/15768",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16286/16286",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17054/17054",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17068/17068",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17081/17081",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17115/17115",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17130/17130",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17812/17812",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18349/18349",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18596/18596",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15468/15468",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16488/16488"
+folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_300_trim2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_trim2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Trimmed/15533_1000_trim2"
+             
              )
-LibraryInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt", 
-                     header=TRUE, stringsAsFactors=TRUE, sep='\t'
-                     )
 ```
 
 # RSeQC
 ## Mapping Stats
-`r margin_note("- rDNA reads not included in first three stats")`
-`r margin_note("- 12 samples have < 10% rRNA reads")`
-`r margin_note("- All samples have < 20% except for 17812 (24%), 17054 (44%) and 18655 (50%)")`
+`r margin_note("- Excludes reads mapping to rDNA")`
+`r margin_note("- Total records = mapped reads + non-primary")`
+`r margin_note("- Number of uniquely mapped reads goes up slightly with inner distance")`
+`r margin_note("- Number of properly paired reads increases considerably")`
+`r margin_note("- Number of non-primary hits peaks at 300 bp")`
+`r margin_note("- Number of non-primary hits down dramatically from 194 million and the number of uniquely mapped reads has gone up from 226 million")`
 
 ``` {r }
 RSeQCstats <- data.frame()
@@ -56,22 +41,47 @@ for (folder in folders) {
                      )
   temp[4,2] <-strsplit(temp[4,1], ' +')[[1]][4]
   temp[4,1] <- 'Non primary hits'
-  temp <- temp[c(6,7,14),]
-  temp2 <- read.delim(paste(folder, ".in.stats.txt", sep=""), 
-                     header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
-                     )
-  temp2[4,2] <-strsplit(temp[4,1], ' +')[[1]][4]
-  temp2[4,1] <- 'Non primary hits'
-  temp <-rbind(temp, c("rDNA",sum(as.numeric(temp2[c(6,7),2]))))
-  temp[,1] <- c("Multimapped", "Unique", "Paired", "rDNA")
-  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$rownum <-row.names(temp)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
-RSeQCstats <- spread(RSeQCstats, V1, V2)
-#mutate(RSeQCstats, Perc_rDNA = as.numeric(rDNA)/(as.numeric(Unique)+as.numeric(Multimapped)+as.numeric(rDNA))) %>% arrange(Perc_rDNA)
-ReadNumbers <- RSeQCstats[,c(1,5)]
-RSeQCstats <- RSeQCstats[c(1,5,3,2,4)]
-RSeQCstats[,2:5] <- sapply(RSeQCstats[,2:5], function(x) formatC(as.numeric(x), format='d', big.mark=','))
+RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2]), format='d', big.mark=',')
+RSeQCstats <- spread(RSeQCstats, file, V2) %>% arrange(as.numeric(rownum))
+RSeQCstats <- RSeQCstats[,-2]
+RSeQCstats <- RSeQCstats[c(1,5,4,2,3)]
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '500bp', '1000bp')
+
+knitr::kable(
+  RSeQCstats
+)
+```
+
+## rRNA Mapping Stats
+
+`r margin_note("- 14 million reads map to rDNA (ca. 5%)")`
+`r margin_note("- Number of mappings is considerably higher for 300 bp for some reason")`
+`r margin_note("- These mappings account for 45% of multimapped reads and 70% of all non-primary hits")`
+`r margin_note("- These numbers are up from 20% and 33% respectively")`
+
+``` {r }
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  temp <- read.delim(paste(folder, ".in.stats.txt", sep=""), 
+                     header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
+                     )
+  temp[4,2] <-strsplit(temp[4,1], ' +')[[1]][4]
+  temp[4,1] <- 'Non primary hits'
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$rownum <-row.names(temp)
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2]), format='d', big.mark=',')
+RSeQCstats <- spread(RSeQCstats, file, V2) %>% arrange(as.numeric(rownum))
+RSeQCstats <- RSeQCstats[,-2]
+
+RSeQCstats <- RSeQCstats[c(1,5,4,2,3)]
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '500bp', '1000bp')
+
 knitr::kable(
   RSeQCstats
 )
@@ -79,10 +89,9 @@ knitr::kable(
 
 
 ## Distribution of Reads Among Features (tags per kb)
-`r margin_note("- Intergenic only considers sequence within 10 kb upstream of TSS and downstream of TES")`
 `r margin_note("- Exons enriched >10 fold relative to introns")`
-`r margin_note("- Introns enriched >10 fold relative to Intergenic")`
-
+`r margin_note("- Introns enriched >10 fold relative to upstream sequence but only ca 5 fold relative to downstream sequence")`
+`r margin_note("- These numbers are EXACTLY the same")`
 
 ``` {r }
 RSeQCstats <- data.frame()
@@ -91,18 +100,16 @@ for (folder in folders) {
                            header=TRUE, stringsAsFactors=FALSE, skip=4, sep=''
                      )
   temp <- temp[-11,]
-  temp <- data.frame(V1 = c("CDS", "UTR", "Intron", "Intergenic"), 
-             V2=c(temp[1,4], 
-                  sum(as.numeric(temp[c(2,3),3]))/sum(as.numeric(temp[c(2,3),2]))*1000,
-                  temp[4,4],
-                  sum(as.numeric(temp[c(7,10),3]))/sum(as.numeric(temp[c(7,10),2]))*1000
-                  )
-             )
-  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$rownum <-row.names(temp)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
-RSeQCstats <- spread(RSeQCstats, V1, V2)
-RSeQCstats <- RSeQCstats[c(1,2,5,4,3)]
+RSeQCstats <- RSeQCstats[,-c(2,3)]
+RSeQCstats <- spread(RSeQCstats, file, Tags.Kb) %>% arrange(as.numeric(rownum))
+RSeQCstats <- RSeQCstats[,-2]
+
+RSeQCstats <- RSeQCstats[c(1,5,4,2,3)]
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '500bp', '1000bp')
 
 knitr::kable(
   RSeQCstats
@@ -112,6 +119,7 @@ knitr::kable(
 ## Strand
 
 `r margin_note("- Data consistent with second-strand experiment")`
+`r margin_note("- The proportion that can't be determined is up slightely from 0.25")`
 
 ```{r }
 RSeQCstats <- data.frame()
@@ -119,11 +127,15 @@ for (folder in folders) {
   temp <- read.delim(paste(folder, ".expt.txt", sep=""), 
                      skip=3, header=FALSE, sep=':'
                      )
-  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$V1 <- c("Ambiguous", "First Strand", "Second Strand")
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$rownum <-row.names(temp)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
-RSeQCstats <- spread(RSeQCstats, V1, V2)
+RSeQCstats <- spread(RSeQCstats, file, V2) %>% arrange(as.numeric(rownum))
+RSeQCstats <- RSeQCstats[,-2]
+
+RSeQCstats <- RSeQCstats[c(1,5,4,2,3)]
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '500bp', '1000bp')
 
 knitr::kable(
   RSeQCstats
@@ -132,9 +144,9 @@ knitr::kable(
 
 ## Insert Size Distribution
 
-`r margin_note("- Inner distance pretty consistenly at - 125 for Edinbrugh data, but centered at about -50 for  Exeter data")`
-`r margin_note("- This indicates that fragment size tends to be around 125-150 bp")`
-
+`r margin_note("- Distribution centered on zero")`
+`r margin_note("- 979,000 of 1,000,000 reads used (up from <2000)")`
+`r margin_note("- Shape is unchanged, but a lot smoother")`
 
 ```{r include=FALSE}
 RSeQCstats <- data.frame()
@@ -142,28 +154,26 @@ for (folder in folders) {
   temp <- read.delim(paste(folder, ".inner_distance_freq.txt", sep=""),
                      header=FALSE
                      )
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 ```
 
 ```{r dev.args = list(bg = 'transparent')}
-ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=centre, group=sample)) +
+ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=file)) +
   geom_line() +
   ylab('reads') +
   xlab('inner distance') +
+  tufte_theme() +
   theme(legend.position=c(.8,.8)) +
-  scale_colour_brewer(type = "qual", palette = 6) +
-  tufte_theme() 
+  scale_colour_brewer(type = "qual", palette = 6)
 
 ```
 
 ## Transcript Read Coverage
 
 `r margin_note("- Looks good. Steep drop-offs at the ends, especially 5'")`
-`r margin_note("- Not sure why 15533 is so much higher than all others")`
+`r margin_note("- Insert size makes no difference")`
 
 ```{r dev.args = list(bg = 'transparent')}
 RSeQCstats <- data.frame()
@@ -172,19 +182,17 @@ for (folder in folders) {
                      header=FALSE
                      )
   temp <-  as.data.frame(t(temp[,-1]))
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 
-ggplot(RSeQCstats, aes(x=V1, y=V2, colour=centre, group=sample)) +
+ggplot(RSeQCstats, aes(x=V1, y=V2, colour=file)) +
   geom_line() +
   ylab('reads') +
   tufte_theme() +
-  theme(legend.position=c(.8,.8)) +
-  scale_colour_brewer(type = "qual", palette = 6) +
-  xlab('transcript percentile') 
+  xlab('transcript percentile') +
+  theme(legend.position=c(.8,.6)) +
+  scale_colour_brewer(type = "qual", palette = 6)
   
 ```
 
@@ -192,7 +200,6 @@ ggplot(RSeQCstats, aes(x=V1, y=V2, colour=centre, group=sample)) +
 
 `r margin_note("- Plenty of duplication")`
 `r margin_note("- Probably not unexpected in this case")`
-`r margin_note("- Duplication higher for Exeter samples")`
 
 ```{r include=FALSE}
 RSeQCstats <- data.frame()
@@ -207,42 +214,48 @@ for (folder in folders) {
                             Method='Sequence-based'
                             )
                 )
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 
 ```
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads, colour=centre, group=sample)) +
-  geom_point(alpha=.2) +
+p<-ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads, colour=file)) +
+  geom_point() +
   xlim(c(0,500)) +
   scale_y_log10() +
   tufte_theme() +
   theme(legend.position=c(.8,.8)) +
-  scale_colour_brewer(type = "qual", palette = 6) +
   facet_wrap(~ Method)
 
+p+scale_colour_brewer(type = "qual", palette = 6)
 
 ```
 
 ## Splice Junctions
 
+`r margin_note("- Events are number of transcripts")`
+`r margin_note("- Junctions are number of exons")`
 `r margin_note("- VAST majority of splice junctions are known")`
+`r margin_note("- A lot more novel transcripts with smaller insert size")`
 
 ```{r }
 RSeQCstats <- data.frame()
 for (folder in folders) {
-  temp <- read.delim(paste(folder, ".junction.bed", sep=""), sep='\t', header=FALSE)
-  temp <- group_by(temp, V4) %>% summarise(Number=n())
-  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp <- read.delim(paste(folder, ".junction.txt", sep=""), 
+                     skip=4, header=FALSE, sep=':'
+                     )
+  temp <- temp[1:8,]
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$rownum <-row.names(temp)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
-RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2][[1]]), format='d', big.mark=',')
-RSeQCstats[,1] <- RSeQCstats[,1][[1]]
-RSeQCstats <- spread(RSeQCstats, V4, Number)
+RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2]), format='d', big.mark=',')
+RSeQCstats <- spread(RSeQCstats, file, V2) %>% arrange(as.numeric(rownum))
+RSeQCstats <- RSeQCstats[,-2]
+RSeQCstats <- RSeQCstats[c(1,5,4,2,3)]
+colnames(RSeQCstats)<-c('stat', '50bp', '300bp', '500bp', '1000bp')
 
 knitr::kable(
   RSeQCstats
@@ -262,25 +275,21 @@ for (folder in folders) {
               data.frame(percent_reads=x, junctions=y, Category='Known'),
               data.frame(percent_reads=x, junctions=w, Category='Novel')
               )
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,2])
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$file <- tail(strsplit(folder, '/')[[1]], 1)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
-
 ```
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-ggplot(RSeQCstats, aes(y=junctions, x=ReadNumbers*percent_reads/100, group=sample, colour=centre)) +
+p<-ggplot(RSeQCstats, aes(y=junctions, x=percent_reads, colour=file)) +
   geom_point() +
   #xlim(c(0,500)) +
   #scale_y_log10() +
-  scale_colour_brewer(type = "qual", palette = 6) +
   tufte_theme() +
-  theme(legend.position=c(.8,.9)) +
-  facet_wrap(~ Category, scales='free') +
-  xlab("Number of Reads")
+  theme(legend.position=c(.8,.7)) +
+  facet_wrap(~ Category, scales='free')
+
+p+scale_colour_brewer(type = "qual", palette = 6)
 
 ```
 
@@ -393,14 +402,11 @@ for (folder in folders) {
                                         'A2T', 'T2A', 'C2G', 'G2C', 'G2T', 'C2A'
                                         )
                                )
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  mutations$sample <- sample
-  mutations$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  mutations$file <- tail(strsplit(folder, '/')[[1]], 1)
   RSeQCmutations <- rbind(RSeQCmutations, mutations)
-  SNPspectrum$sample <- sample
+  SNPspectrum$file <- tail(strsplit(folder, '/')[[1]], 1)
   RSeQCspectrum <- rbind(RSeQCspectrum, SNPspectrum)
-}
-
+}  
 ```
 
 
@@ -411,12 +417,12 @@ for (folder in folders) {
 
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-ggplot(RSeQCmutations, aes(x=Position, y=Number, group=sample, colour=centre)) + 
+ggplot(RSeQCmutations, aes(x=Position, y=Number, colour=file)) + 
   geom_line() + 
   tufte_theme() +
   scale_colour_brewer(type = "qual", palette = 6)  + 
-  theme(legend.position=c(.8,.9)) + 
-  #scale_y_log10() +
+  theme(legend.position=c(.8,.7)) + 
+  scale_y_log10() +
   facet_wrap(~ Type, nrow=2)
 ```
 
@@ -425,7 +431,7 @@ ggplot(RSeQCmutations, aes(x=Position, y=Number, group=sample, colour=centre)) +
 `r margin_note("- These classes are also disproportionate throughout the reads, with G2A/C2T (transitions) also being higher than other (transversion) mutations")`
 
 
-```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=20}
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
 ggplot(RSeQCspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
   geom_bar(stat='identity') + 
   tufte_theme() + 
