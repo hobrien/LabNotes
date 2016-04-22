@@ -220,6 +220,14 @@
                     - ```cat /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bl |blast2bed12.py > /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed```
             - This is working great now, except that insertion_profile.py was reporting results for 52 bp reads. I'm testing it now with the -l 100 option to see if that helps
             - It would be nice if it could separate SNPs from reads 1 and 2, but otherwise, it's pretty nice                     
+
+#Transcript Identification
+- Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
+    - Cufflinks is running on 15533, but it's taken 3 days so far and no indication of progress
+    - Cufflinks finished after 1 day when I ran it on 15468, which isn't a much smaller dataset, so I'm not sure what's going on with that
+    - Cufflinks includes an option (-M) to mask reads matching the specified features (ie; rDNA), but it's probably easier to just use the BAM files that already exclude these reads
+    - I think it would also be helpful to get rid of all of the non-chromosome sequences.
+        - FilterBAM.sh should do this
 #Expression analysis
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
