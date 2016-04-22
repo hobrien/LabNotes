@@ -1,48 +1,48 @@
-sample	Centre	Tophat	RSeQC	Cufflinks
-15468	Edinburgh	Done	3318	3321
-15533	Exeter	Done	Done	3219
-15768	Edinburgh	Done	Done	
-16286	Edinburgh	Done	Done	
-16438	Edinburgh	Done	3312	
-16488	Edinburgh	Done	Done	
-16840	Exeter	Done	3317	
-16929	Exeter	Done	3313	
-16972	Exeter	Done	3320	
-17049	Edinburgh	Done	3322	
-17054	Edinburgh	Done	Done	
-17068	Exeter	Done	Done	
-17081	Edinburgh	Done	Done	
-17087	Edinburgh	Done	3314	
-17109	Exeter	Done	3310	
-17115	Edinburgh	Done	Done	
-17130	Edinburgh	Done	Done	
-17701	Edinburgh	Done	3323	
-17812	Edinburgh	Done	Done	
-18294	Edinburgh	Done	3315	
-18349	Edinburgh	Done	Done	
-18596	Edinburgh	Done	Done	
-18655	Edinburgh	Done	3319	
-18687	Edinburgh	Done	3324	
-15641	Exeter	3337		
-16024	Exeter	3338		
-16115	Exeter	3339		
-16385	Exeter	3340		
-16428	Exeter	3341		
-16491	Exeter	3342	3440	
-16548	Exeter	3343		
-16810	Exeter	3365	3441	
-16826	Exeter	3345		
-17048	Exeter	3346	3442	
-17053	Exeter	3347		
-17071	Exeter	3348	3443	
-17921	Exeter	3349		
-15655	Edinburgh	3411		
-16483	Edinburgh	3412	3434	
-16640	Edinburgh	3413		
-17013	Edinburgh	3414		
-17025	Edinburgh	3415	3433	
-17198	Edinburgh	3436	
-17229	Edinburgh	3437	
-17333	Edinburgh	3438	
-17475	Edinburgh	3439	
-17543	Edinburgh	3444	
+sample	Centre	Tophat	RSeQC	Cufflinks	Cuffcompare
+15468	Edinburgh	Done	3318	3321	3446
+15533	Exeter	Done	Done	3219	
+15768	Edinburgh	Done	Done		
+16286	Edinburgh	Done	Done		
+16438	Edinburgh	Done	3312		
+16488	Edinburgh	Done	Done		
+16840	Exeter	Done	3317		
+16929	Exeter	Done	3313		
+16972	Exeter	Done	3320		
+17049	Edinburgh	Done	3322		
+17054	Edinburgh	Done	Done		
+17068	Exeter	Done	Done		
+17081	Edinburgh	Done	Done		
+17087	Edinburgh	Done	3314		
+17109	Exeter	Done	3310		
+17115	Edinburgh	Done	Done		
+17130	Edinburgh	Done	Done		
+17701	Edinburgh	Done	3323		
+17812	Edinburgh	Done	Done		
+18294	Edinburgh	Done	3315		
+18349	Edinburgh	Done	Done		
+18596	Edinburgh	Done	Done		
+18655	Edinburgh	Done	3319		
+18687	Edinburgh	Done	3324		
+15641	Exeter	3337			
+16024	Exeter	3338			
+16115	Exeter	3339			
+16385	Exeter	3340			
+16428	Exeter	3341			
+16491	Exeter	3342	3440		
+16548	Exeter	3343			
+16810	Exeter	3365	3441		
+16826	Exeter	3345			
+17048	Exeter	3346	3442		
+17053	Exeter	3347			
+17071	Exeter	3348	3443		
+17921	Exeter	3349			
+15655	Edinburgh	3411			
+16483	Edinburgh	3412	3434		
+16640	Edinburgh	3413			
+17013	Edinburgh	3414			
+17025	Edinburgh	3415	3433		
+17198	Edinburgh	3436			
+17229	Edinburgh	3437			
+17333	Edinburgh	3438			
+17475	Edinburgh	3439			
+17543	Edinburgh	3444			
