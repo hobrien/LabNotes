@@ -1,3 +1,10 @@
+  * [Create VCF with imputed SNPs](#create-vcf-with-imputed-snps)
+  * [Sequence data QC](#sequence-data-qc)
+  * [Trimming sequences](#trimming-sequences)
+  * [Mapping](#mapping)
+
+
+#Create VCF with imputed SNPs
 - Followed the instructions [here](https://imputationserver.sph.umich.edu/start.html#!pages/help) to convert binary PLINK (.bed) files to input for the [Michigan Imputation Server](https://imputationserver.sph.umich.edu/start.html)
     - I checked some of the SNPs on the [USCS Genome Browser](http://genome-euro.ucsc.edu/index.html) and it looks like it uses GRCh37/hg19, but the SNPs appear to be on the opposite strand
     - Nick is going to check and try to figure out what is up with the chr0 SNPs (1181 of them)
@@ -67,15 +74,23 @@
         - ```rm temp.head```
 
     - Add SNP IDs to imputed VCFs
-        - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp146.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp146.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
-            - ```mysql -u root FetalRNAseq < SQL/snp146.sql```
+        - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp144.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
         - chromosome (field 1), position (2) and ref (4) and alt (5) alleles can be used to uniquely identify each SNP (I hope!)
-            - there can be several SNPs at the same position
-        - these correspond to chrom, chromStart, refNCBI and observed in snp144
-                                
-        - ```grep -v '^#' FB_Merged_chr22.vcf | cut -f 1,2,3 |python ../LabNotes/Python/AddSNPID.py | wc -l```
+            - there can be several SNPs with the same start position, but they appear to have different end positions
+            - there can also be > 2 observed variants at a position                                
+            - ```grep -v '^#' FB_Merged_chr22.vcf | cut -f 1,2,3 |python ../LabNotes/Python/AddSNPID.py | wc -l```
+                - all rsIDs match, except for some that have been merged together
+                - there are also a lot of duplicates, that presumably will be merged in the future
+                - if I look up SNPs by start position and end position, it should be posible to get a single SNP (or multiple duplicate SNPs) (I think!).
+                - comparing the observed alleles in the DB to the ref/alt alleles in the VCF is a pain because
+                    - a) the observed alleles can be on the opposite strand to the ref Allele
+                    - b) there can be more than 2 observed alleles
+                - there is a exceptions field that will indicate if there are duplicates.
+                - All of the warnings that I get on chromosome 22 are now due to SNPs that have been merged
+            - I've now modified AddSNPID.py to do what the name suggests:
+                - ```bcftools view All_chromosomes_relabelled.vcf.gz | python ../LabNotes/Python/AddSNPID.py |bgzip -c >All_chromosomes_rsID.vcf.gz```
         
-        
+#Sequence data QC        
 - Running FastQC on Edinburgh data
     - I would like to 
         - (a) work with compressed data and 
@@ -100,6 +115,7 @@
         - ```find Uncompressed/ -name fastqc_data.txt | xargs grep 'Total Sequences' | grep -v trimmed | perl -pe 's/(\.sanfastq)?_fastqc\/fastqc_data\.txt\:Total Sequences//' | perl -pe 's/\.\///' > seq_lengths.txt```
     - Results are analysed in FastQC.md
 
+#Trimming sequences
 - Trim Adaptors from reads using cutadapt
     - I was able to install cutadapt on rocks by first installing pip in ~/.local (``` python ~/src/get-pip.py --user```) using it:
         - ```~/.local/bin/pip install --user --upgrade cutadapt```
@@ -132,7 +148,8 @@
             - After doing the mapping with quality trimming and adapter trimming, everything looks good except that there's a big spike in SNP frequency at the 5' end of the reads.
             - I am going to solve this by clipping 5 bp from the 5' end of each read in addition to the quality and adapter trimming:
             - ```find /c8000xd3/databank/foetal-rna/Exeter_sequencing/15533_Oct_2014/ -name *.fastq.gz | xargs qsub SubmissionScripts/Trim.sh```
-            
+
+#Mapping            
 - Start mapping reads with tophat
     - follow the instructions [here](http://www.illumina.com/documents/products/technotes/RNASeqAnalysisTopHat.pdf) to get started with tophat
         - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/NCBI/GRCh38Decoy/Homo_sapiens_NCBI_GRCh38Decoy.tar.gz```
@@ -202,6 +219,7 @@
                     - ```cat /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bl |blast2bed12.py > /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed```
             - This is working great now, except that insertion_profile.py was reporting results for 52 bp reads. I'm testing it now with the -l 100 option to see if that helps
             - It would be nice if it could separate SNPs from reads 1 and 2, but otherwise, it's pretty nice                     
+#Expression analysis
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
         - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```        
