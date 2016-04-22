@@ -12,7 +12,7 @@ library(cowplot)
 library(gridExtra)
 ```
 ## Read numbers
-- One sample (150610_D00125_0239_BC718AANXX_3_IL-TP-013_2) has almost no reads.
+- One sample (17025 = 150610_D00125_0239_BC718AANXX_3_IL-TP-013_1/2) has almost no reads.
 - One other sample has < 50 million. All others are >60 million with most being > 100 million
 - Exeter samples are mcentered around 150 million reads while Edinburgh samples are centered around ca. 120 million
 - Once the difference in read length is accounted for, they have similar distributions
