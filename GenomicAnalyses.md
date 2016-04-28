@@ -228,6 +228,10 @@
     - Cufflinks includes an option (-M) to mask reads matching the specified features (ie; rDNA), but it's probably easier to just use the BAM files that already exclude these reads
     - I think it would also be helpful to get rid of all of the non-chromosome sequences.
         - FilterBAM.sh should do this
+- Run Cuffcompare
+    - I downloaded a set of masked chromosome files from [UCSC](http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromFa.tar.gz) which can be used to filter results with the -s option:
+        - ```cuffcompare -V -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf -s /c8000xd3/rnaseq-heath/Ref/chroms```
+        
 #Expression analysis
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
