@@ -429,7 +429,7 @@ ggplot(RSeQCmutations, aes(x=Position, y=Number, group=sample, colour=centre)) +
 ggplot(RSeQCspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
   geom_bar(stat='identity') + 
   tufte_theme() + 
-  facet_grid(file ~ PositionGroup, scales='free_y') + 
+  facet_grid(sample ~ PositionGroup, scales='free_y') + 
   theme(axis.text.x=element_text(angle=90)) + 
   scale_fill_brewer(type = "qual", palette = 6) + 
   theme(legend.position=c(.95,.95))
