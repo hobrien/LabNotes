@@ -7,7 +7,7 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 16488	Edinburgh	Done	Done	3488	3510	
 16840	Exeter	Done	3317	3489	3511	
 16929	Exeter	Done	3313	3490	3512	
-16972	Exeter	Done	3320	3491	3513	
+16972	Edinburgh	Done	3675	3491	3513	
 17049	Edinburgh	Done	3322	3492	3514	
 17054	Edinburgh	Done	Done	3493	3515	
 17068	Exeter	Done	Done	3494	3516	
@@ -16,26 +16,26 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 17109	Exeter	Done	3310	3497	3519	
 17115	Edinburgh	Done	Done	3498	3520	
 17130	Edinburgh	Done	Done	3499	3521	
-17701	Edinburgh	Done	3323	3500	3522	
+17701*	Edinburgh	Done	3323	3500	3522	
 17812	Edinburgh	Done	Done	3540	3558	
 18294	Edinburgh	Done	3315	3502	3524	
 18349	Edinburgh	Done	Done	3539	3559	
 18596	Edinburgh	Done	Done	3504	3525	
 18655	Edinburgh	Done	3319	3505	3526	
 18687	Edinburgh	Done	3324	3506	3527	
-15641	Exeter	3337	3528			
-16024	Exeter	3338	3529			
-16115	Exeter	3339	3531			
-16385	Exeter	3340	3532			
-16428	Exeter	3341	3533			
-16491	Exeter	3342	3534			
-16548	Exeter	3343	3535			
+15641*	Exeter	3337	3528			
+16024*	Exeter	3338	3529			
+16115*	Exeter	3339	3531			
+16385*	Exeter	3340	3532			
+16428*	Exeter	3341	3533			
+16491*	Exeter	3342	3534			
+16548*	Exeter	3343	3535			
 16810	Exeter	3365	3441			
-16826	Exeter	3345	3536			
+16826*	Exeter	3345	3536			
 17048	Exeter	3346	3442			
-17053	Exeter	3347	3537			
+17053*	Exeter	3347	3537			
 17071	Exeter	3348	3443			
-17921-l1	Exeter	3349	3541			
+17921-l1*	Exeter	3349	3541			
 15655	Edinburgh	3411	3564			
 16483	Edinburgh	3412	3434			
 16640	Edinburgh	3413	3565			
@@ -49,21 +49,21 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 17629	Edinburgh	3572	3597			
 17835	Edinburgh	3573	3599			
 18249	Edinburgh	3574	3609			
-18372	Edinburgh	3575	3649			
+18372*	Edinburgh	3575	3649			
 18666	Edinburgh	3576	3600			
-18983	Edinburgh	3577	3650			
+18983*	Edinburgh	3577	3650			
 19043	Edinburgh	3578	3601			
 19052	Edinburgh	3579	3602			
-A138	Edinburgh	3585	3651			
+A138*	Edinburgh	3585	3651			
 A226	Edinburgh	3586	3652			
-15240	Edinburgh	3587	3653			
-16649	Edinburgh	3588	3654			
-17072	Edinburgh	3589	3655			
+15240*	Edinburgh	3587	3653			
+16649*	Edinburgh	3588	3654			
+17072*	Edinburgh	3589	3655			
 17160	Edinburgh	3590	3648			
-17167	Edinburgh	3591	3656			
-17175	Edinburgh	3592	3657			
+17167*	Edinburgh	3591	3656			
+17175*	Edinburgh	3592	3657			
 17369	Edinburgh	3603				
-17671	Edinburgh	3604	3663			
+17671*	Edinburgh	3604	3663			
 17922	Edinburgh	3605	3671			
 17923	Edinburgh	3606	3672			
 18055	Edinburgh	3607				
