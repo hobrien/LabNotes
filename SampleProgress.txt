@@ -64,11 +64,11 @@ A226	Edinburgh	3586	3652
 17175	Edinburgh	3592	3657			
 17369	Edinburgh	3603				
 17671	Edinburgh	3604	3663			
-17922	Edinburgh	3605				
-17923	Edinburgh	3606				
+17922	Edinburgh	3605	3671			
+17923	Edinburgh	3606	3672			
 18055	Edinburgh	3607				
-18121	Edinburgh	3608				
-18134	Edinburgh	3610				
+18121	Edinburgh	3608	3673			
+18134	Edinburgh	3610	3674			
 18153	Edinburgh	3658				
 18241	Edinburgh	3659				
 18266	Edinburgh	3660				
