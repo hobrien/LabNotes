@@ -7,7 +7,7 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 16488	Edinburgh	Done	Done	3488	3510	
 16840	Exeter	Done	3317	3489	3511	
 16929	Exeter	Done	3313	3490	3512	
-16972	Edinburgh	Done	3675	3491	3513	
+16972	Edinburgh	Done	3675/3690	3491	3513	
 17049	Edinburgh	Done	3322	3492	3514	
 17054	Edinburgh	Done	Done	3493	3515	
 17068	Exeter	Done	Done	3494	3516	
@@ -16,22 +16,22 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 17109	Exeter	Done	3310	3497	3519	
 17115	Edinburgh	Done	Done	3498	3520	
 17130	Edinburgh	Done	Done	3499	3521	
-17701*	Edinburgh	Done	3323	3500	3522	
+17701*	Edinburgh	Done	3323/3691	3500	3522	
 17812	Edinburgh	Done	Done	3540	3558	
 18294	Edinburgh	Done	3315	3502	3524	
 18349	Edinburgh	Done	Done	3539	3559	
 18596	Edinburgh	Done	Done	3504	3525	
 18655	Edinburgh	Done	3319	3505	3526	
 18687	Edinburgh	Done	3324	3506	3527	
-15641*	Exeter	3337	3528			
-16024*	Exeter	3338	3529			
-16115*	Exeter	3339	3531			
-16385*	Exeter	3340	3532			
-16428*	Exeter	3341	3533			
-16491*	Exeter	3342	3534			
-16548*	Exeter	3343	3535			
+15641*	Exeter	3337	3528/3692			
+16024*	Exeter	3338	3529/3693			
+16115*	Exeter	3339	3531/3694			
+16385*	Exeter	3340	3532/3695			
+16428*	Exeter	3341	3533/3696			
+16491*	Exeter	3342	3534/3697			
+16548*	Exeter	3343	3535/3699			
 16810	Exeter	3365	3441			
-16826*	Exeter	3345	3536			
+16826*	Exeter	3345	3536/3700			
 17048	Exeter	3346	3442			
 17053*	Exeter	3347	3537			
 17071	Exeter	3348	3443			
@@ -62,15 +62,19 @@ A226	Edinburgh	3586	3652
 17160	Edinburgh	3590	3648			
 17167*	Edinburgh	3591	3656			
 17175*	Edinburgh	3592	3657			
-17369	Edinburgh	3603				
+17369	Edinburgh	3603	3676			
 17671*	Edinburgh	3604	3663			
 17922	Edinburgh	3605	3671			
 17923	Edinburgh	3606	3672			
-18055	Edinburgh	3607				
+18055	Edinburgh	3607	3677			
 18121	Edinburgh	3608	3673			
 18134	Edinburgh	3610	3674			
 18153	Edinburgh	3658				
-18241	Edinburgh	3659				
+18241	Edinburgh	3659	3684			
 18266	Edinburgh	3660				
-18282	Edinburgh	3661				
+18282	Edinburgh	3661	3685			
 18355	Edinburgh	3662				
+15533_2	Exeter	3686				
+18432	Edinburgh	3687				
+18559	Edinburgh	3688				
+18694	Edinburgh	3689				
