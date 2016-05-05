@@ -307,27 +307,6 @@ ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads/ReadNumbers, colour=centre, 
 
 ```
 
-## Splice Junctions
-
-`r margin_note("- VAST majority of splice junctions are known")`
-
-```{r }
-RSeQCstats <- data.frame()
-for (folder in folders) {
-  temp <- read.delim(paste(folder, ".junction.bed", sep=""), sep='\t', header=FALSE)
-  temp <- group_by(temp, V4) %>% summarise(Number=n())
-  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
-  RSeQCstats <- rbind(RSeQCstats, temp)
-}
-RSeQCstats[,2] <- formatC(as.numeric(RSeQCstats[,2][[1]]), format='d', big.mark=',')
-RSeQCstats[,1] <- RSeQCstats[,1][[1]]
-RSeQCstats <- spread(RSeQCstats, V4, Number)
-
-knitr::kable(
-  RSeQCstats
-)
-```
-
 ## Splice Junction Saturation
 
 `r margin_note("- It looks like both known and novel splice sites continue to be found")`
