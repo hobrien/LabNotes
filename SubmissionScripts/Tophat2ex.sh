@@ -10,7 +10,13 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 filename1=${1##*/}
 filename2=${2##*/}
-sampleID=${filename1%%_*}
+
+if [ $filename1 == 15533_2_TGACCA_L008_R1_001.fastq ]
+then
+    sampleID=15533_2
+else    
+    sampleID=${filename1%%_*}
+fi
 
 if [ $sampleID == 16810 ]
 then
