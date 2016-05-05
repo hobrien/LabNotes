@@ -18,10 +18,10 @@ rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
 folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16438/16438",
-             # "/Users/heo3/BTSync/FetalRNAseq/BamQC/16972/16972",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16972/16972",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17087/17087",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17109/17109",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/17701/17701",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17701/17701",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/18294/18294",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/18655/18655",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15768/15768",
@@ -40,19 +40,19 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16929/16929",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17049/17049",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/18687/18687",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/15641/15641",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16024/16024",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16115/16115",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16385/16385",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16428/16428",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16491/16491",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16548/16548",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15641/15641",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16024/16024",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16115/16115",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16385/16385",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16428/16428",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16491/16491",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16548/16548",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16810/16810",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/16826/16826",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16826/16826",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17048/17048",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/17053/17053",
+             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17053/17053",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17071/17071",
-             # no gene body coverage "/Users/heo3/BTSync/FetalRNAseq/BamQC/17921-l1/17921-l1",
+             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17921-l1/17921-l1",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15655/15655",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16483/16483",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16640/16640",
@@ -72,19 +72,29 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/19043/19043",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/19052/19052",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/A138/A138",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/A226/A226",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A226/A226",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15240/15240",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16649/16649",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17072/17072",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17160/17160",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17167/17167",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17175/17175",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17167/17167",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17175/17175",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17671/17671",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17922/17922",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17923/17923",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/18121/18121",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18134/18134"
-
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18134/18134",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18153/18153",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18241/18241",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18266/18266",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18355/18355",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18432/18432",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18559/18559",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18694/18694",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17369/17369",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18055/18055",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_2/15533_2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18282/18282"
              )
 LibraryInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt", 
                      header=TRUE, stringsAsFactors=TRUE, sep='\t'
@@ -94,8 +104,8 @@ LibraryInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgres
 # RSeQC
 ## Mapping Stats
 `r margin_note("- rDNA reads not included in first three stats")`
-`r margin_note("- 12 samples have < 10% rRNA reads")`
-`r margin_note("- All samples have < 20% except for 17812 (24%), 17054 (44%) and 18655 (50%)")`
+`r margin_note("- # uniquely mapped reads ranges from 57 million to 446 million, with 3 samples (17054, 17160, 15483) having < 100 million")`
+`r margin_note("- % rRNA ranges from 0.1% to 56%, with 4 samples (17054, 17160, 18655, 16428) having > 40%")`
 
 ``` {r }
 RSeQCstats <- data.frame()
@@ -127,35 +137,45 @@ knitr::kable(
 ```
 
 
-## Distribution of Reads Among Features (tags per kb per million reads)
+## Distribution of Reads Among Features (proportion of tags mapping to different feature classes)
 `r margin_note("- Intergenic only considers sequence within 10 kb upstream of TSS and downstream of TES")`
 `r margin_note("- Exons enriched >10 fold relative to introns")`
 `r margin_note("- Introns enriched >10 fold relative to Intergenic")`
+`r margin_note("- 1/3rd to 2/3rd of tags map to introns. 2-4% map to intergenic (except for 17198 which is 13% intergenic)")`
+`r margin_note("- Number of tags per read ranges from 1.1 to 1.8, except for 17198, which has 0.8")`
+`r margin_note("- 17198, also has the highest proportion of intronic and intergenic sequence and the lowest proportion of CDS and second lowest of UTR")`
+`r margin_note("- I wonder if this might be an indeciation of DNA contamination?")`
 
 
 ``` {r }
-RSeQCstats <- data.frame()
+RSeQCdistribution <- data.frame()
+ReadNumbers$ExpressedTags = NA
 for (folder in folders) {
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp <- read.delim(paste(folder, ".dist.txt", sep=""), 
                            header=TRUE, stringsAsFactors=FALSE, skip=4, sep=''
                      )
   temp <- temp[-11,]
-  temp <- data.frame(V1 = c("CDS", "UTR", "Intron", "Intergenic"), 
-             V2=c(temp[1,4]/as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)*1000000, 
-                  sum(as.numeric(temp[c(2,3),3]))/sum(as.numeric(temp[c(2,3),2]))*1000/as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)*1000000,
-                  temp[4,4]/as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)*1000000,
-                  sum(as.numeric(temp[c(7,10),3]))/sum(as.numeric(temp[c(7,10),2]))*1000/as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)*1000000
+  tag_total <- sum(temp[c(1,2,3,4,7,10),3])
+  ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags <- sum(temp[c(1,2,3),3])
+  temp <- data.frame(V1 = c("Tags_per_read", "CDS", "UTR", "Intron", "Intergenic"), 
+                     V2=c(
+                  tag_total/as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique),
+                  temp[1,3]/tag_total, 
+                  sum(as.numeric(temp[c(2,3),3]))/tag_total,
+                  temp[4,3]/tag_total,
+                  sum(as.numeric(temp[c(7,10),3]))/tag_total
                   )
              )
   temp$sample <- sample
-  RSeQCstats <- rbind(RSeQCstats, temp)
+  #temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  RSeQCdistribution <- rbind(RSeQCdistribution, temp)
 }
-RSeQCstats <- spread(RSeQCstats, V1, V2)
-RSeQCstats <- RSeQCstats[c(1,2,5,4,3)]
+RSeQCdistribution <- spread(RSeQCdistribution, V1, V2)
+RSeQCdistribution <- RSeQCdistribution[c(1,5,2,6,4,3)]
 
 knitr::kable(
-  RSeQCstats
+  RSeQCdistribution
 )
 ```
 
@@ -182,13 +202,15 @@ knitr::kable(
 
 ## Insert Size Distribution
 
-`r margin_note("- Inner distance pretty consistenly at - 125 for Edinbrugh data, but centered at about -50 for  Exeter data")`
+`r margin_note("- Sharp peaks indicate that most fragments are shorter than the read length")`
+`r margin_note("- Inner distance pretty consistenly at - 125 for Edinbrugh data, but centered at about -50 for Exeter data")`
 `r margin_note("- This indicates that fragment size tends to be around 125-150 bp")`
 
 
 ```{r include=FALSE}
 RSeQCstats <- data.frame()
 for (folder in folders) {
+  #print(folder)
   temp <- read.delim(paste(folder, ".inner_distance_freq.txt", sep=""),
                      header=FALSE
                      )
@@ -213,11 +235,12 @@ ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=centre, group=sample)) +
 ## Transcript Read Coverage
 
 `r margin_note("- Looks good. Steep drop-offs at the ends, especially 5'")`
-`r margin_note("- Not sure why 15533 is so much higher than all others")`
+`r margin_note("- I'm still a bit surprised about the spread in these values because I've normalised by the number of tags that map to CDS or UTR features. I guess there can be some variation in the size of the tags, but this still seems like a lot")`
 
 ```{r dev.args = list(bg = 'transparent')}
 RSeQCstats <- data.frame()
 for (folder in folders) {
+  #print(folder)
   temp <- read.delim(paste(folder, ".geneBodyCoverage.txt", sep=""),
                      header=FALSE
                      )
@@ -226,10 +249,11 @@ for (folder in folders) {
   temp$sample <- sample
   temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
   temp$V2 <- temp$V2
-  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)
+  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 
+#ggplot(subset(RSeQCstats, sample != 17175), aes(x=V1, y=V2/ReadNumbers, colour=centre, group=sample)) +
 ggplot(RSeQCstats, aes(x=V1, y=V2/ReadNumbers, colour=centre, group=sample)) +
   geom_line() +
   ylab('reads') +
@@ -237,7 +261,7 @@ ggplot(RSeQCstats, aes(x=V1, y=V2/ReadNumbers, colour=centre, group=sample)) +
   theme(legend.position=c(0.1,.9)) +
   scale_colour_brewer(type = "qual", palette = 6) +
   xlab('transcript percentile') +
-  ylab("proportion of uniquely mapped reads")
+  ylab("proportion of expressed tags")
   
 ```
 
@@ -461,14 +485,16 @@ for (folder in folders) {
 ```
 
 
-`r margin_note("- For some reason, mutations are only counted separately on reads 1 and 2 for insertions")`
-
-`r margin_note("- Approximately equal numbers of insertions, deletions and SNPs, except at the starts and end where indels drop to zero and SNPs increase")`
-`r margin_note("- Odd zig-zag pattern for SNPs for some reason")`
+`r margin_note("- Exeter samples appear to have dropped bases throughout, with big peaks in many samples at bases 83 and 84, especially for 16428 and 15533_2")`
+`r margin_note("- There is a dip in Q scores at positions 78 and 79 of the unclipped reads, which is 5 bp less than 83-84, but I feel like the corresponding bases should be 88 and 89 in the unclipped reads")`
+`r margin_note("- 17922 has a big spike of insertions at the end of read 1")`
+`r margin_note("- The Exeter samples also have slightly more SNPs, which I'm guessing is caused by incorrect placement of the gaps in the alignments")`
 
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-#ggplot(subset(RSeQCmutations, centre=='Exeter'), aes(x=Position, y=Number, group=sample, colour=sample)) + 
+#ggplot(subset(RSeQCmutations, Position > 84 | Position < 83), aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=centre)) + 
+#ggplot(subset(RSeQCmutations, sample != 16428 & sample != '15533_2' & sample != 17922 & sample != 16385), aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=centre)) + 
+#ggplot(subset(RSeQCmutations, centre !='Exeter' & sample > 18666), aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=sample)) + 
 ggplot(RSeQCmutations, aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=centre)) + 
   geom_line() + 
   tufte_theme() +
@@ -484,11 +510,12 @@ ggplot(RSeQCmutations, aes(x=Position, y=Number/ReadNumbers*1000000, group=sampl
 `r margin_note("- These classes are also disproportionate throughout the reads, with G2A/C2T (transitions) also being higher than other (transversion) mutations")`
 
 
-```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=20}
+```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=30}
 ggplot(RSeQCspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
   geom_bar(stat='identity') + 
   tufte_theme() + 
-  facet_grid(sample ~ PositionGroup, scales='free_y') + 
+  #facet_grid(sample ~ PositionGroup, scales='free_y') + 
+  facet_grid(sample ~ PositionGroup) + 
   theme(axis.text.x=element_text(angle=90)) + 
   scale_fill_brewer(type = "qual", palette = 6) + 
   theme(legend.position=c(.95,.95))
