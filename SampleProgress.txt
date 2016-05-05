@@ -7,7 +7,7 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 16488	Edinburgh	Done	Done	3488	3510	
 16840	Exeter	Done	3317	3489	3511	
 16929	Exeter	Done	3313	3490	3512	
-16972	Edinburgh	Done	3675/3690	3491	3513	
+16972	Edinburgh	Done	3892	3491	3513	
 17049	Edinburgh	Done	3322	3492	3514	
 17054	Edinburgh	Done	Done	3493	3515	
 17068	Exeter	Done	Done	3494	3516	
@@ -36,7 +36,7 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 17053	Exeter	3347	3537/3890		3854	
 17071	Exeter	3348	3443		3855	
 17921-l1	Exeter	3349	3541/3889		3856	
-15655	Edinburgh	3411	3564		3709	
+15655	Edinburgh	3411	3891		3709	
 16483	Edinburgh	3412	3434		3710	
 16640	Edinburgh	3413	3565		3711	
 17013	Edinburgh	3414	3536		3712	
