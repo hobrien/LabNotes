@@ -1,0 +1,124 @@
+---
+title: "Cufflinks"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+library(dplyr)
+library(data.table)
+library(ggplot2)
+```
+
+
+```{r cars}
+Combined <- fread("~/BTSync/FetalRNAseq/Cufflinks/Combined.tracking", header=FALSE)
+colnames(Combined) <- c("transfrag_id", 
+                     "locus_id", 
+                     "gene_id",                     
+                     "class",
+                     "15468",
+                     "15533",
+                     "15768",
+                     "16286",
+                     "16438",
+                     "16488",
+                     "16840",
+                     "16929",
+                     "16972",
+                     "17049",
+                     "17054",
+                     "17068",
+                     "17081",
+                     "17087",
+                     "17109",
+                     "17115",
+                     "17130",
+                     "17701",
+                     "17812",
+                     "18294",
+                     "18349",
+                     "18596",
+                     "18655",
+                     "18687"
+                     )
+AllTranscripts <- ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1)
+Combined$Count<- rowSums(ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1))
+```
+
+# Cufflinks
+## Transfrag classes 
+`r margin_note("- 207,000 match reference (=)")`
+`r margin_note("- 216,000 intronic (i)")`
+`r margin_note("- 77,000 fall in repeat masked regions (r)")`
+`r margin_note("- 51,000 multiple classes (.)")`
+`r margin_note("- 48,000 intergenic (u)")`
+`r margin_note("- 36,000 splice variants (j)")`
+`r margin_note("- 32,000 antisense (x)")`
+`r margin_note("- 5000 pre-mRNA (e)")`
+`r margin_note("- 4000 polymerse run-on (p)")`
+`r margin_note("- 1000 generic exon overlap (o)")`
+`r margin_note("- 89 contained (c)")`
+`r margin_note("- 27 intron antisense (s)")`
+
+
+```{r pressure, echo=FALSE}
+knitr::kable(
+group_by(Combined, class) %>% summarise(n())
+)
+```
+
+
+``` {r}
+SampleRows <- function(x, n) {
+  if ( n ==1 ) {
+  counts <- x[, sample(ncol(x), size = n)]  
+  }
+  else {
+  counts <- x[, sample(ncol(x), size = n)] %>% rowSums() 
+  }
+  length(counts[counts > 0])  
+}
+
+SampleMean <- function(data, n, reps) {
+  countList <- vector(,reps)
+  for (x in 1:reps){
+    countList[x] <- SampleRows(data, n)
+  }
+  mean(countList)
+}
+
+RarefyTranscripts <- function(Subset, reps) {
+  Means <- vector(,ncol(Subset))
+  for (x in 1:ncol(Subset)) {
+    Means[x] <- SampleMean(Subset, x, reps)
+  }
+  data.frame(N = 1:ncol(Subset), Mean=Means)
+}
+```
+
+`r margin_note("- 'multiple classes' is the conly class that shows evidence of saturation")`
+
+``` {r}
+SatData <- data.frame()
+for ( trans_class in unique(select(Combined, class))[[1]]) {
+  #print(trans_class)
+  Subset <- ifelse(filter(Combined, class == trans_class)[,5:26, with=F] == '-', 0, 1)
+  #print(nrow(Subset))
+  temp <- RarefyTranscripts(Subset, 100)
+  temp$Class <- trans_class
+  SatData <-rbind(SatData, temp)
+}
+ggplot(SatData, aes(x=N, y=Mean, colour=Class))+geom_line()
+```
+
+`r margin_note("- all intergenic features and almost all intron antisense features are singletons")`
+`r margin_note("- 'all intergenic features and almost all intron antisense features are singletons'multiple classes are bimodal, with most being confined to 2 samples are present in all")`
+
+``` {r}
+ggplot(Combined, aes(x=Count, fill=class))+geom_bar(position='dodge')+facet_grid(class ~ ., scales="free_y")
+```

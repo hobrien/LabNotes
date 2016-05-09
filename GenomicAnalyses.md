@@ -231,6 +231,12 @@
 - Run Cuffcompare
     - I downloaded a set of masked chromosome files from [UCSC](http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromFa.tar.gz) which can be used to filter results with the -s option:
         - ```cuffcompare -V -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf -s /c8000xd3/rnaseq-heath/Ref/chroms```
+    - I've now run Cuffcompare on an initial set of 24 samples with high RIN values
+        - The input GTF files from Cufflinks have between 1.4 million and 1.55 million exons and between 300,000 and 450,000 transcripts
+            - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "exon") count ++} END{print count}'```
+            - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "transcript") count ++} END{print count}'```
+        - the combined GTF assembly 1.9 million exons (```wc -l Combined.combined.gtf```), 681,030 transcripts (```wc -l Combined.tracking```) and 258,321 loci (```wc -l Combined.loci```)
+        
         
 #Expression analysis
 - Analyse expressed SNPs
