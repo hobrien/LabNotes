@@ -50,9 +50,9 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16810/16810",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16826/16826",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17048/17048",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17053/17053",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17053/17053",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17071/17071",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17921-l1/17921-l1",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17921-l1/17921-l1",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15655/15655",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16483/16483",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16640/16640",
@@ -489,7 +489,7 @@ ggplot(RSeQCmutations, aes(x=Position, y=Number/ReadNumbers*1000000, group=sampl
 `r margin_note("- These classes are also disproportionate throughout the reads, with G2A/C2T (transitions) also being higher than other (transversion) mutations")`
 
 
-```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=30}
+```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=40}
 ggplot(RSeQCspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
   geom_bar(stat='identity') + 
   tufte_theme() + 
