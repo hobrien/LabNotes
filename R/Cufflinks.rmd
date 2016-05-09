@@ -48,6 +48,7 @@ colnames(Combined) <- c("transfrag_id",
                      )
 AllTranscripts <- ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1)
 Combined$Count<- rowSums(ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1))
+
 ```
 
 # Cufflinks
@@ -117,8 +118,19 @@ ggplot(SatData, aes(x=N, y=Mean, colour=Class))+geom_line()
 ```
 
 `r margin_note("- all intergenic features and almost all intron antisense features are singletons")`
-`r margin_note("- 'all intergenic features and almost all intron antisense features are singletons'multiple classes are bimodal, with most being confined to 2 samples are present in all")`
+`r margin_note("- 'multiple classes' is bimodal, with most being confined to 2 samples or present in all")`
 
 ``` {r}
 ggplot(Combined, aes(x=Count, fill=class))+geom_bar(position='dodge')+facet_grid(class ~ ., scales="free_y")
+```
+
+`r margin_note("- intronic, repeats, intergenic and antisense are the most common types in the 'multiple types' category")`
+`r margin_note("- most of the transfrags that are present in all samples are intronic")`
+```{r}
+Mixed <- read.delim("~/BTSync/FetalRNAseq/Cufflinks/Mixed.txt", header=FALSE)
+
+colnames(Mixed) <- c('transfrag_id', '=', 'i', 'r', 'u', 'j', 'x', 'e', 'p', 'o', 'c', 's')
+summarise_each(Mixed[,-1], funs(sum(.)))
+Mixed2 <- gather(Mixed, class, count, -transfrag_id)
+ggplot(Mixed2, aes(x=count, fill=class))+geom_bar(position='dodge')+facet_grid(class ~ ., scales="free_y")+scale_x_continuous(limits=c(.5,25))
 ```

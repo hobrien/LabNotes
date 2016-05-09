@@ -236,9 +236,14 @@
             - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "exon") count ++} END{print count}'```
             - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "transcript") count ++} END{print count}'```
         - the combined GTF assembly 1.9 million exons (```wc -l Combined.combined.gtf```), 681,030 transcripts (```wc -l Combined.tracking```) and 258,321 loci (```wc -l Combined.loci```)
+    - Concatinate all tmap results and upload them to DB
+        - ```grep 0  *.tmap | perl -pe 's/Combined\.(\d+)\.gtf\.tmap:/$1\t/' > All.gtf.tmap```
+    - Get distribution of classes for all "multiple types" entries in Combined.tracking:
+        -``` grep '\t\.\t'  Combined.tracking | python ../LabNotes/Python/MixedClasses.py >Mixed.txt```        
         
         
 #Expression analysis
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
-        - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```        
+        - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```  
+              
