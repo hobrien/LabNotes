@@ -34,19 +34,24 @@ def main(args):
            counts = {'=':0, 'i':0, 'r':0, 'u':0, 'j':0, 'x':0, 'e':0, 'p':0, 'o':0, 'c':0, 's':0}
            if row[3] != '.':
                continue
-           for entry in row[4:]:
-               if entry == '-':
+           for main_entry in row[4:]:
+               sub_counts = {'=':0, 'i':0, 'r':0, 'u':0, 'j':0, 'x':0, 'e':0, 'p':0, 'o':0, 'c':0, 's':0}
+               if main_entry == '-':
                    continue
-               id = entry.split(':')[0][1:]
-               transcript_id = entry.split('|')[1]
-               cursor.execute("SELECT Cufflinks.class FROM Cufflinks, QueryNumber WHERE Cufflinks.sample_id = QueryNumber.sample_id AND QueryNumber.id = %s AND Cufflinks.transcript_id = %s", (id, transcript_id,))
-               rows = cursor.fetchall()
-               if len(rows) == 0:
+               id = main_entry.split(':')[0][1:]
+               for entry in main_entry.split(','):
+                 transcript_id = entry.split('|')[1]
+                 cursor.execute("SELECT Cufflinks.class FROM Cufflinks, QueryNumber WHERE Cufflinks.sample_id = QueryNumber.sample_id AND QueryNumber.id = %s AND Cufflinks.transcript_id = %s", (id, transcript_id,))
+                 rows = cursor.fetchall()
+                 if len(rows) == 0:
                    warnings.warn("no entry for q%s|%s" % (id, transcript_id))
                    continue
-               elif len(rows) > 1:
+                 elif len(rows) > 1:
                    warnings.warn("Multiple entires for q%s|%s" % (id, transcript_id))
-               counts[rows[0][0]] += 1
+                 sub_counts[rows[0][0]] += 1
+               for key in sub_counts.keys():
+                   if sub_counts[key] > 0:
+                       counts[key] += 1  
            print '\t'.join(str(i) for i in (row[0], counts['='], counts['i'], counts['r'], counts['u'], counts['j'], counts['x'], counts['e'], counts['p'], counts['o'], counts['c'], counts['s']))
   
     except Error as e:
