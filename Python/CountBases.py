@@ -11,7 +11,7 @@ def main(args):
            fields = line.split()
            bases = fields[4]
            ref = bases.count(',')+bases.count('.')
-           alt = fields[3] - ref - bases.count('<') - bases.count('>')
+           alt = int(fields[3]) - ref - bases.count('<') - bases.count('>')
            print '\t'.join(fields[:3]+ [str(ref), str(alt)])    
                
   
