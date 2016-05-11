@@ -7,16 +7,21 @@ output:
 ---
 <!-- see http://rstudio.github.io/tufte/ for info about tufte -->
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 rm(list=ls())
 library(dplyr)
 library(data.table)
 library(ggplot2)
 library(tidyr)
+library(tufte)
+library(RColorBrewer)
+library(scales)
+source("~/BTSync/Code/R/FormatGGplot.R")
+
 ```
 
 
-```{r cars}
+```{r include=FALSE}
 Combined <- fread("~/BTSync/FetalRNAseq/Cufflinks/Combined.tracking", header=FALSE)
 colnames(Combined) <- c("transfrag_id", 
                      "locus_id", 
@@ -53,7 +58,7 @@ Combined$Count<- rowSums(ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1))
 ```
 
 # Cufflinks
-## Transfrag classes 
+## Transcript saturation (mean of 100 random samples) 
 `r margin_note("- 207,000 match reference (=)")`
 `r margin_note("- 216,000 intronic (i)")`
 `r margin_note("- 77,000 fall in repeat masked regions (r)")`
@@ -69,13 +74,13 @@ Combined$Count<- rowSums(ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1))
 
 
 ```{r pressure, echo=FALSE}
-knitr::kable(
-group_by(Combined, class) %>% summarise(n())
-)
+#knitr::kable(
+#group_by(Combined, class) %>% summarise(n())
+#)
 ```
 
 
-``` {r}
+``` {r include=FALSE}
 SampleRows <- function(x, n) {
   if ( n ==1 ) {
   counts <- x[, sample(ncol(x), size = n)]  
@@ -101,41 +106,85 @@ RarefyTranscripts <- function(Subset, reps) {
   }
   data.frame(N = 1:ncol(Subset), Mean=Means)
 }
+#SatData <- data.frame()
+#for ( trans_class in unique(select(Combined, class))[[1]]) {
+  #print(trans_class)
+#  Subset <- ifelse(filter(Combined, class == trans_class)[,5:26, with=F] == '-', 0, 1)
+  #print(nrow(Subset))
+#  temp <- RarefyTranscripts(Subset, 100)
+#  temp$Class <- trans_class
+#  SatData <-rbind(SatData, temp)
+#}
+#dput(SatData, file="~/BTSync/FetalRNAseq/Cufflinks/Saturation.r")
+SatData <- dget(file="~/BTSync/FetalRNAseq/Cufflinks/Saturation.r")
 ```
 
-`r margin_note("- 'multiple classes' is the conly class that shows evidence of saturation")`
+`r margin_note("- 'multiple classes' is the only class that shows evidence of saturation")`
 
-``` {r}
-SatData <- data.frame()
-for ( trans_class in unique(select(Combined, class))[[1]]) {
-  #print(trans_class)
-  Subset <- ifelse(filter(Combined, class == trans_class)[,5:26, with=F] == '-', 0, 1)
-  #print(nrow(Subset))
-  temp <- RarefyTranscripts(Subset, 100)
-  temp$Class <- trans_class
-  SatData <-rbind(SatData, temp)
-}
-ggplot(SatData, aes(x=N, y=Mean, colour=Class))+geom_line()
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=8}
+ggplot(SatData, aes(x=N, y=Mean, colour=Class)) + 
+  geom_line() + 
+  tufte_theme() +
+  theme(legend.position=c(.9,.65)) 
+ 
 ```
 
 `r margin_note("- all intergenic features and almost all intron antisense features are singletons")`
 `r margin_note("- 'multiple classes' is bimodal, with most being confined to 2 samples or present in all")`
 
-``` {r}
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
 ggplot(Combined, aes(x=Count, fill=class))+geom_bar(position='dodge') +
-  facet_grid(class ~ .) + #, scales="free_y") + 
-  scale_y_continuous(limits=c(0,10000))
- # scale_x_continuous(limits=c(1.5,25))
+  facet_grid(class ~ ., scales="free_y") + 
+  tufte_theme() +
+  scale_y_continuous(breaks=pretty_breaks(n=2), labels=comma)
 ```
 
+`r margin_note("- Y-axes scaled the same. Most abundant classes excluded")`
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(Combined, aes(x=Count, fill=class))+geom_bar(position='dodge') +
+  facet_grid(class ~ .) + 
+  scale_y_continuous(limits=c(0,10000), breaks=c(0,5000,10000)) +
+  tufte_theme()
+
+```
+
+# Mixed category
 `r margin_note("- intronic, repeats, intergenic and antisense are the most common types in the 'multiple types' category")`
-`r margin_note("- most of the transfrags that are present in all samples are intronic")`
-```{r}
+`r margin_note("- ca. 300 reference transcripts that overlap an additional feature in another category")`
+```{r include=FALSE}
 Mixed <- read.delim("~/BTSync/FetalRNAseq/Cufflinks/Mixed.txt", header=FALSE)
 
 colnames(Mixed) <- c('transfrag_id', '=', 'i', 'r', 'u', 'j', 'x', 'e', 'p', 'o', 'c', 's')
 summarise_each(Mixed[,-1], funs(sum(.)))
 Mixed$total <- rowSums(Mixed[,-1])
 Mixed2 <- gather(Mixed, class, count, -transfrag_id, -total)
-ggplot(Mixed2, aes(x=count, fill=class))+geom_bar(position='dodge')+facet_grid(class ~ ., scales="free_y")+scale_x_continuous(limits=c(.5,25))
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+```
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(Mixed2, aes(x=count, fill=class)) +
+  geom_bar(position='dodge') +
+  facet_grid(class ~ ., scales="free_y") +
+  tufte_theme() +
+  scale_x_continuous(limits=c(.5,25)) +
+  scale_y_continuous(breaks=pretty_breaks(n=2)) +
+  scale_fill_manual(values=gg_color_hue(12)[2:12])
+```
+
+`r margin_note("- Y-axes scaled the same. Most abundant classes excluded")`
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(Mixed2, aes(x=count, fill=class)) +
+  geom_bar(position='dodge') +
+  facet_grid(class ~ .) +
+  scale_x_continuous(limits=c(.5,25)) +
+  scale_y_continuous(limits=c(0,2000), breaks=c(0,1000,2000)) +
+  tufte_theme() +
+  scale_fill_manual(values=gg_color_hue(12)[2:12])
+
+
 ```
