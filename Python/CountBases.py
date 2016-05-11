@@ -4,8 +4,6 @@ import sys
 import subprocess
 import fileinput
 import warnings
-import mysql.connector 
-from mysql.connector import Error
 
 # read header using bcftools, lookup sample IDs in DB, then write new header with BrainIDs
  
