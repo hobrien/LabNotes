@@ -9,7 +9,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 filename1=${1##*/}
-file_location = ${1%/*} 
+file_location=${1%/*} 
 sampleID=${filename1%%.*}
 
 
