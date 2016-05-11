@@ -5,15 +5,14 @@ import subprocess
 import fileinput
 import warnings
 
-# read header using bcftools, lookup sample IDs in DB, then write new header with BrainIDs
- 
-
+#Read count in column 4 includes skips caused by spliced alignments. I need to screen these out and report only ref matches and mismatches
 def main(args):
        for line in fileinput.input():
            fields = line.split()
            bases = fields[4]
-           counts = bases.count(',')+bases.count('.')
-           print '\t'.join(fields[:4]+ [str(counts)])    
+           ref = bases.count(',')+bases.count('.')
+           alt = fields[3] - ref - bases.count('<') - bases.count('>')
+           print '\t'.join(fields[:3]+ [str(ref), str(alt)])    
                
   
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
