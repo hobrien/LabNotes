@@ -40,7 +40,7 @@ sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 16483	Edinburgh	3412	3434		3710	
 16640	Edinburgh	3413	3565		3711	
 17013	Edinburgh	3414	3536		3712	
-17025	Edinburgh	3415	3433		3713	
+17025*	Edinburgh	3415	3433		3713	
 17198	Edinburgh	3436	3567		3714	
 17229	Edinburgh	3437	3568		3715	
 17333	Edinburgh	3438	3569		3716	
