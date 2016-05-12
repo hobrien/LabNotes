@@ -6,16 +6,17 @@ import fileinput
 import warnings
 
 #Read count in column 4 includes skips caused by spliced alignments. I need to screen these out and report only ref matches and mismatches
-def main(args):
-       for line in fileinput.input():
+def main(sampleID):
+
+       for line in fileinput.input([]):
            fields = line.split()
            try:
                bases = fields[4]
                ref = bases.count(',')+bases.count('.')
                alt = int(fields[3]) - ref - bases.count('<') - bases.count('>')
-               print '\t'.join(fields[:3]+ [str(ref), str(alt)])    
+               print '\t'.join(fields[:3]+ [str(ref), str(alt), sampleID])    
            except IndexError: # no pileup data
-               print '\t'.join(fields[:3]+ ['0', '0'])    
+               print '\t'.join(fields[:3]+ ['0', '0', sampleID])    
   
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
@@ -24,5 +25,6 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
            
 if __name__ == "__main__":
     warnings.formatwarning = warning_on_one_line
-    main(sys.argv[1:])
+    sampleID = sys.argv[1]
+    main(sampleID)
     
