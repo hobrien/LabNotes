@@ -14,6 +14,9 @@ then
 elif [[ $file == *"tar" ]]
 then
     tar -xf $file
+elif [[ $file == *"gz" ]]
+then
+    gunzip $file
 else
     echo "extension not recognised"
 fi   

@@ -18,7 +18,7 @@ else
     sampleID=${filename1%%_*}
 fi
 
-if [ $sampleID == 16810 ]
+if [ $sampleID == 16810 ] || [ $sampleID == 15533 ]
 then
     read1=/c8000xd3/rnaseq-heath/Trimmed/${filename1%%.*}_val_1.fq.gz
     read2=/c8000xd3/rnaseq-heath/Trimmed/${filename2%%.*}_val_2.fq.gz

@@ -91,7 +91,7 @@ cp /c8000xd3/rnaseq-heath/Cufflinks/18432/transcripts.gtf /c8000xd3/rnaseq-heath
 cp /c8000xd3/rnaseq-heath/Cufflinks/18559/transcripts.gtf /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/18559.gtf
 cp /c8000xd3/rnaseq-heath/Cufflinks/18694/transcripts.gtf /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/18694.gtf
 
-cd /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare2/
+cd /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/
 cuffcompare -V -o Combined \
   -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
   -s /c8000xd3/rnaseq-heath/Ref/chroms \

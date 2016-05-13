@@ -19,7 +19,7 @@ folder=${folder_path##*/}
 #/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CollectRnaSeqMetrics REF_FLAT=/home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/refFlat.txt.gz STRAND_SPECIFICITY=SECOND_READ_TRANSCRIPTION_STRAND INPUT=/home/heath/Mappings/15533_300_secondstrand/accepted_hits.bam OUTPUT=/home/heath/Mappings/15533_300_secondstrand/RnaSeqMetrics.txt ASSUME_SORTED=false
 
 # This isn't needed because it's run separately for reads mapping and not mapping to rDNA
-bam_stat.py -i $@ > $folder_path/$folder.stats.txt
+#bam_stat.py -i $@ > $folder_path/$folder.stats.txt
 
 # determine the strand of experiment ("1++,1--,2+-,2-+" = first strand, "1+-,1-+,2++,2--" = second strand)
 infer_experiment.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $@ > $folder_path/$folder.expt.txt

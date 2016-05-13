@@ -1,5 +1,5 @@
 #Exeter
-for id in 15533 #15533_2 15641 16024 16115 16385 16428 16491 16548 16826 17048 17053 17071 17921 # 16929 16840 17068 17109  
+for id in 15533_2 #15641 16024 16115 16385 16428 16491 16548 16826 17048 17053 17071 17921 # 16929 16840 17068 17109  
 do
   if [ ! -d /c8000xd3/rnaseq-heath/Mappings/$id ]
   then
@@ -8,7 +8,7 @@ do
 done
 
 #Compressed Exeter data
-for id in #16810 15533
+for id in 15533 #16810 
 do
   if [ ! -d /c8000xd3/rnaseq-heath/Mappings/$id ]
   then
