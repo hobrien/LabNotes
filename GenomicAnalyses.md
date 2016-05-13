@@ -246,6 +246,8 @@
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
         - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```  
+- Concatinate tracking files and upload to DB:
+    - ```grep 0  *.tmap | perl -pe 's/Combined\.(\d+)\.gtf\.tmap:/$1\t/' > All.gtf.tmap```
 - Get read count data over first exon of TCF4 transcript ENST00000544241.6
     - ```SELECT FPKM from Cufflinks WHERE transcript_id = 'ENST00000544241.6'```
         - no expression of transcript
