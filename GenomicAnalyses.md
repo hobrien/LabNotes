@@ -253,6 +253,6 @@
     - ```SELECT FPKM from Cufflinks WHERE transcript_id = 'ENST00000544241.6'```
         - no expression of transcript
     - Use mpileup to get read counts over exon (chr18:55403601-55403997)
-        - I think I am going to run mpileup on everything and add it to the db to make it easy to grab intervals from within R to plot coverage, say over exon and 100 bp on each flank, coloured by sample_id
+        - Running mpileup on everything creates a VERY large file, so I've modified mpileup.sh to run over a specified region for all samples
                 
               
