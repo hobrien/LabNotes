@@ -231,11 +231,12 @@
 - Run Cuffcompare
     - I downloaded a set of masked chromosome files from [UCSC](http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromFa.tar.gz) which can be used to filter results with the -s option:
         - ```cuffcompare -V -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf -s /c8000xd3/rnaseq-heath/Ref/chroms```
-    - I've now run Cuffcompare on an initial set of 24 samples with high RIN values
-        - The input GTF files from Cufflinks have between 1.4 million and 1.55 million exons and between 300,000 and 450,000 transcripts
-            - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "exon") count ++} END{print count}'```
-            - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "transcript") count ++} END{print count}'```
-        - the combined GTF assembly 1.9 million exons (```wc -l Combined.combined.gtf```), 681,030 transcripts (```wc -l Combined.tracking```) and 258,321 loci (```wc -l Combined.loci```)
+    - I've now run Cuffcompare on all samples
+        - The input GTF files from Cufflinks have between 1.4 million and 2 million exons and between 300,000 and 1 million transcripts
+            - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "exon") count ++} END{print count}' | sort -n```
+            - ```ls | grep gtf$ | xargs -n 1 awk '{if ($3 == "transcript") count ++} END{print count}' | sort -n```
+            - 17198 has 30% more exons and more than twice as many transcripts as any other sample
+        - the combined GTF assembly 3.1 million exons (```wc -l Combined.combined.gtf```), 1.5 million transcripts (```wc -l Combined.tracking```) and 258,321 loci (```wc -l Combined.loci```)
     - Concatinate all tmap results and upload them to DB
         - ```grep 0  *.tmap | perl -pe 's/Combined\.(\d+)\.gtf\.tmap:/$1\t/' > All.gtf.tmap```
     - Get distribution of classes for all "multiple types" entries in Combined.tracking:
