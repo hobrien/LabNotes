@@ -1,0 +1,50 @@
+---
+title: "COunts"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+rm(list=ls())
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(tufte)
+library(RColorBrewer)
+library(scales)
+source("~/BTSync/Code/R/FormatGGplot.R")
+
+```
+
+
+```{r include=FALSE}
+
+```
+
+`r margin_note("- 'multiple classes' is the only class that shows evidence of saturation")`
+
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=8}
+Counts <- read.delim("~/BTSync/FetalRNAseq/Counts/chr18:55403100-55404500.counts.txt", header=FALSE)
+ggplot(Counts, aes(x=V2, y=V4+V5, group=V6)) + 
+  geom_line(colour='grey20') + 
+  geom_rect(xmin=55403601, xmax=55403997, ymin=1725, ymax=1675, alpha=0, colour='black') + 
+  geom_rect(xmin=55403454, xmax=55403518, ymin=1725, ymax=1675, alpha=0, colour='black') + 
+  geom_segment(x=55403518, xend=55403601, y=1700, yend=1700, colour='black') +
+  geom_segment(x=55403997, xend=55404500, y=1700, yend=1700, colour='black') +
+  geom_segment(x=55403100, xend=55403454, y=1700, yend=1700, colour='black') +
+  tufte_theme() +
+  #scale_y_continuous(limits=c(0, 450)) +
+  xlab("chr18")+ylab("Read Depth") 
+
+ggplot(subset(Counts, V2 > 55403550 & V2 < 55404050), aes(x=V2, y=V4+V5, group=V6)) + 
+  geom_line(colour='grey20') + 
+  geom_rect(xmin=55403601, xmax=55403997, ymin=375, ymax=425, alpha=0, colour='black') + geom_segment(x=55403550, xend=55403601, y=400, yend=400, colour='black') + geom_segment(x=55403997, xend=55404050, y=400, yend=400, colour='black') +
+  tufte_theme() +
+  scale_y_continuous(limits=c(0, 450)) +
+  xlab("chr18")+ylab("Read Depth") 
+
+```
