@@ -23,37 +23,8 @@ source("~/BTSync/Code/R/FormatGGplot.R")
 
 ```{r include=FALSE}
 Combined <- fread("~/BTSync/FetalRNAseq/Cufflinks/Combined.tracking", header=FALSE)
-colnames(Combined) <- c("transfrag_id", 
-                     "locus_id", 
-                     "gene_id",                     
-                     "class",
-                     "15468",
-                     "15533",
-                     "15768",
-                     "16286",
-                     "16438",
-                     "16488",
-                     "16840",
-                     "16929",
-                     "16972",
-                     "17049",
-                     "17054",
-                     "17068",
-                     "17081",
-                     "17087",
-                     "17109",
-                     "17115",
-                     "17130",
-                     "17701",
-                     "17812",
-                     "18294",
-                     "18349",
-                     "18596",
-                     "18655",
-                     "18687"
-                     )
-AllTranscripts <- ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1)
-Combined$Count<- rowSums(ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1))
+AllTranscripts <- ifelse(Combined[,5:ncol(Combined), with=FALSE] == '-', 0, 1)
+Combined$Count<- rowSums(AllTranscripts)
 
 ```
 
@@ -79,50 +50,11 @@ Combined$Count<- rowSums(ifelse(Combined[,5:28, with=FALSE] == '-', 0, 1))
 #)
 ```
 
-
-``` {r include=FALSE}
-SampleRows <- function(x, n) {
-  if ( n ==1 ) {
-  counts <- x[, sample(ncol(x), size = n)]  
-  }
-  else {
-  counts <- x[, sample(ncol(x), size = n)] %>% rowSums() 
-  }
-  length(counts[counts > 0])  
-}
-
-SampleMean <- function(data, n, reps) {
-  countList <- vector(,reps)
-  for (x in 1:reps){
-    countList[x] <- SampleRows(data, n)
-  }
-  mean(countList)
-}
-
-RarefyTranscripts <- function(Subset, reps) {
-  Means <- vector(,ncol(Subset))
-  for (x in 1:ncol(Subset)) {
-    Means[x] <- SampleMean(Subset, x, reps)
-  }
-  data.frame(N = 1:ncol(Subset), Mean=Means)
-}
-#SatData <- data.frame()
-#for ( trans_class in unique(select(Combined, class))[[1]]) {
-  #print(trans_class)
-#  Subset <- ifelse(filter(Combined, class == trans_class)[,5:26, with=F] == '-', 0, 1)
-  #print(nrow(Subset))
-#  temp <- RarefyTranscripts(Subset, 100)
-#  temp$Class <- trans_class
-#  SatData <-rbind(SatData, temp)
-#}
-#dput(SatData, file="~/BTSync/FetalRNAseq/Cufflinks/Saturation.r")
-SatData <- dget(file="~/BTSync/FetalRNAseq/Cufflinks/Saturation.r")
-```
-
 `r margin_note("- 'multiple classes' is the only class that shows evidence of saturation")`
 
 ``` {r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=8}
-ggplot(SatData, aes(x=N, y=Mean, colour=Class)) + 
+SatData <- read.delim("~/BTSync/FetalRNAseq/Cufflinks/TranscriptSat.txt", header=FALSE)
+ggplot(SatData, aes(x=V2, y=V3, colour=V1)) + 
   geom_line() + 
   tufte_theme() +
   theme(legend.position=c(.9,.65)) 
