@@ -24,3 +24,6 @@ vignettes/*.pdf
 # Excel files
 *.xls
 *.xlsx
+
+# ipython notebook checkpoints
+Python/.ipynb_checkpoints/*
