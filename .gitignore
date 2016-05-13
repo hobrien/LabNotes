@@ -20,3 +20,7 @@ vignettes/*.pdf
 *.html
 *.pdf
 *.png
+
+# Excel files
+*.xls
+*.xlsx
