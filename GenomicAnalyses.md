@@ -253,6 +253,8 @@
     - ```SELECT FPKM from Cufflinks WHERE transcript_id = 'ENST00000544241.6'```
         - no expression of transcript
     - Use mpileup to get read counts over exon (chr18:55403601-55403997)
+    - ENSG00000196628
+    - In the GTEx junction data, the intron after this exon is 18_53070749_53070852
         - Running mpileup on everything creates a VERY large file, so I've modified mpileup.sh to run over a specified region for all samples
                 
               

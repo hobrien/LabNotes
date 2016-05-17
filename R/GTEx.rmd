@@ -1,0 +1,83 @@
+---
+title: "GTEx"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+rm(list=ls())
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(tufte)
+library(RColorBrewer)
+library(scales)
+source("~/BTSync/Code/R/FormatGGplot.R")
+```
+
+# TCF4 splice diversity
+
+![TCF4 splice variants](/Users/heo3/BTSync/FetalRNAseq/LabNotes/R/Images/TCF4.png)
+
+`r margin_note("- TCF4 LoF transcript is rare, but expressed in brain, blood and ovary")`
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=8}
+TCF4 <- read.delim("~/BTSync/FetalRNAseq/GTEx/TCF4.txt", header=TRUE)
+SampleAttributes <- read.delim("~/BTSync/FetalRNAseq/GTEx/GTEx_Data_V6_Annotations_SampleAttributesDS.txt")
+SampleAttributes <- separate(SampleAttributes, SAMPID, c('GTEx', 'Individual', 'Tissue'), sep='-', extra="merge", remove=FALSE)
+
+
+TCF4.1 <-gather(TCF4, SAMPID, Count, -1, -2, -3, -4)
+TCF4.1$SAMPID=gsub(pattern="\\.", replacement='-', TCF4.1$SAMPID)
+select(SampleAttributes, SAMPID, SMTS, SMTSD) %>%
+  left_join(TCF4.1, .) %>%
+  filter(grepl('18_53070749', TargetID)) %>%
+  ggplot(aes(x=Count)) + 
+    geom_histogram(binwidth=1) +
+    facet_grid(SMTS ~ TargetID) +
+    tufte_theme() +
+    theme(strip.text.y = element_text(size = 8, angle = 0),
+          axis.text.y = element_text(size = 6)) +
+    scale_y_continuous(breaks=c(0, 600, 1200))
+```
+
+`r margin_note("- Within brain, it is expressed in all tissues")`
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=6}
+select(SampleAttributes, SAMPID, SMTS, SMTSD) %>%
+  left_join(TCF4.1, .) %>%
+  filter(grepl('18_53070749', TargetID)) %>%
+  filter(SMTS == 'Brain') %>%
+  ggplot(aes(x=Count)) + 
+    geom_histogram(binwidth=1) +
+    facet_grid(SMTSD ~ TargetID) +
+    scale_y_continuous(breaks=c(60, 120)) +
+    tufte_theme() +
+    theme(strip.text.y = element_text(size = 8, angle = 0),
+          axis.text.y = element_text(size = 6)) 
+```
+
+`r margin_note("- three cases where the TCF4 LoF transcript is expressed in two brain tissues in the same individual")`
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=6}
+select(SampleAttributes, SAMPID, SMTS, SMTSD, Individual) %>%
+  left_join(TCF4.1, .) %>%
+  filter(grepl('18_53070749', TargetID)) %>%
+  filter(TargetID != '18_53070749_53128250') %>%
+  filter(SMTS == 'Brain') %>%
+  filter(Count > 0) %>%
+  ggplot(aes(x=Individual, y=Count, fill=SMTSD)) + 
+    geom_bar(stat='identity') +
+    coord_flip() +
+    facet_grid(. ~ TargetID) +
+    scale_y_continuous(breaks=c(0, 1, 2)) +
+    tufte_theme() +
+    theme(legend.position="right") +
+    theme(legend.text = element_text(size=8)) 
+
+```
