@@ -1,6 +1,6 @@
 sample	Centre	Tophat	RSeQC	Filter	Cufflinks	Cuffcompare
 15468	Edinburgh	Done	3318	3484	3560	3446
-15533	Exeter	4350	4367	3483	3219/3562	
+15533	Exeter	4350	4367		4423	
 15768	Edinburgh	Done	Done	3485	3507	
 16286	Edinburgh	Done	Done	3486	3508	
 16438	Edinburgh	Done	3312	3487	3509	
