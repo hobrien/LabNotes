@@ -240,7 +240,11 @@
     - Concatinate all tmap results and upload them to DB
         - ```grep 0  *.tmap | perl -pe 's/Combined\.(\d+)\.gtf\.tmap:/$1\t/' > All.gtf.tmap```
     - Get distribution of classes for all "multiple types" entries in Combined.tracking:
-        -``` grep '\t\.\t'  Combined.tracking | python ../LabNotes/Python/MixedClasses.py >Mixed.txt```        
+        -``` grep '\t\.\t'  Combined.tracking | python ../LabNotes/Python/MixedClasses.py >Mixed.txt```  
+    - A common novel transcript type is large single exon transcripts classed as 'i' or 'x'
+        - these are very likely to represent unspliced introns and should probably be filtered out
+        - does a pretty poor job of distinguishing x from i as far as I can tell
+        - need to plot exon size by feature type to investigate this
         
         
 #Expression analysis
