@@ -157,3 +157,22 @@ Thresholds <- sapply( SampleIDlist$sample_id, function(x) {
   table[floor(nrow(table)/20),1]
 })  
 ```
+
+```{r}
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+SampleIDlist <- collect(tbl(my_db, sql("SELECT DISTINCT sample_id FROM CufflinksGTF")))
+
+classes <- collect(tbl(my_db, sql(paste("SELECT CufflinksGTF.FPKM, CufflinksGTF.cov, CufflinksGTF.full_read_support, Cufflinks.class FROM CufflinksGTF, Cufflinks WHERE CufflinksGTF.transcript_id = Cufflinks.transcript_id AND feature = 'transcript' AND Cufflinks.sample_id = CufflinksGTF.sample_id AND CufflinksGTF.sample_id = '", SampleIDlist$sample_id[3], "'", sep="" ))))
+
+ggplot(classes, aes(x=log10(cov+0.00001)))+ geom_histogram() + facet_grid(class ~full_read_support, scales = 'free_y') +
+  geom_segment(x=log10(0.402634), xend=log10(0.402634), y=0, yend=100000, colour='red', linetype='dotted') +
+  tufte_theme()
+
+ggplot(classes, aes(x=log10(FPKM+0.00001)))+ geom_histogram() + facet_grid(class ~full_read_support, scales = 'free_y')
+
+ggplot(classes, aes(x=log10(cov+0.00001), y=log10(FPKM+0.00001))) + 
+  geom_point(alpha=0.1) + facet_grid(class ~full_read_support) +
+  geom_segment(x=log10(0.402634), xend=log10(0.402634), y=-4, yend=4, colour='red', linetype='dotted') +
+  tufte_theme()
+
+```
