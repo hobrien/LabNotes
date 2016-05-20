@@ -1,0 +1,1 @@
+for file in `find . -name "*.gtf" | grep -v sorted |wc -l`
