@@ -17,6 +17,7 @@ library(tufte)
 library(RColorBrewer)
 library(scales)
 source("~/BTSync/Code/R/FormatGGplot.R")
+library(RMySQL)
 
 ```
 
@@ -119,4 +120,40 @@ ggplot(Mixed2, aes(x=count, fill=class)) +
   scale_fill_manual(values=gg_color_hue(12)[2:12])
 
 
+```
+
+```{r}
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+SampleIDlist <- collect(tbl(my_db, sql("SELECT DISTINCT sample_id FROM CufflinksGTF")))
+
+table <- collect(tbl(my_db, sql(paste("SELECT cov, full_read_support FROM CufflinksGTF WHERE gene_id LIKE 'ENSG%' AND feature = 'transcript' AND sample_id = '", SampleIDlist$sample_id[2], "'", sep="" ))))
+
+max <- summarise(table, max(cov)) %>% as.numeric()
+cov_array <- c(0, sapply( seq(-4, floor(log10(max))), function(x) 10^x))
+
+FP <-sapply( cov_array, function(x) {
+  filter(table, cov >= x & full_read_support == 'no') %>% 
+          summarise(n()) %>% 
+          as.numeric()
+})
+TP <-sapply( cov_array, function(x) {
+  filter(table, cov >= x & full_read_support == 'yes') %>% 
+          summarise(n()) %>% 
+          as.numeric()
+})
+results <- data.frame(cov=cov_array, TP = TP/TP[1], FP=FP/FP[1])
+#results <- rbind(results, results2)
+FP <- filter(table, full_read_support == 'no') %>% arrange(desc(cov))
+
+
+ggplot(results, aes(x=FP, y=TP)) + 
+  geom_line() + 
+  geom_segment(x=.05, xend=.05, y=0, yend=1, colour='red', linetype='dotted') +
+  annotate("text", y=.15, x=.06, hjust=0, label=paste('cov =', as.numeric(FP[floor(nrow(FP)/20),1]))) +
+  tufte_theme()
+
+Thresholds <- sapply( SampleIDlist$sample_id, function(x) {
+  table <- collect(tbl(my_db, sql(paste("SELECT cov FROM CufflinksGTF WHERE gene_id LIKE 'ENSG%' AND feature = 'transcript' AND full_read_support = 'no' AND sample_id = '", x, "' ORDER BY cov DESC", sep="" ))))
+  table[floor(nrow(table)/20),1]
+})  
 ```
