@@ -176,3 +176,11 @@ ggplot(classes, aes(x=log10(cov+0.00001), y=log10(FPKM+0.00001))) +
   tufte_theme()
 
 ```
+15533 exons:
+9390 > 10kb
+1.4 million <= 10kb
+987 k < 200 bp
+
+RefFeatures <- collect(tbl(my_db, sql("SELECT GencodeFeatures.`value` AS gene_type, GencodeGTF.`end` - GencodeGTF.`start` AS length FROM GencodeFeatures, GencodeGTF WHERE GencodeFeatures.`id` = GencodeGTF.`id` AND GencodeFeatures.`feature` = 'gene_type' AND GencodeGTF.`feature` = 'exon' AND ( GencodeFeatures.value = 'non_coding' OR GencodeFeatures.value = '3prime_overlapping_ncrna' OR GencodeFeatures.value = 'antisense' OR GencodeFeatures.value = 'lincRNA' OR GencodeFeatures.value = 'bidirectional_promoter_lncrna' OR GencodeFeatures.value = 'sense_intronic' OR GencodeFeatures.value = 'sense_overlapping' OR GencodeFeatures.value = 'macro_lncRNA')")))
+
+ggplot(RefFeatures, aes(x=log10(length)))+ geom_histogram(binwidth=0.1)+facet_grid(gene_type ~ ., scales='free_y') + theme(strip.text.y = element_text(size = 8, angle = 0))
