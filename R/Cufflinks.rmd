@@ -192,12 +192,14 @@ ggplot(classes, aes(x=log10(cov+0.00001)))+ geom_histogram() + facet_grid(class 
 `r margin_note("- With the exceptions of 1 macro lincRNA 1 sense intronic, 6 sense overlapping, 10 lincRNA and 11 antisense, all 76100+ lncRNAs are <10 kb")`
 
 ``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
-RefFeatures <- collect(tbl(my_db, sql("SELECT GencodeFeatures.`value` AS gene_type, GencodeGTF.`end` - GencodeGTF.`start` AS length FROM GencodeFeatures, GencodeGTF WHERE GencodeFeatures.`id` = GencodeGTF.`id` AND GencodeFeatures.`feature` = 'gene_type' AND GencodeGTF.`feature` = 'exon' AND ( GencodeFeatures.value = 'non_coding' OR GencodeFeatures.value = '3prime_overlapping_ncrna' OR GencodeFeatures.value = 'antisense' OR GencodeFeatures.value = 'lincRNA' OR GencodeFeatures.value = 'bidirectional_promoter_lncrna' OR GencodeFeatures.value = 'sense_intronic' OR GencodeFeatures.value = 'sense_overlapping' OR GencodeFeatures.value = 'macro_lncRNA')")))
+lncRNA_types <- c("'non_coding'", "'3prime_overlapping_ncrna'", "'antisense'", "'lincRNA'", "'bidirectional_promoter_lncrna'", "'sense_intronic'", "'sense_overlapping'", "'macro_lncRNA'")
+
+RefFeatures <- collect(tbl(my_db, sql(paste("SELECT GencodeFeatures.`value` AS gene_type, GencodeGTF.`end` - GencodeGTF.`start` AS length FROM GencodeFeatures, GencodeGTF WHERE GencodeFeatures.`id` = GencodeGTF.`id` AND GencodeFeatures.`feature` = 'gene_type' AND GencodeGTF.`feature` = 'exon' AND GencodeFeatures.value IN (", paste0(lncRNA_types, collapse = ', ' ), ")", sep=''))))
 
 ggplot(RefFeatures, aes(x=log10(length)))+ geom_histogram(binwidth=0.1)+facet_grid(gene_type ~ ., scales='free_y') +
   tufte_theme() +
   theme(strip.text.y = element_text(size = 8, angle = 0)) +
-    geom_segment(x=log10(10000), xend=log10(10000), y=0, yend=100000, colour='red', linetype='dotted') +
+  geom_segment(x=log10(10000), xend=log10(10000), y=0, yend=100000, colour='red', linetype='dotted') +
   xlab("log length")
 ```
 
@@ -205,11 +207,59 @@ ggplot(RefFeatures, aes(x=log10(length)))+ geom_histogram(binwidth=0.1)+facet_gr
 `r margin_note("- Antisense is bimodal with peaks at 1 kb and 10 kb")`
 `r margin_note("- Reference lncRNA exons centred around 200 bp")`
 ``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
-exons <- collect(tbl(my_db, sql(paste("SELECT CufflinksGTF.FPKM, CufflinksGTF.cov, CufflinksGTF.full_read_support, CufflinksGTF.end - CUfflinksGTF.start AS length, Cufflinks.class FROM CufflinksGTF, Cufflinks WHERE CufflinksGTF.transcript_id = Cufflinks.transcript_id AND feature = 'exon' AND Cufflinks.sample_id = CufflinksGTF.sample_id AND CufflinksGTF.sample_id = '", SampleIDlist$sample_id[3], "'", sep="" ))))
-ggplot(exons, aes(x=log10(length)))+ geom_histogram() + facet_grid(class ~ ., scales = 'free_y') +
+CuffExons <- collect(tbl(my_db, sql(paste("SELECT CufflinksGTF.FPKM, CufflinksGTF.cov, CufflinksGTF.full_read_support, CufflinksGTF.end - CUfflinksGTF.start AS length, Cufflinks.class, Cufflinks.transcript_id FROM CufflinksGTF, Cufflinks WHERE CufflinksGTF.transcript_id = Cufflinks.transcript_id AND feature = 'exon' AND Cufflinks.sample_id = CufflinksGTF.sample_id AND CufflinksGTF.sample_id = '", SampleIDlist$sample_id[3], "'", sep="" ))))
+
+
+ggplot(CuffExons, aes(x=log10(length)))+ geom_histogram() + 
+  facet_grid(class ~ ., scales = 'free_y') +
   geom_segment(x=log10(10000), xend=log10(10000), y=0, yend=100000, colour='red', linetype='dotted') +
   tufte_theme() +
+  theme(strip.text.y = element_text(size = 8, angle = 0)) +
   xlab("log length")
 
 ```
 
+# Filtering on Exon Number
+
+`r margin_note("- Rate of single-exon transcripts is 7% for antisense (x), 10% for lincRNA (u) and 41% for sense_intronic (i)")`
+
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
+RefExonNumber <- do.call(rbind, lapply( lncRNA_types, function(x) {
+  table <- collect(tbl(my_db, sql(paste("SELECT GencodeFeatures.value, COUNT(GencodeFeatures.value) AS count FROM GencodeFeatures, GencodeGTF WHERE GencodeFeatures.id = GencodeGTF.id AND GencodeGTF.feature = 'exon' AND GencodeFeatures.feature = 'transcript_id' AND  GencodeFeatures.id IN ( SELECT GencodeFeatures.id FROM GencodeFeatures WHERE GencodeFeatures.feature = 'transcript_type' AND GencodeFeatures.value = ", x, " ) GROUP BY GencodeFeatures.value", sep="" ))))
+  table$gene_type <- factor(x)
+  table
+}))
+
+ggplot(RefExonNumber, aes(x=count)) +
+  geom_histogram(binwidth=1) + 
+  facet_grid(gene_type ~ ., scales = 'free_y') +
+  tufte_theme() +
+  theme(strip.text.y = element_text(size = 8, angle = 0)) +
+  xlab("exon number")
+```
+
+`r margin_note("- Rate of single-exon transcripts WAY higher for cufflinks results.")`
+`r margin_note("- There are only 108 antisense (x), 27 lincRNA (u) and 119 sense_intronic (i) novel multi-exon transcripts")`
+`r margin_note("- There are also 3203 novel splice variants (j)")`
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
+CuffExonNumber <- group_by(CuffExons, transcript_id, class) %>% summarise(count = n())
+ggplot(CuffExonNumber, aes(x=count)) +
+  geom_histogram(binwidth=1) +
+  facet_grid(class ~ ., scales = 'free_y') +
+  tufte_theme() +
+  theme(strip.text.y = element_text(size = 8, angle = 0)) +
+  xlab("exon number")
+```
+
+`r margin_note("- Filtering out single-exon transcripts does nothing to improve the exon length distribution")`
+
+``` {r dev.args = list(bg = 'transparent'), warning=FALSE}
+CuffMultiExons <-filter(CuffExonNumber, count > 1) %>% left_join(CuffExons)
+ggplot(CuffMultiExons, aes(x=log10(length)))+ geom_histogram() + 
+  facet_grid(class ~ ., scales = 'free_y') +
+  geom_segment(x=log10(10000), xend=log10(10000), y=0, yend=100000, colour='red', linetype='dotted') +
+  tufte_theme() +
+  theme(strip.text.y = element_text(size = 8, angle = 0)) +
+  xlab("log length")
+
+```
