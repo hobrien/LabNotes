@@ -54,6 +54,7 @@
             - ```vcf-sort FB_Merged_chr1_flip_filter.vcf |bgzip -c > FB_Merged_chr1_filtered.vcf.gz```
         - I'm not yet sure if this will work or not, but I might as well figure out a way to apply this to all chromosomes
             - ```echo {1..22} |xargs -n 1 -P 4 bash ~/BTSync/FetalRNAseq/LabNotes/Bash/FilterAndRecode.sh```
+    - Run imputation (see ScreenShots/Imputation2.png)
     - Concatenate and filter imputed data    
         - Imputed data are in BTSync/FetalRNAseq/ImputedGenotypes/Raw_output/
         - I need to combine into a single file
@@ -228,7 +229,7 @@
         - This is an offset error that I think it related to the size of the matrix, tho the code looks fine to me
         - No idea if this is going to cause problems or not (beyond meaning that this snp in not included)
         - It is also reporting that the data are unphased, which appears to be correct. No idea how the imputation could have happened without phasing the data though.
-            - That would be becuase I selected the unphased output option
+            - That would be because I selected the unphased output option
         - I am going to need to do a liftover before running this because the vcf is for hg19
             - there is a picard tool for this purpose. I just need to download the chain from ucsc
 #Transcript Identification

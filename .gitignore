@@ -17,9 +17,9 @@ vignettes/*.pdf
 .Rproj.user
 
 # html output from knitR
-*.html
-*.pdf
-*.png
+R/*.html
+R/*.pdf
+R/*.png
 
 # Excel files
 *.xls
