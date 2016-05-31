@@ -221,6 +221,16 @@
             - This is working great now, except that insertion_profile.py was reporting results for 52 bp reads. I'm testing it now with the -l 100 option to see if that helps
             - It would be nice if it could separate SNPs from reads 1 and 2, but otherwise, it's pretty nice                     
 
+#Allele-specific alignment
+- Run [WASP](https://github.com/bmvdgeijn/WASP) allele-aware alignment
+    - I compiled snp2hd5, which worked fine, though there was a fairly obvious problem with the vcf parsing that I had to fixed
+    - It is reporting an error on the last line of the chr22 vcf
+        - This is an offset error that I think it related to the size of the matrix, tho the code looks fine to me
+        - No idea if this is going to cause problems or not (beyond meaning that this snp in not included)
+        - It is also reporting that the data are unphased, which appears to be correct. No idea how the imputation could have happened without phasing the data though.
+            - That would be becuase I selected the unphased output option
+        - I am going to need to do a liftover before running this because the vcf is for hg19
+            - there is a picard tool for this purpose. I just need to download the chain from ucsc
 #Transcript Identification
 - Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
     - Cufflinks is running on 15533, but it's taken 3 days so far and no indication of progress
@@ -245,7 +255,13 @@
         - these are very likely to represent unspliced introns and should probably be filtered out
         - does a pretty poor job of distinguishing x from i as far as I can tell
         - need to plot exon size by feature type to investigate this
-        
+    - Make DB of GencodeGTF:
+        - ```cat  gencode.v24.chr_patch_hapl_scaff.annotation.gtf |python ~/BTSync/FetalRNAseq/LabNotes/Python/GTF2CSV.py > ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.annotation.csv
+```
+        - ```mv features.csv ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.features.csv```
+        - ```mysql db_name < ~/BTSync/FetalRNAseq/LabNotes/SQL/refGTF.sql```
+        - ```SELECT DISTINCT feature FROM GencodeFeatures```
+            - transcript_support_level, exon_number, level, gene_type, transcript_type, gene_name, transcript_name, tag, ccdsid, exon_id, gene_id, protein_id, transcript_id, gene_status, transcript_status, havana_gene, havana_transcript, ont        
         
 #Expression analysis
 - Analyse expressed SNPs
