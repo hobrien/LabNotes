@@ -224,7 +224,7 @@
 
 #Allele-specific alignment
 - Run [WASP](https://github.com/bmvdgeijn/WASP) allele-aware alignment
-    - I compiled snp2hd5, which worked fine, though there was a fairly obvious problem with the vcf parsing that I had to fixed
+    - I compiled snp2hd5, which worked fine, though there was a fairly obvious problem with the vcf parsing that I had to be fixed
     - It is reporting an error on the last line of the chr22 vcf
         - This is an offset error that I think it related to the size of the matrix, tho the code looks fine to me
         - No idea if this is going to cause problems or not (beyond meaning that this snp in not included)
@@ -232,6 +232,8 @@
             - That would be because I selected the unphased output option
         - I am going to need to do a liftover before running this because the vcf is for hg19
             - there is a picard tool for this purpose. I just need to download the chain from ucsc
+                - ```~/bin/java -jar ~/src/picard-tools-2.1.1/picard.jar LiftoverVcf```
+
 #Transcript Identification
 - Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
     - Cufflinks is running on 15533, but it's taken 3 days so far and no indication of progress
