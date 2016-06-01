@@ -231,9 +231,18 @@
         - It is also reporting that the data are unphased, which appears to be correct. No idea how the imputation could have happened without phasing the data though.
             - That would be because I selected the unphased output option
         - I am going to need to do a liftover before running this because the vcf is for hg19
-            - there is a picard tool for this purpose. I just need to download the chain from ucsc
+            - there is a picard tool for this purpose. I just need to download the chain from UCSC
                 - ```~/bin/java -jar ~/src/picard-tools-2.1.1/picard.jar LiftoverVcf```
-
+            - this isn't working. all SNPs are being rejected. I think this is because the chromosomes are coded '1', etc rather than 'chr1', etc.
+                - I am attempting to fix this:
+                    - ```bcftools view chr1.dose.vcf.gz |perl -pe 's/^1/chr1/' | bgzip >chr1.recoded.vcf.gz```
+                        - I had to install a newer version of [bcftools](http://www.htslib.org/download) on the server because the command line interface has changed
+            - this is a right pain. I'm having major issues with b37 (lacks 'chr') and hg19 (has chr). See [this](http://gatkforums.broadinstitute.org/gatk/discussion/63/errors-about-input-files-having-missing-or-incompatible-contigs).
+            - the UCSC chain file has the 'chr' prefix for the target, but not for the query, which matches my data, actually.
+            - the ensembl chain has versions with and without the prefix, but they are the same for both target and query
+            - i am getting out-of-memory errors, which could be because it's running out of memory or could be because something has gone wrong
+            - I've also gotten a bunch of errors about non matching contigs. I need to keep chasing this up.
+            
 #Transcript Identification
 - Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
     - Cufflinks is running on 15533, but it's taken 3 days so far and no indication of progress
