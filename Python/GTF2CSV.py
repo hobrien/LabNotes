@@ -7,53 +7,24 @@ import warnings
 Parse GTF from Tophat and add to DB
 """ 
 
-def main(sample_id):
-             
-       for line in fileinput.input([]):
+def main(argv):
+       id = 0
+       fixed_fields = ('seqid', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame')
+       #I'm going to write the features to aa file with an arbitrary name and the other fields to STDOUT
+       with open("features.csv", 'w') as feature_fh:
+         for line in fileinput.input():
            line = line.strip()
-           
            parsed = parse_GTF(line.split('\t'))
+           if not parsed:
+               continue
            keys = parsed.keys()
-           if parsed['feature'] == 'transcript':
-               print ','.join([str(x) for x in (parsed['frac'],
-                          parsed['full_read_support'],
-                          'NULL',
-                          parsed['cov'],
-                          parsed['conf_lo'],
-                          parsed['FPKM'],
-                          parsed['feature'],
-                          parsed['start'],
-                          parsed['transcript_id'],
-                          parsed['gene_id'],
-                          parsed['conf_hi'],
-                          parsed['seqid'],
-                          parsed['end'],
-                          parsed['score'],
-                          parsed['strand'],
-                          parsed['source'],
-                          sample_id,)])
-           elif parsed['feature'] == 'exon':
-               print ','.join([str(x) for x in (parsed['frac'],
-                          'NULL',
-                          parsed['exon_number'],
-                          parsed['cov'],
-                          parsed['conf_lo'],
-                          parsed['FPKM'],
-                          parsed['feature'],
-                          parsed['start'],
-                          parsed['transcript_id'],
-                          parsed['gene_id'],
-                          parsed['conf_hi'],
-                          parsed['seqid'],
-                          parsed['end'],
-                          parsed['score'],
-                          parsed['strand'],
-                          parsed['source'],
-                          sample_id,)])
+           id += 1
+           print ','.join([str(id)] + [str(parsed[x]) for x in fixed_fields])
+           for key in keys:
+               if key not in fixed_fields:
+                   feature_fh.write(','.join([str(x) for x in (id, key, parsed[key])])+'\n')
 
-
-           else:
-               warnings.warn("feature %s not recognised" % parsed['feature'])
+           
     
     
     
@@ -61,6 +32,8 @@ def main(sample_id):
     
 def parse_GTF (fields):
   tags = {}
+  if fields[0][:2] == '##':
+      return ''
   for attribute in fields[8].split(";")[:-1]:
     attribute = attribute.strip()
     tags[attribute.split(" ")[0]] = " ".join(attribute.split(" ")[1:]).replace('"','')
@@ -104,5 +77,4 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
            
 if __name__ == "__main__":
     warnings.formatwarning = warning_on_one_line
-    sample_id = sys.argv[1]
-    main(sample_id)
+    main(sys.argv[1:])
