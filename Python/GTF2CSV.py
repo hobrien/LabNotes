@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-import subprocess
 import fileinput
 import warnings
-import mysql.connector 
-from mysql.connector import Error
-from string import maketrans
-
 """
 Parse GTF from Tophat and add to DB
 """ 
