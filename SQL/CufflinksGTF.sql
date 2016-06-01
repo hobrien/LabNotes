@@ -1,4 +1,4 @@
-DROP TABLE `CufflinksGTF`;
+DROP TABLE IF EXISTS `CufflinksGTF`;
 CREATE TABLE `CufflinksGTF` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `frac` float DEFAULT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE `CufflinksGTF` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-LOAD DATA INFILE '/Users/heo3/BTSync/FetalRNAseq/Cufflinks/15533.csv'
+LOAD DATA INFILE '/Users/heo3/BTSync/FetalRNAseq/Cufflinks/AllGTF.csv'
 INTO TABLE CufflinksGTF  
     FIELDS TERMINATED BY ',' 
            OPTIONALLY ENCLOSED BY '"'
