@@ -238,10 +238,10 @@
                     - ```bcftools view chr1.dose.vcf.gz |perl -pe 's/^1/chr1/' | bgzip >chr1.recoded.vcf.gz```
                         - I had to install a newer version of [bcftools](http://www.htslib.org/download) on the server because the command line interface has changed
             - this is a right pain. I'm having major issues with b37 (lacks 'chr') and hg19 (has chr). See [this](http://gatkforums.broadinstitute.org/gatk/discussion/63/errors-about-input-files-having-missing-or-incompatible-contigs).
-            - the UCSC chain file has the 'chr' prefix for the target, but not for the query, which matches my data, actually.
-            - the ensembl chain has versions with and without the prefix, but they are the same for both target and query
-            - i am getting out-of-memory errors, which could be because it's running out of memory or could be because something has gone wrong
-            - I've also gotten a bunch of errors about non matching contigs. I need to keep chasing this up.
+            - the UCSC chain file (hg19ToHg38.over.chain) has the 'chr' prefix while the Ensembl one (GRCh37_to_GRCh38.chain) works with or without the prefix, but outputs contig names without them.
+            - I recoded the fasta file (genome_recoded.fa) to work with the Ensembl chain file, but it is going to cause downstream problems because the BAM files have the prefixes
+            - there is an additional problem in that picard-tools-2.1.1 is unable to find the sequences even when the names match. something about [using bytes instead of names](https://github.com/broadinstitute/picard/releases/download/2.2.0/README.txt). Newer versions work
+            - finally, the memory requirements for this are HUGE! It took 12 GB to process 20,000 lines. Chromosome 1 has 3.7 million lines, so that's going to require truly massive memory, or a hell of a lot of splitting and concatinating.
             
 #Transcript Identification
 - Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
