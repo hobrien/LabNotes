@@ -11,10 +11,8 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 #path=${1%/*}
 #sampleID=${path##*/}
 
-~/bin/java -Xmx20g -jar ~/src/picard-tools-2.4.1/picard.jar LiftoverVcf \
-  INPUT=/c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr1.recoded100k.vcf.gz \
-  OUTPUT=/c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr1.GRCh38.vcf.gz \
-  CHAIN=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/hg19ToHg38.over.chain \
-  REJECT=/c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr1.reject.vcf.gz \
-  REFERENCE_SEQUENCE=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa 
-  #MAX_RECORDS_IN_RAM=5000000 
+CrossMap.py vcf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/hg19ToHg38.over.chain \
+  /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr1.recoded.vcf.gz \
+  /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
+  /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr1.GRCh38.vcf
+bgzip /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr1.GRCh38.vcf

@@ -242,7 +242,11 @@
             - I recoded the fasta file (genome_recoded.fa) to work with the Ensembl chain file, but it is going to cause downstream problems because the BAM files have the prefixes
             - there is an additional problem in that picard-tools-2.1.1 is unable to find the sequences even when the names match. something about [using bytes instead of names](https://github.com/broadinstitute/picard/releases/download/2.2.0/README.txt). Newer versions work
             - finally, the memory requirements for this are HUGE! It took 12 GB to process 20,000 lines. Chromosome 1 has 3.7 million lines, so that's going to require truly massive memory, or a hell of a lot of splitting and concatinating.
-            
+        - fortunately, it looks like something called [CrossMap](http://crossmap.sourceforge.net) is going to come to my rescue. 
+            - It works fine on 100,000 lines. We'll see how it does on all of them
+            - The only problem is that it produces an uncompressed VCF, so I'll have to run bgzip after it finishes    
+        
+                       
 #Transcript Identification
 - Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
     - Cufflinks is running on 15533, but it's taken 3 days so far and no indication of progress
@@ -268,8 +272,7 @@
         - does a pretty poor job of distinguishing x from i as far as I can tell
         - need to plot exon size by feature type to investigate this
     - Make DB of GencodeGTF:
-        - ```cat  gencode.v24.chr_patch_hapl_scaff.annotation.gtf |python ~/BTSync/FetalRNAseq/LabNotes/Python/GTF2CSV.py > ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.annotation.csv
-```
+        - ```cat  gencode.v24.chr_patch_hapl_scaff.annotation.gtf |python ~/BTSync/FetalRNAseq/LabNotes/Python/GTF2CSV.py > ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.annotation.csv```
         - ```mv features.csv ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.features.csv```
         - ```mysql db_name < ~/BTSync/FetalRNAseq/LabNotes/SQL/refGTF.sql```
         - ```SELECT DISTINCT feature FROM GencodeFeatures```
