@@ -11,7 +11,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 #path=${1%/*}
 #sampleID=${path##*/}
 bcftools view /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr$1.dose.vcf.gz \
-  |perl -pe 's/^(\n+)/chr$1/' \
+  |perl -pe 's/^(\d+)/chr$1/' \
   | bgzip \
   > /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr$1.recoded.vcf.gz
 CrossMap.py vcf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/hg19ToHg38.over.chain \

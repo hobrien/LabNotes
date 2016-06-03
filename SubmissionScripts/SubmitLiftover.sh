@@ -1,4 +1,4 @@
-for num in {3..25}
+for num in {2..22}
 do
-    qstat ~/LabNotes/SubmissionScripts/Liftover.sh $num
+    qsub ~/LabNotes/SubmissionScripts/Liftover.sh $num
 done
