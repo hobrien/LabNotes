@@ -292,4 +292,11 @@
     - In the GTEx junction data, the intron after this exon is 18_53070749_53070852
         - Running mpileup on everything creates a VERY large file, so I've modified mpileup.sh to run over a specified region for all samples
                 
-              
+
+#Cell-type deconvolution
+- there is a nice description in the supplement of the common mind paper on how they did this
+    - they used [this](http://web.stanford.edu/group/barres_lab/barreslab_rnaseq.xlsx) 7 cell type mouse dataset from {Zhang:2014bt}
+    - I need to convert the MGI Symbols to HUGO symbols
+        - [This](ftp://ftp.informatics.jax.org/pub/reports/HOM_MouseHumanSequence.rpt) table has mouse REFseq Gene IDs and symbols for their homologs
+        - Now I just need to figure out a way to get REFSEQ IDs from MGI symbols
+        - I can do a batch query [here](http://www.informatics.jax.org/batch) that I think will give me what I need
