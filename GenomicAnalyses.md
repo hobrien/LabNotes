@@ -349,6 +349,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - there is a nice description in the supplement of the common mind paper on how they did this
     - they used [this](http://web.stanford.edu/group/barres_lab/barreslab_rnaseq.xlsx) 7 cell type mouse dataset from {Zhang:2014bt}
     - I need to convert the MGI Symbols to HUGO symbols
-        - [This](ftp://ftp.informatics.jax.org/pub/reports/HOM_MouseHumanSequence.rpt) table has mouse REFseq Gene IDs and symbols for their homologs
+        - The 'Complete List of Human and Mouse Homologs (plain text)' link [here](http://www.informatics.jax.org/homology.shtml) has mouse REFseq Gene IDs and symbols for their homologs
         - Now I just need to figure out a way to get REFSEQ IDs from MGI symbols
         - I can do a batch query [here](http://www.informatics.jax.org/batch) that I think will give me what I need
+        - I created MGI table to store search results and MouseHumanHomo to store homology INFO
+        - I wrote MouseHomo.py to convert symbols in Reference/barreslab_rnaseq.txt to human symbols (MouseHomo.txt)
+            - Of 22458 genes with expression info, this was able to assign human homologs to 16094
+            - 542 had screwed up search results (no result or multiple). It's possible that if I used Ensembl or something like that to search I might find homologs for some of these
+            
