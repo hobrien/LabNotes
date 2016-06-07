@@ -95,13 +95,5 @@ cd /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/
 cuffmerge -p 8 -o ../Cuffmerge \
   -g /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
   -s /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
-  15468.gtf 15533.gtf 15768.gtf 16286.gtf 16438.gtf 16488.gtf 16840.gtf 16929.gtf 16972.gtf \
-  17049.gtf 17054.gtf 17068.gtf 17081.gtf 17087.gtf 17109.gtf 17115.gtf 17130.gtf 17701.gtf \
-  17812.gtf 18294.gtf 18349.gtf 18596.gtf 18655.gtf 18687.gtf 15641.gtf 16024.gtf 16115.gtf \
-  16385.gtf 16428.gtf 16491.gtf 16548.gtf 16810.gtf 16826.gtf 17048.gtf 17053.gtf 17071.gtf \
-  17921-l1.gtf 15655.gtf 16483.gtf 16640.gtf 17013.gtf 17229.gtf 17333.gtf 17475.gtf \
-  17543.gtf 17629.gtf 17835.gtf 18249.gtf 18372.gtf 18666.gtf 18983.gtf 19043.gtf 19052.gtf \
-  A138.gtf A226.gtf 15240.gtf 16649.gtf 17072.gtf 17160.gtf 17167.gtf 17175.gtf 17369.gtf \
-  17671.gtf 17922.gtf 17923.gtf 18055.gtf 18121.gtf 18134.gtf 18153.gtf 18241.gtf 18266.gtf \
-  18282.gtf 18355.gtf 15533_2.gtf 18432.gtf 18559.gtf 18694.gtf 
+  ~/LabNotes/Datafiles/transcriptomes.txt
 echo "Finished Cuffmerge"
