@@ -92,7 +92,7 @@ echo "Starting Cuffmerge"
 #cp /c8000xd3/rnaseq-heath/Cufflinks/18694/transcripts.gtf /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/18694.gtf
 
 cd /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/
-cuffcompare -p 8 -o ../Cuffmerge \
+cuffmerge -p 8 -o ../Cuffmerge \
   -g /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
   -s /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
   15468.gtf 15533.gtf 15768.gtf 16286.gtf 16438.gtf 16488.gtf 16840.gtf 16929.gtf 16972.gtf \
