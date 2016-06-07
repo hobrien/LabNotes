@@ -356,4 +356,10 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - I wrote MouseHomo.py to convert symbols in Reference/barreslab_rnaseq.txt to human symbols (MouseHomo.txt)
             - Of 22458 genes with expression info, this was able to assign human homologs to 16094
             - 542 had screwed up search results (no result or multiple). It's possible that if I used Ensembl or something like that to search I might find homologs for some of these
-            
+                - The list of homologs includes 85 previous HUGO symbols, 468  Synonyms, and 54 unmatched Symbols
+                - If necessary, I can recover all but the unmatched ones using the [HUGO symbol checker](http://www.genenames.org/cgi-bin/symbol_checker)
+
+##HTSeq-count
+- Install:
+    - ```pip install HTSeq```
+    - run htseq-count.sh        
