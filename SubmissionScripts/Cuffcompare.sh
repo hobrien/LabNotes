@@ -93,8 +93,8 @@ echo "Starting Cuffcompare"
 
 cd /c8000xd3/rnaseq-heath/Cufflinks/Cuffcompare/
 cuffcompare -V -o ../Cuffcompare2/Combined \
-  -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
-  -s /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
+  -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
+  -s /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
   15468.gtf 15533.gtf 15768.gtf 16286.gtf 16438.gtf 16488.gtf 16840.gtf 16929.gtf 16972.gtf \
   17049.gtf 17054.gtf 17068.gtf 17081.gtf 17087.gtf 17109.gtf 17115.gtf 17130.gtf 17701.gtf \
   17812.gtf 18294.gtf 18349.gtf 18596.gtf 18655.gtf 18687.gtf 15641.gtf 16024.gtf 16115.gtf \

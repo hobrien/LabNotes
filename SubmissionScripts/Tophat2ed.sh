@@ -14,7 +14,7 @@ echo "Started processing $sampleID"
 
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  --mate-std-dev 50 --num-threads 8 \
-  --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
+  --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
   --output-dir /c8000xd3/rnaseq-heath/Mappings/$sampleID \
   /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome \
   /c8000xd3/rnaseq-heath/Trimmed/${1##*/}_val_1.fq.gz /c8000xd3/rnaseq-heath/Trimmed/${2##*/}_val_2.fq.gz
