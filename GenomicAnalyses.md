@@ -363,3 +363,6 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - Install:
     - ```pip install HTSeq```
     - run htseq-count.sh        
+
+##Cufflinks
+- Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPMK values
