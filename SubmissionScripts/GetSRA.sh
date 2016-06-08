@@ -12,6 +12,6 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 sraID=$1
 
 echo "Starting SRA dump for $sraID"
-
+cd /c8000xd3/rnaseq-heath/SRA
 fastq-dump --split-files --gzip --readids $sraID
-echo "Finished SRA dump for $sraID. Output in /c8000xd3/rnaseq-heath/ncbi/public/src"
+echo "Finished SRA dump for $sraID. Output in /c8000xd3/rnaseq-heath/SRA"
