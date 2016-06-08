@@ -329,6 +329,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```mysql db_name < ~/BTSync/FetalRNAseq/LabNotes/SQL/refGTF.sql```
     - ```SELECT DISTINCT feature FROM GencodeFeatures```
         - transcript_support_level, exon_number, level, gene_type, transcript_type, gene_name, transcript_name, tag, ccdsid, exon_id, gene_id, protein_id, transcript_id, gene_status, transcript_status, havana_gene, havana_transcript, ont        
+
+##Run Cufflinks on SRA data from Liu:2016ji (GSE71315)
+- downloaded sra toolkit and ran fastq-dump (GetSRA.sh)
+- hopefully I get similar results to what I have for our data
+- I've downloaded all bulk tissue riboZero RNAseq datasets and Tophat is running on one
         
 #Expression analysis
 - Analyse expressed SNPs
@@ -362,7 +367,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 ##HTSeq-count
 - Install:
     - ```pip install HTSeq```
-    - run htseq-count.sh        
+    - run htseq-count.sh
+    - wrote SubmitHtseq-count.sh to run on all samples sequentially      
 
 ##Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPMK values
