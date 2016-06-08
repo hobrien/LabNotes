@@ -10,7 +10,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 sampleID=$1
 
-samtools sort -n /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.sort.bam \
+samtools sort -n /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nsort 
   
 htseq-count -f bam -s reverse -t exon -i gene_id -m intersection-strict \
