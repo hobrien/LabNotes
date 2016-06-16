@@ -334,7 +334,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - downloaded sra toolkit and ran fastq-dump (GetSRA.sh)
 - hopefully I get similar results to what I have for our data
 - I've downloaded all bulk tissue riboZero RNAseq datasets and Tophat is running on one
-        
+- The mapping QC looks VERY similar to our data, but a lot less reads, resulting in 10+ fold fewer novel junctions
+    - This suggests that using a higher coverage threshold is the answer to cleaning up the novel cufflinks data
+      
 #Expression analysis
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
@@ -371,4 +373,5 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - wrote SubmitHtseq-count.sh to run on all samples sequentially      
 
 ##Cufflinks
-- Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPMK values
+- Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
+- Cuffquant produces a binary .cxb file. I'll need to run this on everything, then run cuffnorm to get FPKM values
