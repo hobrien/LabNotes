@@ -24,6 +24,7 @@ tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.fq2.gz
 
 python ~/src/WASP/mapping/filter_remapped_reads.py -p \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.bam
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Remap/accepted_hits.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.remap.keep.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.num.gz
