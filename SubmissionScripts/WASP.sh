@@ -14,7 +14,7 @@ sampleID=${path##*/}
 
 echo "Starting WASP Remapping on $sampleID"
 
-#python ~/src/WASP/mapping/find_intersecting_snps.py -p $1 /c8000xd3/rnaseq-heath/Genotypes/Imputation2/SNPs/
+python ~/src/WASP/mapping/find_intersecting_snps.py -p $1 /c8000xd3/rnaseq-heath/Genotypes/Imputation2/SNPs/
 
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Remap
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  --mate-std-dev 50 --num-threads 8 \
@@ -25,18 +25,18 @@ tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.fq2.gz
 
 python ~/src/WASP/mapping/filter_remapped_reads.py -p \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.bam
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Remap/accepted_hits.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.remap.keep.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.keep.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.num.gz
 
-samtools merge /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.keep.merged.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.keep.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.remap.keep.bam
+samtools merge /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.keep.bam
   
-samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.keep.merged.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.keep.merged.sorted
+samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.sorted
   
-samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.keep.merged.sorted.bam
+samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.sorted.bam
 
 echo "Finished WASP Remapping on $sampleID"
