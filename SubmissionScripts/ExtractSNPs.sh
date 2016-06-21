@@ -7,7 +7,8 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
-# Index is the position of the sample in the VCF. Name is the BrainBankID
+# Index is the position of the sample in the VCF plus 9 (ie; sample 1 has an index of 10) 
+# Name is the BrainBankID
 sampleName=$1
 sampleIndex=$2
 
