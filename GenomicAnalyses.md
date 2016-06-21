@@ -295,6 +295,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - No idea if this is going to cause problems or not (beyond meaning that this snp in not included)
         - It is also reporting that the data are unphased, which appears to be correct. No idea how the imputation could have happened without phasing the data though.
             - That would be because I selected the unphased output option
+    - Need a list of SNPs for each chromosome for the mapping:
+        - ```bcftools view -H chr1.GRCh38.vcf.gz cut -f1,2,4,5 | gzip >SNPs/chr1.snps.txt.gz```
+    - This gives a list of all SNPs in all samples. It might make more sense to use sample-specific lists of SNPs: 
+        - ```bcftools view -H chr1.GRCh38.vcf.gz | cut -f1,2,3,4,5,6,7,8,9,10 | grep -v '0|0' | cut -f1,2,4,5 | gzip > 15240/chr1.snps.txt```
+    - This gives 309k SNPs as compared to 3.7M    
                             
 #Transcript Identification
 ##Cufflinks
