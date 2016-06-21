@@ -299,7 +299,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - ```bcftools view -H chr1.GRCh38.vcf.gz cut -f1,2,4,5 | gzip >SNPs/chr1.snps.txt.gz```
     - This gives a list of all SNPs in all samples. It might make more sense to use sample-specific lists of SNPs: 
         - ```bcftools view -H chr1.GRCh38.vcf.gz | cut -f1,2,3,4,5,6,7,8,9,10 | grep -v '0|0' | cut -f1,2,4,5 | gzip > 15240/chr1.snps.txt```
-    - This gives 309k SNPs as compared to 3.7M    
+    - This gives 309k SNPs as compared to 3.7M  
+    - Get index position for each sample in VCF files:
+        - ```bcftools query -l ../../ImputedGenotypes/Imputation2/chr_1/chr1.dose.vcf.gz | head -96 | python GetVCFindex.py > ../VCFindex.txt```  
                             
 #Transcript Identification
 ##Cufflinks
