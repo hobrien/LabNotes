@@ -10,9 +10,9 @@ export PATH=/share/apps/R-3.2.2/bin:$PATH
 for dataset in $@
 do
     folder_path=${dataset%/*}
-    folder_path=${folder_path%/*}
-    folder=${folder_path##*/}.wasp
     folder_path=${folder_path}/Wasp
+    folder=${dataset##*/}
+    folder=${folder%%.*}.wasp
     echo "Starting QC for $dataset"
     mkdir $folder_path
 
