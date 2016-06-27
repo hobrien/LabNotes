@@ -357,7 +357,16 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ENSG00000196628
     - In the GTEx junction data, the intron after this exon is 18_53070749_53070852
         - Running mpileup on everything creates a VERY large file, so I've modified mpileup.sh to run over a specified region for all samples
-                
+- Analyse WASP results
+    - ```samtools mpileup -d 8000 -f /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa -r chr2:184936178-184936178 /c8000xd3/rnaseq-heath/Mappings/15240/BAM/15240.chr.keep.merged.sorted.bam | ~/LabNotes/Python/CountBases.py 15240```
+        - this produces no output because all of the reads in this region have been discarded
+        - when I run it on the WASP output using only the non-reference bases, I get the same results as I did for the non-remapped BAM file (50 non-ref, zero ref)
+        - this makes sense, since this strain is homozygous for the non-ref base (```bcftools view -r chr2:184936178 /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr2.GRCh38.sort.vcf.gz | cut -f 10```)
+        - this also means that the focal SNP is not enough to affect the mapping
+        - there are 4 bp indels 48 bp upstream and 61 bp downstream from the focal SNP, which explains why all of these reads are lost
+        -these indels are not present an ANY of our samples, so it definitely doesn't make sense to use the entire VCF
+        - I need to at least filter out any variants absent from all samples
+                    
 
 #Cell-type deconvolution
 - there is a nice description in the supplement of the common mind paper on how they did this
