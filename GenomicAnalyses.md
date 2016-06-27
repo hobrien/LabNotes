@@ -294,6 +294,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - This is an offset error that I think it related to the size of the matrix, tho the code looks fine to me
         - No idea if this is going to cause problems or not (beyond meaning that this snp in not included)
         - It is also reporting that the data are unphased, which appears to be correct. No idea how the imputation could have happened without phasing the data though.
+        - VCF files are improperly sorted for some reason:
+            - ```/share/apps/vcftools-0.1.14/bin/vcf-sort chr2.GRCh38.vcf.gz | bgzip > chr2.GRCh38.sort.vcf.gz```
             - That would be because I selected the unphased output option
     - Need a list of SNPs for each chromosome for the mapping:
         - ```bcftools view -H chr1.GRCh38.vcf.gz cut -f1,2,4,5 | gzip >SNPs/chr1.snps.txt.gz```
