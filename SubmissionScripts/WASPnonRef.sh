@@ -33,10 +33,12 @@ python ~/src/WASP/mapping/filter_remapped_reads.py -p \
 samtools merge /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.remap.keep.bam
+
+mv /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam
+samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted
   
-samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.sorted
-  
-samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.sorted.bam
+samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam
 
 echo "Finished WASP Non-ref Remapping on $sampleID"

@@ -10,10 +10,17 @@ export PATH=/share/apps/R-3.2.2/bin:$PATH
 for dataset in $@
 do
     folder_path=${dataset%/*}
-    folder_path=${folder_path}/Wasp
     folder=${dataset##*/}
-    folder=${folder%%.*}.wasp
+    if [[ $dataset == *"nonref"* ]]
+    then
+        folder_path=${folder_path}/Wasp_nonref
+        folder=${folder%%.*}.nrwasp        
+    else    
+        folder_path=${folder_path}/Wasp
+        folder=${folder%%.*}.wasp
+    fi
     echo "Starting QC for $dataset"
+
     mkdir $folder_path
 
     bam_stat.py -i $dataset > $folder_path/$folder.stats.txt
