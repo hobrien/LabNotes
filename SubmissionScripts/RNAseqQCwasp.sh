@@ -38,15 +38,9 @@ do
 
     read_distribution.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset > $folder_path/$folder.dist.txt
 
-    read_duplication.py -i $dataset -o $folder_path/$folder
-
     geneBody_coverage.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset -o $folder_path/$folder
 
 
-    deletion_profile.py -l 120 -i $dataset -o $folder_path/$folder
-    insertion_profile.py -s PE -i $dataset -o $folder_path/$folder
-    #clipping_profile.py -s PE -i $dataset -o $folder_path/$folder
-    mismatch_profile.py -l 120 -i $dataset -o $folder_path/$folder
 
     echo "finished QC for $dataset"
 done

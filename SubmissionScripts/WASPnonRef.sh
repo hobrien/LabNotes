@@ -10,6 +10,9 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 
 sampleID=$1
+sampleIndex=$2
+
+bash ~/LabNotes/SubmissionScripts/ExtractSNPs.sh $1 $2
 
 echo "Starting WASP non-ref Remapping on $sampleID"
 
@@ -30,15 +33,18 @@ python ~/src/WASP/mapping/filter_remapped_reads.py -p \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.remap.keep.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.to.remap.num.gz
 
-samtools merge /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.bam \
+samtools merge /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.remap.keep.bam
-
-mv /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.keep.merged.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam
+  
 samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted
   
 samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam
 
 echo "Finished WASP Non-ref Remapping on $sampleID"
+
+bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam
+
+bash ~/LabNotes/SubmissionScripts/htseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam
+
