@@ -8,7 +8,7 @@
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
-for input in `find /c8000xd3/rnaseq-heath/Mappings/ -name *.sort.bam`
+for input in `find /c8000xd3/rnaseq-heath/Mappings/ -name *.chr.nonref.merged.sorted.bam`
 do
     filename1=${input##*/}
     file_location=${input%/*} 
