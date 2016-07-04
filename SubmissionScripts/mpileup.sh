@@ -18,7 +18,7 @@ do
 
 
     samtools mpileup -d 8000 -r $1 \
-    -f /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
+    -f /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
     $input |python ~/LabNotes/Python/CountBases.py $sampleID >> /c8000xd3/rnaseq-heath/Counts/$1.counts.txt
     echo "Finished processing $sampleID"
 done
