@@ -12,12 +12,16 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 sampleID=$1
 sampleIndex=$2
 
-bash ~/LabNotes/SubmissionScripts/ExtractSNPs.sh $1 $2
+if [ $dataset != 15533_2 ]
+then
+    bash ~/LabNotes/SubmissionScripts/ExtractSNPs.sh $1 $2
+fi
 
 echo "Starting WASP non-ref Remapping on $sampleID"
 
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef
 cp /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.bam
+
 python ~/src/WASP/mapping/find_intersecting_snps.py -p /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.bam /c8000xd3/rnaseq-heath/Genotypes/Imputation2/$sampleID/
 
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  --mate-std-dev 50 --num-threads 8 \
