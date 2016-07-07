@@ -1,0 +1,43 @@
+---
+title: "Data QC"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+```
+## Read numbers
+
+
+```{r}
+
+lengths <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/Carolina/seq_lengths.txt", header=FALSE, stringsAsFactors=FALSE)
+lengths$Million_reads <- lengths$V2/1000000
+lengths <- filter(lengths, !grepl("_R2_",V1)) %>% filter(!grepl("_2$",V1))
+ggplot(lengths, aes(y=Million_reads, x = V1))+geom_bar(stat='identity') + coord_flip()
+```
+
+## Fast QC
+
+- All samples pass Adapter content, Basic stats, N content, Per-seq quality and Per-base quality
+- All samples fail for per-base sequence content and Kmer content
+- Warning for all samples for Overrepresented seqs, GC content, per-tile quality and length distribtuion
+- Sequence dulplication level passes for about half of samples and gives a warning for the others
+
+
+```{r fig.width=8, fig.height=10}
+
+summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/Carolina/Carolina_summary.txt", header=FALSE, stringsAsFactors=FALSE)
+fastQC_summary <- spread(summary_all, V2, V1)
+colnames(fastQC_summary) <- c("Sample", "Adapter", "Basic_stats", "Kmers", "Overrepresented", "N_content", "Per_base_content", "Per_base_Q", "Per_seq_GC", "Per_seq_Q", "Per_tile_Q", "Duplication", "Length_dist")
+#summary(fastQC_summary[-1]) #this no longer works since I set stringsAsFactors to FALSE
+ggplot(summary_all, aes(x=V2, y=V3, fill=V1)) +
+  geom_tile() +
+  scale_fill_manual(values=c('red', 'green', 'yellow')) +
+  theme(axis.text.x= element_text(angle=90, hjust = 1), axis.text.y= element_text(size=8), axis.title = element_blank(), legend.title=element_blank())
+```
+
