@@ -11,7 +11,6 @@ output:
 knitr::opts_chunk$set(echo = FALSE, message=FALSE, warnings=FALSE)
 rm(list=ls())
 library(dplyr)
-library(data.table)
 library(ggplot2)
 library(tidyr)
 library(tufte)
@@ -31,6 +30,15 @@ DRD2.1 <-gather(DRD2, SAMPID, Count, -1, -2, -3, -4)
 DRD2.1$SAMPID=gsub(pattern="\\.", replacement='-', DRD2.1$SAMPID)
 DRD2.1<- select(SampleAttributes, SAMPID, SMTS, SMTSD, Individual) %>%
   left_join(DRD2.1, .) 
+
+rs2514218 <- read.delim("~/BTSync/FetalRNAseq/GTEx/rs2514218.txt", check.names = FALSE, comment.char = '#')
+rs2514218<-gather(rs2514218[,10:ncol(rs2514218)], SAMPID, genotype) %>%
+separate(genotype, c("GT","GL","DS"), sep=':') 
+
+rs2514218 <- select(SampleAttributes, SAMPID, Individual) %>%  right_join( rs2514218)
+  
+DRD2.1 <- full_join(rs2514218,  DRD2.1, by='Individual')
+
 ```
 
 `r margin_note("- A quick and dirty way to compare the counts over all junctions is to plot introns as line segments with their coordinates on the x axis and read counts on the y axis")`
@@ -98,6 +106,24 @@ filter(DRD2.Brain, grepl('113286143', TargetID)) %>%
   tufte_theme() 
 ```
 
+#Caudate Splice QTL analysis 
+`r margin_note("- rs2514218 genotype does not affect the proportion of short transcripts (logistic regression is non-significant)")`
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+Caudate <- filter(DRD2.Brain, SMTSD == 'Brain - Caudate (basal ganglia)' & grepl('113286143', TargetID)) %>%
+  spread(TargetID, Count) %>%
+  rename(short = `11_113283605_113286143`, long = `11_113285183_113286143`) %>%
+  mutate(perc_short = short/(short+long)) %>% 
+  mutate(GT = ifelse(GT == '1|0', '0|1', GT))
+
+ggplot(Caudate, aes(x=GT, y=perc_short, size=short+long)) + 
+  geom_boxplot(outlier.size=0, outlier.colour='white') +
+  geom_jitter(alpha=.2, height=0, width=.5) + 
+  coord_flip() +
+  tufte_theme()
+
+summary(glm(cbind(short, long) ~ GT, data=Caudate, family = binomial))
+```
 
 
 # TCF4 splice diversity
