@@ -10,7 +10,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 rm(list=ls())
 library(dplyr)
-library(data.table)
+#library(data.table)
 library(ggplot2)
 library(tidyr)
 library(tufte)
@@ -216,6 +216,8 @@ ggplot(CuffExons, aes(x=log10(length)))+ geom_histogram() +
   tufte_theme() +
   theme(strip.text.y = element_text(size = 8, angle = 0)) +
   xlab("log length")
+
+ggplot(CuffExons, aes(x=log10(length), y=log10(cov))) + geom_point() + facet_grid(class ~ ., scales = 'free_y')
 
 ```
 
