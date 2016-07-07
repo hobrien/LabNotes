@@ -1,0 +1,43 @@
+
+---
+title: "ZNF804A"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE)
+
+library(ggplot2)
+library(dplyr)
+library(tufte)
+rm(list=ls())
+source("~/BTSync/Code/R/FormatGGplot.R")
+```
+```{r }
+counts <- read.delim("~/Desktop/counts.txt", header=FALSE)
+colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
+rs1344706 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/Rs1344706.txt", header=FALSE)
+colnames(rs1344706) <- c('chr', 'pos', 'rs1344706', 'sample')
+rs12476147 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs12476147.txt", header=FALSE)
+colnames(rs12476147) <- c('chr', 'pos', 'rs12476147', 'sample')
+counts <- left_join(counts, rs1344706[,c(3,4)]) %>% left_join(rs12476147[,c(3,4)])
+ggplot(counts, aes(x=rs1344706, y=alt/(ref+alt), size=ref+alt)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  facet_grid(rs12476147 ~ .) +
+  ylab('perc_alt') +
+  tufte_theme()
+```
+
+```{r } 
+snapshot <- read.delim("~/Desktop/snapshot.txt")
+
+comb<-right_join(counts, snapshot, by=c('V6'= 'id')) %>%
+  filter(V4 > 0 & V5 > 0 & V4 + V5 > 15) %>%
+  mutate(ratio = V4/V5) %>%
+  filter(ratio < 1.6)
+ggplot(comb,aes(x=ratio, y=cDNA, colour=rs1344706)) + geom_point() +
+  geom_abline(slope=1, intercept = 0)
+```
