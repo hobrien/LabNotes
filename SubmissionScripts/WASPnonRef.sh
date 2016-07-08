@@ -12,10 +12,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 sampleID=$1
 sampleIndex=$2
 
-if [ $dataset != 15533_2 ]
-then
-    bash ~/LabNotes/SubmissionScripts/ExtractSNPs.sh $1 $2
-fi
+bash ~/LabNotes/SubmissionScripts/ExtractSNPs.sh $1 $2
 
 echo "Starting WASP non-ref Remapping on $sampleID"
 
