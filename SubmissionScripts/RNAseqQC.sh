@@ -21,34 +21,31 @@ do
 #/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar ReorderSam INPUT=/home/heath/Mappings/15533_300/accepted_hits.bam OUTPUT=/home/heath/Mappings/15533_300/accepted_hits_sorted.bam REFERENCE=/home/heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa
 #/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CollectRnaSeqMetrics REF_FLAT=/home/heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/refFlat.txt.gz STRAND_SPECIFICITY=SECOND_READ_TRANSCRIPTION_STRAND INPUT=/home/heath/Mappings/15533_300_secondstrand/accepted_hits.bam OUTPUT=/home/heath/Mappings/15533_300_secondstrand/RnaSeqMetrics.txt ASSUME_SORTED=false
 
-    # This isn't needed because it's run separately for reads mapping and not mapping to rDNA
-    #bam_stat.py -i $dataset > $folder_path/$folder.stats.txt
-
-    # determine the strand of experiment ("1++,1--,2+-,2-+" = first strand, "1+-,1-+,2++,2--" = second strand)
-    infer_experiment.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset > $folder_path/$folder.expt.txt
-
-    # plot distribution of insert sizes (size - total read length)
-    inner_distance.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset -o $folder_path/$folder -u 1000 -s 10 >/dev/null
-
-    # the necessary output from this is going to the log file, not to $folder.junction.txt
-    junction_annotation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset -o $folder_path/$folder  >  $folder_path/$folder.junction.txt
-
-    junction_saturation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset -o $folder_path/$folder
-
-    read_distribution.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset > $folder_path/$folder.dist.txt
-
-    read_duplication.py -i $dataset -o $folder_path/$folder
-
-    geneBody_coverage.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $dataset -o $folder_path/$folder
-
     split_bam.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed -i $dataset -o $folder_path/BAM/$folder
     bam_stat.py -i $folder_path/BAM/$folder.in.bam > $folder_path/$folder.in.stats.txt
     bam_stat.py -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
 
-    deletion_profile.py -l 120 -i $dataset -o $folder_path/$folder
-    insertion_profile.py -s PE -i $dataset -o $folder_path/$folder
-    #clipping_profile.py -s PE -i $dataset -o $folder_path/$folder
-    mismatch_profile.py -l 120 -i $dataset -o $folder_path/$folder
+    # determine the strand of experiment ("1++,1--,2+-,2-+" = first strand, "1+-,1-+,2++,2--" = second strand)
+    infer_experiment.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.expt.txt
+
+    # plot distribution of insert sizes (size - total read length)
+    inner_distance.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder -u 1000 -s 10 >/dev/null
+
+    # the necessary output from this is going to the log file, not to $folder.junction.txt
+    junction_annotation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder  >  $folder_path/$folder.junction.txt
+
+    junction_saturation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder
+
+    read_distribution.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.dist.txt
+
+    read_duplication.py -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder
+
+    geneBody_coverage.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder
+
+
+    deletion_profile.py -l 120 -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder
+    insertion_profile.py -s PE -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder
+    mismatch_profile.py -l 120 -i $folder_path/BAM/$folder.ex.bam -o $folder_path/$folder
 
     echo "finished QC for $dataset"
 done
