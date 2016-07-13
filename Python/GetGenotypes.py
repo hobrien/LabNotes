@@ -29,21 +29,25 @@ The IDs are culled from ~/LabNotes/VCFindex.txt (need to subtract 1 for zero-bas
 def main(argv):
     with open(argv[0], 'r') as index_file:
         index_file = open(argv[0], "rw+")
-        VCFindex = index_file.readlines()
-        for line in fileinput.input():
+        VCF_index = index_file.readlines()
+        for line in fileinput.input([]):
            line = line.strip()
-           print get_genotypes(VCF_index, line)
+           get_genotypes(VCF_index, line)
 
-def get_genotype(VCF_index, VCF_line):
-    fields = VCF_line.split('\t')
-    for line in VCFindex:
-        (sampleID, index) = line.split('\t')
-        index -= 1 # one-based to zero based
-        genotype = fields[index].split(':')[0].translate(trantab)
+def get_genotypes(VCF_index, VCF_line):
+    fields = VCF_line.split()
+    intab='01'
+    outtab=fields[3]+fields[4]
+    trantab = maketrans(intab, outtab)
+    for sample in VCF_index:
+        (sampleID, index) = sample.split('\t')
+        index = int(index) - 1 # one-based to zero based
         try:
-            return '\t'.join((fields[0], fields[1], genotype, sampleID))
+            genotype = fields[index]
         except IndexError:
             sys.exit("the number of samples in the index file does not match the number of fields in the VCF")
+        genotype = genotype.split(':')[0].translate(trantab)
+        print '\t'.join((fields[0], fields[1], genotype, sampleID))
     
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
