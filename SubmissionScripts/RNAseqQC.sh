@@ -5,7 +5,7 @@
 #$ -S /bin/bash
 #
 
-export PATH=/share/apps/R-3.2.2/bin:$PATH
+export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 for dataset in $@
 do
