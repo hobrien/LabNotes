@@ -28,7 +28,6 @@ The IDs are culled from ~/LabNotes/VCFindex.txt (need to subtract 1 for zero-bas
 """ 
 
 def main(argv):
-    usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
     with open(argv[0], 'r') as index_file:
         index_file = open(argv[0], "rw+")
         VCF_index = index_file.readlines()
@@ -59,5 +58,6 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
            
 if __name__ == "__main__":
+    global usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
     warnings.formatwarning = warning_on_one_line
     main(sys.argv[1:])
