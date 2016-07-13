@@ -6,6 +6,7 @@ import warnings
 from string import maketrans
 
 """
+
 I need to read a line from a vcf and output the genotypes with the BrainBank IDs
 should look like this:
 chr2	184936178	A|A	15240
@@ -27,6 +28,7 @@ The IDs are culled from ~/LabNotes/VCFindex.txt (need to subtract 1 for zero-bas
 """ 
 
 def main(argv):
+    usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
     with open(argv[0], 'r') as index_file:
         index_file = open(argv[0], "rw+")
         VCF_index = index_file.readlines()
@@ -37,7 +39,10 @@ def main(argv):
 def get_genotypes(VCF_index, VCF_line):
     fields = VCF_line.split()
     intab='01'
-    outtab=fields[3]+fields[4]
+    try:
+        outtab=fields[3]+fields[4]
+    except IndexError:
+        warnings.warn("Not enough columns in VCF. This is usually because the headeris included. Be sure to use -H option for bcftools")
     trantab = maketrans(intab, outtab)
     for sample in VCF_index:
         (sampleID, index) = sample.split('\t')
