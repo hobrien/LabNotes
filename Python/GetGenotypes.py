@@ -43,6 +43,7 @@ def get_genotypes(VCF_index, VCF_line):
         outtab=fields[3]+fields[4]
     except IndexError:
         warnings.warn("Not enough columns in VCF. This is usually because the headeris included. Be sure to use -H option for bcftools")
+        sys.exit("Usage: %s" % usage)
     trantab = maketrans(intab, outtab)
     for sample in VCF_index:
         (sampleID, index) = sample.split('\t')
