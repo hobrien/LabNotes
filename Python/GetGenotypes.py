@@ -41,8 +41,8 @@ def get_genotypes(VCF_index, VCF_line):
     try:
         outtab=fields[3]+fields[4]
     except IndexError:
-        warnings.warn("Not enough columns in VCF. This is usually because the headeris included. Be sure to use -H option for bcftools")
-        sys.exit("Usage: %s" % usage)
+        warnings.warn("Not enough columns in VCF. This is usually because the header is included. Be sure to use -H option for bcftools")
+        sys.exit("\nUsage: %s" % usage)
     trantab = maketrans(intab, outtab)
     for sample in VCF_index:
         (sampleID, index) = sample.split('\t')
@@ -58,6 +58,7 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
            
 if __name__ == "__main__":
-    global usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
+    global usage
+    usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
     warnings.formatwarning = warning_on_one_line
     main(sys.argv[1:])
