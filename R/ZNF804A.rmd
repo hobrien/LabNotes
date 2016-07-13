@@ -12,10 +12,16 @@ knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE)
 
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(tufte)
 rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
 ```
+
+##Allele-specific
+
+I’ve finished matching up the genotypes to the expression data for ZNF804A. rs1344706 is on the x axis and I made separate plots for each rs12476147 genotype. Samples are phased, so there are 4 different genotypes for each locus. In most cases, T/T individuals at rs12476147 have 100% alt reads and A/A individuals have 0% (as you’d expect), though there are three T/T individuals with 0% alt reads (I assume these are genotyping errors). The 2 SNPs look like they are tightly linked because there are no AC haplotypes (well according to the VCF, there are two AC|TA individuals and 1 TA|AC, but in all these cases, the samples have 100% alt reads, suggesting that they are actually TC haplotypes that have been mis-genotyped. There are two other heterozygotes for rs12476147 that have 100% alt reads, so they are probably mis-genotyped as well. When we filter out the rs12476147 homozygotes, we are left with 6 A/A homozygotes and zero C/C homozygotes at rs1344706. This is for 53 samples, so the numbers will go up slightly once all the WASP remapping is done. There’s no obvious distortion or difference between the A/A and A/C genotypes, but then it’s hard to tell with 6 data points…
+
 ```{r }
 counts <- read.delim("~/Desktop/counts.txt", header=FALSE)
 colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
@@ -31,13 +37,24 @@ ggplot(counts, aes(x=rs1344706, y=alt/(ref+alt), size=ref+alt)) +
   tufte_theme()
 ```
 
-```{r } 
-snapshot <- read.delim("~/Desktop/snapshot.txt")
+# Overall expression
 
-comb<-right_join(counts, snapshot, by=c('V6'= 'id')) %>%
-  filter(V4 > 0 & V5 > 0 & V4 + V5 > 15) %>%
-  mutate(ratio = V4/V5) %>%
-  filter(ratio < 1.6)
-ggplot(comb,aes(x=ratio, y=cDNA, colour=rs1344706)) + geom_point() +
-  geom_abline(slope=1, intercept = 0)
+`r margin_note("- DESeq-normalized counts")`
+`r margin_note("- Heterzygotes are cobined in this analysis")`
+`r margin_note("- Counts are not significantly different across genotypes")`
+
+```{r }
+allCounts <- read.delim("~/BTSync/FetalRNAseq/Counts/tables/num2vsnum1.complete.txt", check.names = FALSE)
+allCounts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000170396.7') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'sample'), sep='\\.') %>%
+  left_join(allCounts, rs1344706) %>%
+  mutate(rs1344706 = ifelse(rs1344706 == 'C|A', 'A|C', as.character(rs1344706)))
+
+ggplot(allCounts, aes(x=rs1344706, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25)
+
+summary(lm(count ~ rs1344706, data=allCounts))
 ```
+
