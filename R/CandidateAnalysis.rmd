@@ -1,0 +1,62 @@
+
+---
+title: "ZNF804A"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(tufte)
+rm(list=ls())
+source("~/BTSync/Code/R/FormatGGplot.R")
+```
+
+# Overall expression
+`r margin_note("- DESeq-normalized counts")`
+`r margin_note("- Heterzygotes are cobined in this analysis")`
+`r margin_note("- Counts are not significantly different across genotypes")`
+
+```{r }
+rs1344706 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs1344706.txt", header=FALSE)
+colnames(rs1344706) <- c('chr', 'pos', 'rs1344706', 'BrainBankID')
+rs12476147 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs12476147.txt", header=FALSE)
+colnames(rs12476147) <- c('chr', 'pos', 'rs12476147', 'BrainBankID')
+allCounts <- read_tsv("~/BTSync/FetalRNAseq/Counts/tables/num2vsnum1.complete.txt")
+allCounts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000170396.7') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(rs1344706) %>%
+  mutate(rs1344706 = ifelse(rs1344706 == 'C|A', 'A|C', as.character(rs1344706)))
+
+ggplot(allCounts, aes(x=rs1344706, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25)
+
+summary(lm(count ~ rs1344706, data=allCounts))
+```
+
+
+# Co-variates
+
+```{r}
+covariates <- read_tsv("~/BTSync/FetalRNAseq/Info/sample_info.txt")
+allCountsCov <- allCounts %>% left_join(covariates) 
+ggplot(allCountsCov, aes(x=PCW, y=count)) + geom_point()
+ggplot(allCountsCov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25)
+ggplot(allCountsCov, aes(x=RIN, y=count)) + geom_point()
+
+summary(lm(count ~ PCW + Sex +RIN, data=allCountsCov))
+summary(lm(count ~ PCW, data=allCountsCov))
+summary(lm(count ~ Sex, data=allCountsCov))
+summary(lm(count ~ RIN, data=allCountsCov))
+cor.test(allCountsCov$count, allCountsCov$PCW)
+cor.test(allCountsCov$count, allCountsCov$RIN)
+```
