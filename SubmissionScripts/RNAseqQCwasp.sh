@@ -13,8 +13,14 @@ do
     folder=${dataset##*/}
     if [[ $dataset == *"nonref"* ]]
     then
-        folder_path=${folder_path}/Wasp_nonref
-        folder=${folder%%.*}.nrwasp        
+        if [[ $dataset == *"dedup"* ]]
+        then
+            folder_path=${folder_path}/Wasp_dedup
+            folder=${folder%%.*}.dedup
+        else
+            folder_path=${folder_path}/Wasp_nonref
+            folder=${folder%%.*}.nrwasp
+        fi                             
     else    
         folder_path=${folder_path}/Wasp
         folder=${folder%%.*}.wasp
