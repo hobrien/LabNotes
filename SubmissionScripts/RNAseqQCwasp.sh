@@ -25,6 +25,10 @@ do
         folder_path=${folder_path}/Wasp
         folder=${folder%%.*}.wasp
     fi
+    if [[ ! -e $dataset.bai ]]
+    then
+        samtools index $dataset
+    fi    
     echo "Starting QC for $dataset"
 
     mkdir $folder_path
