@@ -27,6 +27,7 @@ do
     fi
     if [[ ! -e $dataset.bai ]]
     then
+        echo "indexing $dataset"
         samtools index $dataset
     fi    
     echo "Starting QC for $dataset"
