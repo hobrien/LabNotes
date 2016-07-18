@@ -29,6 +29,16 @@ do
     then
         echo "indexing $dataset"
         samtools index $dataset
+        if [ $? -ne 0 ]
+        then
+            echo "sorting and indexing $dataset"
+            nosort=${dataset/.sort}
+            mv $dataset $nosort
+            base=${nosort%%.*}
+            samtools sort $nosort $base.sort
+            dataset=$base.sort.bam
+            samtools index $dataset
+        fi    
     fi    
     echo "Starting QC for $dataset"
 
