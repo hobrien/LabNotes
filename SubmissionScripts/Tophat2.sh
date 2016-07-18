@@ -12,7 +12,7 @@ filename=${1##*/}
 sampleID=${filename%%_L00*} #This will remove the lane number and read number
 
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID
-tophat --keep-fasta-order --library-type fr-secondstrand --num-threads 8 \
+tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500 --mate-std-dev 50 --num-threads 8 \
   --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
   --output-dir /c8000xd3/rnaseq-heath/Mappings/$sampleID \
   /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome $@
