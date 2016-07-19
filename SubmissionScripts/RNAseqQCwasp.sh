@@ -32,10 +32,10 @@ do
         if [ $? -ne 0 ]
         then
             echo "sorting and indexing $dataset"
-            nosort=${dataset/.sort}
+            nosort=${dataset/.sorted}
             mv $dataset $nosort
             base=${nosort%%.*}
-            samtools sort $nosort $base.sort
+            samtools sort -o $base.sort $nosort 
             dataset=$base.sort.bam
             samtools index $dataset
         fi    
