@@ -37,7 +37,7 @@ do
             nosort=${dataset/.sorted}
             mv $dataset $nosort
             base=${nosort%.*}
-            samtools sort -o $base.sort $nosort 
+            samtools sort -o $base.sort.bam $nosort 
             dataset=$base.sort.bam
             samtools index $dataset
         fi    
