@@ -7,6 +7,8 @@
 
 export PATH=/share/apps/R-3.2.2/bin:$PATH
 
+# see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
+
 for dataset in $@
 do
     folder_path=${dataset%/*}
@@ -34,7 +36,7 @@ do
             echo "sorting and indexing $dataset"
             nosort=${dataset/.sorted}
             mv $dataset $nosort
-            base=${nosort%%.*}
+            base=${nosort%.*}
             samtools sort -o $base.sort $nosort 
             dataset=$base.sort.bam
             samtools index $dataset
