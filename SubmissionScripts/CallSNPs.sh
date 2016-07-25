@@ -17,7 +17,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 filename=${1##*/}
 filename=${filename#*.}
 filename=${filename%%.bam}
-~/bin/samtools mpileup -uf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa $@ \
+~/bin/samtools mpileup -uf -d 100000 /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa $@ \
    | bcftools call -mv -o b - > /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.raw.bcf
    
 #bcftools view /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/var.raw.bcf \
