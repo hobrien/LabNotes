@@ -304,6 +304,15 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - This gives 309k SNPs as compared to 3.7M  
     - Get index position for each sample in VCF files:
         - ```bcftools query -l ../../ImputedGenotypes/Imputation2/chr_1/chr1.dose.vcf.gz | head -96 | python GetVCFindex.py > ../VCFindex.txt```  
+
+##Clip overlapping reads
+- the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
+- this clips the read with the lowest quality score, which isn't as good as comparing the bases of the overlapping reads, but is probably good enough
+- this turned out to be a huge pain to install, until [bioconda](https://bioconda.github.io/index.html#setup) saved the day
+    - ```conda config --add channels r```
+    - ```conda config --add channels bioconda```
+    - ```conda install bamutil```
+  
                             
 #Transcript Identification
 ##Cufflinks
