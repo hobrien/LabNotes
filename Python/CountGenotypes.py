@@ -48,7 +48,7 @@ def count_genotypes(fields):
         elif genotype == "./.":
            genotype_counts[5] += 1
         else:
-            sys.exit("genotype %s not recognised" % genotype)
+            warnings.warn("genotype %s not recognised" % genotype)
     genotype_counts = [str(i) for i in genotype_counts]
     return genotype_counts          
     
