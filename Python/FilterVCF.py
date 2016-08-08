@@ -19,7 +19,6 @@ For SNP calling output, I would like counts of the following genotypes for each 
 """ 
 
 def main(argv):
-    print '\t'.join(('Position', '0/0', '0/1', '1/1', '0/.', '1/.', './.'))
     for line in fileinput.input([]):
        line = line.strip()
        try:
