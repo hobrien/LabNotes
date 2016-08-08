@@ -4,6 +4,7 @@ import sys
 import fileinput
 import warnings
 from string import maketrans
+import re
 
 """
 "For each gene-SNP pair, with the SNP encoded by 0,1 and 2 according to the frequency of the minor allele, the association between gene expression g and genotype s is assumed to be linear"
@@ -15,7 +16,7 @@ The VCF is coded according to the reference allele, so I am going to have to cou
 
 """ 
 
-def main(argv):
+def main():
     for line in fileinput.input([]):
        line = line.strip()
        try:
@@ -23,12 +24,36 @@ def main(argv):
                continue
            elif line[0] == '#': # column names
                fields = line.split('\t')
-               print '\t'.join((fields[2]) + fields[9:])
-        except IndexError:
-            continue
-        fields = line.split('t')
+               print '\t'.join(fields[2:3] + fields[9:])
+               continue
+       except IndexError:
+           continue
+       fields = line.split('\t')
+       output = [fields[2]]
+       if minor_allele(line) == 0:
+           minor_homo = '0|0'
+           major_homo = '1|1'
+       else:
+           minor_homo = '1|1'
+           major_homo = '0|0'
+           
+       for field in fields[9:]:
+           if field[:3] == major_homo:
+               output += ['0']
+           elif field[:3] == '0|1' or field[:3] == '1|0':
+               output += ['1']
+           elif field[:3] == minor_homo:
+               output += ['2']
+           else:
+               sys.exit(field)
+       print '\t'.join(output)                  
+               
         
-def count_alleles(line):
+def minor_allele(line):
+    if len(re.findall(r'(?=(0\|)|(\|0))', line)) <= len(re.findall(r'(?=(1\|)|(\|1))', line)):
+        return 0
+    else:
+        return 1
     
 
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
@@ -38,4 +63,4 @@ if __name__ == "__main__":
     global usage
     usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
     warnings.formatwarning = warning_on_one_line
-    main(sys.argv[1:])
+    main()
