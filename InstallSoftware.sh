@@ -36,6 +36,7 @@ sudo chown -R $(whoami) /usr/local/lib
 sudo chown -R $(whoami) /usr/local/lib/pkgconfig
 sudo chown -R $(whoami) /usr/local/share/man/man5
 sudo chown -R $(whoami) /usr/local/share/man/mann
+sudo chown -R $(whoami) /usr/local/share/info
 
 
 brew tap homebrew/science
@@ -45,6 +46,7 @@ brew install mercurial
 brew install mysql  #mysql.server start/stop
 brew install pandoc
 brew install igv
+brew install ImageMagick
 
 # Link pandoc template files
 ln -s ~/BTSync/LaTEX/Templates/letter.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/letter.latex
