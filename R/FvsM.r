@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF"      # working directory for the R session
+workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_all"      # working directory for the R session
 
 projectName <- "MvsF"                         # name of the project
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
@@ -24,7 +24,7 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
 varInt <- "treatment"                                    # factor of interest
 condRef <- "F"                                      # reference biological condition
 batch <- c("centre", "PCW", "RIN")                  # blocking factor: NULL (default) or "batch" for example
-RIN_cutoff <- 5
+RIN_cutoff <- 0
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- TRUE                                  # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
