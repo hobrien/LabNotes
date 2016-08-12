@@ -12,7 +12,7 @@ CREATE TABLE `GencodeGTF` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-LOAD DATA INFILE '/Users/heo3/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.annotation.csv'
+LOAD DATA INFILE '/Users/heo3/BTSync/FetalRNAseq/Reference/genes.csv'
 INTO TABLE GencodeGTF  
     FIELDS TERMINATED BY ',' 
            OPTIONALLY ENCLOSED BY '"'
@@ -39,7 +39,7 @@ CREATE TABLE `GencodeFeatures` (
   PRIMARY KEY (`id`, `feature`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOAD DATA INFILE '/Users/heo3/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.features.csv'
+LOAD DATA INFILE '/Users/heo3/BTSync/FetalRNAseq/Reference/features.csv'
 INTO TABLE `GencodeFeatures`  
     FIELDS TERMINATED BY ',' 
            OPTIONALLY ENCLOSED BY '"'
