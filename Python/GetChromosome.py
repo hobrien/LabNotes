@@ -22,11 +22,11 @@ def main():
        for line in fileinput.input():
            fields = line.strip().split('\t')
            if header == 0:
-               print '\t'.join(['Chromosome'] + fields)
+               print '\t'.join(['Chromosome', 'Gene'] + fields)
                header = 1
            else:    
-               chrom = GetChr(cursor, fields[0])
-               print '\t'.join([chrom] + fields)
+               (chrom, gene) = GetChr(cursor, fields[0])
+               print '\t'.join([chrom, gene] + fields)
   
     except Error as e:
         print(e)
@@ -37,7 +37,7 @@ def main():
     
     
 def GetChr(cursor, gene_id):
-    cursor.execute("SELECT DISTINCT seqid FROM GencodeGTF, GencodeFeatures WHERE GencodeGTF.id = GencodeFeatures.id AND GencodeFeatures.Value = %s", (gene_id,))
+    cursor.execute("SELECT DISTINCT GencodeGTF.seqid, GencodeFeatures.value FROM GencodeFeatures, GencodeGTF WHERE GencodeGTF.id = GencodeFeatures.id AND GencodeFeatures.feature = 'gene_name' AND GencodeFeatures.id IN (SELECT GencodeGTF.id FROM GencodeGTF, GencodeFeatures WHERE GencodeGTF.id = GencodeFeatures.id AND GencodeFeatures.Value = %s)", (gene_id,))
     rows = cursor.fetchall()
     ref_row = 0
     try:
@@ -48,7 +48,7 @@ def GetChr(cursor, gene_id):
             rows = [['NA']]
         else:
             warnings.warn("Feature with geneID %s on multiple chromosomes" % (gene_id))           
-    return  rows[0][0]
+    return  rows[0]
 
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
