@@ -1,0 +1,48 @@
+
+---
+title: "Sex-Specific Expression"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(tufte)
+rm(list=ls())
+source("~/BTSync/Code/R/FormatGGplot.R")
+```
+
+#Compare Effect of Excluding samples with low RIN (< 5)
+
+`r margin_note("- 592 of 1073 genes that are significant at FDR of 0.1 in the full dataset have p values < 0.05 when analysis is restricted to samples with RIN >= 5")`
+
+```{r }
+all_counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/MvsF_all/tables/MvsF.complete.txt", col_names=TRUE)
+counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/MvsF/tables/MvsF.complete.txt", col_names=TRUE)
+select(all_counts, Id, pvalue, padj) %>% 
+  full_join(select(counts, Id, pvalue, padj), by='Id') %>%
+  filter(padj.x < 0.1) %>%
+  ggplot(aes(x=pvalue.x, y=pvalue.y)) + 
+    geom_point() + 
+    geom_hline(yintercept=.05, colour='red') + 
+    xlab("pvalue(RIN >=5)") + 
+    ylab("pvalue (all samples)")
+select(all_counts, Id, pvalue, padj) %>% 
+  full_join(select(counts, Id, pvalue, padj), by='Id') %>%
+  filter(padj.x < 0.1) %>%
+  nrow()
+
+select(all_counts, Id, pvalue, padj) %>% 
+  full_join(select(counts, Id, pvalue, padj), by='Id') %>%
+  filter(padj.x < 0.1) %>%
+  filter(pvalue.y < 0.05) %>%
+  nrow()
+
+```
