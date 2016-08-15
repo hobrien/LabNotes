@@ -9,11 +9,8 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 
-for sampleID in `ls /c8000xd3/rnaseq-heath/Mappings`
+for sampleID in 17666 16491 17812 17049 18687 18655 16286 18294 17701 16438 17087 16972 18596 17130 17115 16488 18349 17054 16929 17068 16840 17109 16491 17048 17071 16024 16385 16115 17053 16428 17921-l1 16826 15641 16810 17013 16483 15655 17025 17198 17475 17229 17333 17543 17835 17629 18372 18249 18666 19052 19043 18983 A138 A226 15240 17167 17072 17160 17175 17369 17671 17922 17923 18055 18121 18134 18355 18266 18241 18153 18282 18559 18694 18432 15533_2 15533
 do
-    if [[ $sampleID != "15236"* && $sampleID != "SRR"* ]]
-    then
-        echo $sampleID
-        qsub ../LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nsort.bam
-    fi
+    echo $sampleID
+    qsub ../LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nsort.bam
 done
