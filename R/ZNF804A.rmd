@@ -8,11 +8,12 @@ output:
 ---
 <!-- see http://rstudio.github.io/tufte/ for info about tufte -->
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
 
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(readr)
 library(tufte)
 rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
@@ -23,9 +24,9 @@ source("~/BTSync/Code/R/FormatGGplot.R")
 I’ve finished matching up the genotypes to the expression data for ZNF804A. rs1344706 is on the x axis and I made separate plots for each rs12476147 genotype. Samples are phased, so there are 4 different genotypes for each locus. In most cases, T/T individuals at rs12476147 have 100% alt reads and A/A individuals have 0% (as you’d expect), though there are three T/T individuals with 0% alt reads (I assume these are genotyping errors). The 2 SNPs look like they are tightly linked because there are no AC haplotypes (well according to the VCF, there are two AC|TA individuals and 1 TA|AC, but in all these cases, the samples have 100% alt reads, suggesting that they are actually TC haplotypes that have been mis-genotyped. There are two other heterozygotes for rs12476147 that have 100% alt reads, so they are probably mis-genotyped as well. When we filter out the rs12476147 homozygotes, we are left with 6 A/A homozygotes and zero C/C homozygotes at rs1344706. This is for 53 samples, so the numbers will go up slightly once all the WASP remapping is done. There’s no obvious distortion or difference between the A/A and A/C genotypes, but then it’s hard to tell with 6 data points…
 
 ```{r }
-counts <- read.delim("~/Desktop/counts.txt", header=FALSE)
+counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/chr2:184936178-184936178.counts.txt")
 colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-rs1344706 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/Rs1344706.txt", header=FALSE)
+rs1344706 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs1344706.txt", header=FALSE)
 colnames(rs1344706) <- c('chr', 'pos', 'rs1344706', 'sample')
 rs12476147 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs12476147.txt", header=FALSE)
 colnames(rs12476147) <- c('chr', 'pos', 'rs12476147', 'sample')
@@ -34,8 +35,80 @@ ggplot(counts, aes(x=rs1344706, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(rs12476147 ~ .) +
   ylab('perc_alt') +
-  tufte_theme()
+  tufte_theme() +
+  theme(legend.position='top') +
+  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) 
 ```
+
+
+Here’s the crazy plot that I showed you last week with colour-coding to indicate samples where this haploview file does not match the imputed VCF. As you can see, all but two of the samples that have expression that is inconsistent with the VCF have different genotypes in the haploview file. I still need to track down if this is genotyping error, problems with the imputation or sample swaps, but it probably isn’t a problem with the AS expression assay.
+
+```{r }
+haploview <- read.delim("~/BTSync/FetalRNAseq/LabNotes/Datafiles/ZNF_haploview.txt", header=FALSE)
+
+haploview <-mutate(haploview, rs12476147hv= paste(V8, V9, sep='|'), 
+                   rs1344706hv = paste(V10, V11, sep='|'),
+                   sample = as.character(V2))
+counts <- mutate(counts, 
+       rs12476147vcf = ifelse(rs12476147 == 'T|A', 'A|T', as.character(rs12476147)),
+       rs1344706vcf = ifelse(rs1344706 == 'C|A', 'A|C', as.character(rs1344706))) %>%
+  left_join(haploview[,c(12,13,14)])
+counts <- mutate(counts, mismatches = ifelse(rs12476147vcf != rs12476147hv & rs1344706vcf != rs1344706hv, 'both',
+                                   ifelse(rs12476147vcf != rs12476147hv, 'rs12476147', 
+                                          ifelse(rs1344706vcf != rs1344706hv, 'rs1344706', 'none'))))
+
+ggplot(counts, aes(x=rs1344706, y=alt/(ref+alt), size=ref+alt, colour=mismatches)) +
+  geom_jitter(alpha=.3, height=0, width=.25) +
+  facet_grid(rs12476147 ~ .) +
+  ylab('perc_alt') +
+  tufte_theme() + 
+  theme(legend.position='top') +
+  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) 
+
+ggplot(subset(counts, rs12476147vcf == 'A|T'), aes(x=rs1344706vcf, y=alt/(ref+alt), size=ref+alt, colour=mismatches)) +
+  geom_jitter(alpha=.3, height=0, width=.25) +
+  ylab('perc_alt') +
+  tufte_theme() + 
+  theme(legend.position='top') +
+  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) 
+
+```
+
+# Deduplicated
+
+```{r }
+counts_dedup <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr2:184936178-184936178.counts.txt")
+colnames(counts_dedup) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
+rs1344706 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs1344706.txt", header=FALSE)
+colnames(rs1344706) <- c('chr', 'pos', 'rs1344706', 'sample')
+rs12476147 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs12476147.txt", header=FALSE)
+colnames(rs12476147) <- c('chr', 'pos', 'rs12476147', 'sample')
+counts_dedup <- left_join(counts, rs1344706[,c(3,4)]) %>% left_join(rs12476147[,c(3,4)])
+counts_dedup <- mutate(counts_dedup, 
+       rs12476147vcf = ifelse(rs12476147 == 'T|A', 'A|T', as.character(rs12476147)),
+       rs1344706vcf = ifelse(rs1344706 == 'C|A', 'A|C', as.character(rs1344706))) %>%
+  left_join(haploview[,c(12,13,14)])
+counts <- mutate(counts, mismatches = ifelse(rs12476147vcf != rs12476147hv & rs1344706vcf != rs1344706hv, 'both',
+                                   ifelse(rs12476147vcf != rs12476147hv, 'rs12476147', 
+                                          ifelse(rs1344706vcf != rs1344706hv, 'rs1344706', 'none'))))
+
+ggplot(subset(counts_dedup, rs12476147vcf == 'A|T'), aes(x=rs1344706vcf, y=alt/(ref+alt), size=ref+alt, colour=mismatches)) +
+  geom_jitter(alpha=.3, height=0, width=.25) +
+  ylab('perc_alt') +
+  tufte_theme() + 
+  theme(legend.position='top') +
+  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1))
+
+ggplot(subset(counts_dedup, rs12476147vcf == 'A|T' & mismatches == 'none' & ref > 0), aes(x=rs1344706vcf, y=alt/(ref+alt), size=ref+alt, colour=mismatches)) +
+  geom_jitter(alpha=.3, height=0, width=.25) +
+  ylab('perc_alt') +
+  tufte_theme() + 
+  theme(legend.position='top') +
+  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1))
+
+summary(glm(cbind(ref, alt) ~ rs1344706vcf, data=subset(counts_dedup, rs12476147vcf == 'A|T' & mismatches == 'none' & ref > 0), family = binomial))
+```
+
 
 # Overall expression
 
@@ -44,12 +117,12 @@ ggplot(counts, aes(x=rs1344706, y=alt/(ref+alt), size=ref+alt)) +
 `r margin_note("- Counts are not significantly different across genotypes")`
 
 ```{r }
-allCounts <- read.delim("~/BTSync/FetalRNAseq/Counts/tables/num2vsnum1.complete.txt", check.names = FALSE)
+allCounts <- read_tsv("~/BTSync/FetalRNAseq/Counts/tables/num2vsnum1.complete.txt")
 allCounts<- allCounts[,c(1, 79:155)] %>%
   filter(Id =='ENSG00000170396.7') %>%
   gather(sample, count, -Id) %>%
   separate(sample, c('norm', 'sample'), sep='\\.') %>%
-  left_join(allCounts, rs1344706) %>%
+  left_join(rs1344706) %>%
   mutate(rs1344706 = ifelse(rs1344706 == 'C|A', 'A|C', as.character(rs1344706)))
 
 ggplot(allCounts, aes(x=rs1344706, y=count)) +
