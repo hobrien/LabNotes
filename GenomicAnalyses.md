@@ -406,6 +406,15 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - 17198 looks really strange in the DESeq analysis because it has very few reads overlapping coding features. I am rerunning with this sample excluded (17025 is also excluded because it has very few reads mapping)
 - report includes normalised counts for each gene for each sample (in Counts/tables/num2vsnum1.complete.txt) that can be used to see if a given SNP affects expression of a gene of interest
 
+###DEXSeq
+- This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
+    - There's some problem with the system version of R interacting with my installation of anaconda
+    - I'm just going to try installing R with anaconda and using that:
+        - ```conda install -c r r```
+    - I wasn't able to install DEXSeq because RcppArmadillo would not compile. I installed it using coda:
+        - ```conda install -c rgrout r-rcpparmadillo```
+        - When I tried again to install DEXSeq, it asked me if I want to update RcppArmadillo. I selected 'no'
+          
 ##Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
 - Cuffquant produces a binary .cxb file. I'll need to run this on everything, then run cuffnorm to get FPKM values
