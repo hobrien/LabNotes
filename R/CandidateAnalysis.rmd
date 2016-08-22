@@ -8,7 +8,7 @@ output:
 ---
 <!-- see http://rstudio.github.io/tufte/ for info about tufte -->
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
 
 library(ggplot2)
 library(dplyr)
@@ -17,46 +17,452 @@ library(readr)
 library(tufte)
 rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
+allCounts <- read_tsv("~/BTSync/FetalRNAseq/Counts/tables/num2vsnum1.complete.txt")
+covariates <- read_tsv("~/BTSync/FetalRNAseq/Info/sample_info.txt")
+
 ```
 
-# Overall expression
+#AS3MT
+## Overall expression
 `r margin_note("- DESeq-normalized counts")`
-`r margin_note("- Heterzygotes are cobined in this analysis")`
-`r margin_note("- Counts are not significantly different across genotypes")`
+`r margin_note("- Heterzygotes are combined in this analysis")`
+`r margin_note("- Used raw tophat output (without running WASP)")`
 
 ```{r }
-rs1344706 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs1344706.txt", header=FALSE)
-colnames(rs1344706) <- c('chr', 'pos', 'rs1344706', 'BrainBankID')
-rs12476147 <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs12476147.txt", header=FALSE)
-colnames(rs12476147) <- c('chr', 'pos', 'rs12476147', 'BrainBankID')
-allCounts <- read_tsv("~/BTSync/FetalRNAseq/Counts/tables/num2vsnum1.complete.txt")
-allCounts<- allCounts[,c(1, 79:155)] %>%
+riskVar <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs11191419.txt", header=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000214435.7') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'T|A', 'A|T', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- ")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar + PCW + Sex + RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#ZNF804A
+## Overall expression
+`r margin_note("- DESeq-normalized counts")`
+`r margin_note("- Heterzygotes are combined in this analysis")`
+`r margin_note("- Used raw tophat output (without running WASP)")`
+
+```{r }
+riskVar <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs1344706.txt", header=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
   filter(Id =='ENSG00000170396.7') %>%
   gather(sample, count, -Id) %>%
   separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
-  left_join(rs1344706) %>%
-  mutate(rs1344706 = ifelse(rs1344706 == 'C|A', 'A|C', as.character(rs1344706)))
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'C|A', 'A|C', as.character(riskVar)))
 
-ggplot(allCounts, aes(x=rs1344706, y=count)) +
-  geom_jitter(alpha=.2, height=0, width=.25)
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
 
-summary(lm(count ~ rs1344706, data=allCounts))
+summary(lm(count ~ riskVar, data=counts))
 ```
 
 
-# Co-variates
+## Co-variates
+`r margin_note("- ZNF804A is nagatively correlated with RIN")`
 
 ```{r}
-covariates <- read_tsv("~/BTSync/FetalRNAseq/Info/sample_info.txt")
-allCountsCov <- allCounts %>% left_join(covariates) 
-ggplot(allCountsCov, aes(x=PCW, y=count)) + geom_point()
-ggplot(allCountsCov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25)
-ggplot(allCountsCov, aes(x=RIN, y=count)) + geom_point()
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
 
-summary(lm(count ~ PCW + Sex +RIN, data=allCountsCov))
-summary(lm(count ~ PCW, data=allCountsCov))
-summary(lm(count ~ Sex, data=allCountsCov))
-summary(lm(count ~ RIN, data=allCountsCov))
-cor.test(allCountsCov$count, allCountsCov$PCW)
-cor.test(allCountsCov$count, allCountsCov$RIN)
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
 ```
+
+#MIR137HG
+
+```{r }
+riskVar <- read.delim("~/BTSync/FetalRNAseq/Genotypes/rs1625579.txt", header=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000225206.5') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'T|G', 'G|T', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+
+## Co-variates
+`r margin_note("- MIR137HG is positively correlated with PCW")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+
+#PCGEM1
+`r margin_note("- Expressed at VERY low levels in developing brain")`
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs17662626.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000227418.6') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+
+## Co-variates
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#TRIM26
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2021722.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000234127.8') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'T|C', 'C|T', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- None of co-variates are significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#CSMD1
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs10503253.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000183117.17') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'C|A', 'A|C', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- None of co-variates are significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#MMP16
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs7004633.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000156103.15') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- Sex is highely significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#CNNM2
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs7914558.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000148842.17') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- RIN is highely significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#NT5C2
+`r margin_note("- Not present in HTSeq-count output")`
+
+#STT3A
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs548181.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000134910.12') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- PCW is marginally significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#CCDC68
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs12966547.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000166510.13') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- None of co-variates are significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
+#TCF4
+
+```{r }
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs17512836.txt", col_names=FALSE)
+colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'BrainBankID')
+counts<- allCounts[,c(1, 79:155)] %>%
+  filter(Id =='ENSG00000196628.13') %>%
+  gather(sample, count, -Id) %>%
+  separate(sample, c('norm', 'BrainBankID'), sep='\\.') %>%
+  left_join(riskVar) %>%
+  mutate(riskVar = ifelse(riskVar == 'T|C', 'C|T', as.character(riskVar)))
+
+ggplot(counts, aes(x=riskVar, y=count)) +
+  geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+
+summary(lm(count ~ riskVar, data=counts))
+```
+
+## Co-variates
+`r margin_note("- PCW is highely significant")`
+
+```{r}
+count_cov <- counts %>% left_join(covariates) 
+ggplot(count_cov, aes(x=PCW, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+ggplot(count_cov, aes(x=Sex, y=count)) +   geom_jitter(alpha=.2, height=0, width=.25) +
+  tufte_theme()
+ggplot(count_cov, aes(x=RIN, y=count)) + geom_point(alpha=.2) +
+  tufte_theme()
+
+summary(lm(count ~ PCW + Sex +RIN, data=count_cov))
+summary(lm(count ~ PCW, data=count_cov))
+summary(lm(count ~ Sex, data=count_cov))
+summary(lm(count ~ RIN, data=count_cov))
+cor.test(count_cov$count, count_cov$PCW)
+cor.test(count_cov$count, count_cov$RIN)
+```
+
