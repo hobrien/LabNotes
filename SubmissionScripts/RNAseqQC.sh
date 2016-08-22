@@ -21,6 +21,7 @@ do
 #/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar ReorderSam INPUT=/home/heath/Mappings/15533_300/accepted_hits.bam OUTPUT=/home/heath/Mappings/15533_300/accepted_hits_sorted.bam REFERENCE=/home/heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa
 #/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CollectRnaSeqMetrics REF_FLAT=/home/heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/refFlat.txt.gz STRAND_SPECIFICITY=SECOND_READ_TRANSCRIPTION_STRAND INPUT=/home/heath/Mappings/15533_300_secondstrand/accepted_hits.bam OUTPUT=/home/heath/Mappings/15533_300_secondstrand/RnaSeqMetrics.txt ASSUME_SORTED=false
 
+#http://rseqc.sourceforge.net/
     split_bam.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed -i $dataset -o $folder_path/BAM/$folder
     bam_stat.py -i $folder_path/BAM/$folder.in.bam > $folder_path/$folder.in.stats.txt
     #bam_stat.py -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
@@ -51,9 +52,9 @@ do
     geneBody_coverage.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
 
 
-    deletion_profile.py -l 120 -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
-    insertion_profile.py -s PE -i $folder_path/BAM?$folder.chr.bam -o $folder_path/$folder
-    mismatch_profile.py -l 120 -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
+    #deletion_profile.py -l 120 -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
+    #insertion_profile.py -s PE -i $folder_path/BAM?$folder.chr.bam -o $folder_path/$folder
+    #mismatch_profile.py -l 120 -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
 
     echo "finished QC for $dataset"
 done
