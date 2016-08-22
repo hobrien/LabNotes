@@ -41,3 +41,4 @@ png(filename="/c8000xd3/rnaseq-heath/Counts/DEXSeq/plotMA.png", bg="transparent"
 plotMA( dxr1, cex=0.8 )
 dev.off()
 DEXSeqHTML( dxr1, FDR=0.05, color=c("#FF000080", "#0000FF80"), fitExpToVar="Sex", path="/c8000xd3/rnaseq-heath/Counts/DEXSeq", BPPARAM=BPPARAM )
+save.image(file="/c8000xd3/rnaseq-heath/Counts/DEXSeq/results.RData")
