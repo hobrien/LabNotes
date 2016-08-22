@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+import sys
+import subprocess
+import fileinput
+import warnings
+import mysql.connector 
+from mysql.connector import Error
+from string import maketrans
+
 """
 BED columns are as follows:
    chrom        The name of the chromosome.
@@ -39,6 +49,80 @@ DB fields
 - It should be easy enough to match up the junctions from annotate_junctions.py and update the block size (and chromStart/chromEnd + blockStarts) and strand fields if I need to
 """
 
+def main(sample_id):
+    try:
+       conn = mysql.connector.connect(host='localhost',
+                                       database='FetalRNAseq',
+                                       #autocommit=True ,
+                                       user='root'
+                                       )
+            
+       cursor = conn.cursor()
+             
+       for line in fileinput.input([]):
+           line = line.strip()
+           
+           parsed = parse_GTF(line.split('\t'))
+           keys = parsed.keys()
+           if parsed['feature'] == 'transcript':
+               try:
+                   cursor.execute('INSERT INTO `CufflinksGTF`(frac,full_read_support,cov,conf_lo,FPKM,feature,start,transcript_id,gene_id,conf_hi,seqid,end,score,strand,source,sample_id) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (
+                          parsed['frac'],
+                          parsed['full_read_support'],
+                          parsed['cov'],
+                          parsed['conf_lo'],
+                          parsed['FPKM'],
+                          parsed['feature'],
+                          parsed['start'],
+                          parsed['transcript_id'],
+                          parsed['gene_id'],
+                          parsed['conf_hi'],
+                          parsed['seqid'],
+                          parsed['end'],
+                          parsed['score'],
+                          parsed['strand'],
+                          parsed['source'],
+                          sample_id,))
+               except mdb.IntegrityError, e:
+                  warnings.warn("%s" % e)
+                  pass
+
+           elif parsed['feature'] == 'exon':
+               try:
+                   cursor.execute('INSERT INTO `CufflinksGTF`(frac,exon_number,cov,conf_lo,FPKM,feature,start,transcript_id,gene_id,conf_hi,seqid,end,score,strand,source,sample_id) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (
+                          parsed['frac'],
+                          parsed['exon_number'],
+                          parsed['cov'],
+                          parsed['conf_lo'],
+                          parsed['FPKM'],
+                          parsed['feature'],
+                          parsed['start'],
+                          parsed['transcript_id'],
+                          parsed['gene_id'],
+                          parsed['conf_hi'],
+                          parsed['seqid'],
+                          parsed['end'],
+                          parsed['score'],
+                          parsed['strand'],
+                          parsed['source'],
+                          sample_id,))
+               except mdb.IntegrityError, e:
+                  warnings.warn("%s" % e)
+                  pass
+
+           else:
+               warnings.warn("feature %s not recognised" % parsed['feature'])
+           cursor.execute("SELECT * FROM CufflinksGTF")
+           results = cursor.fetchall()
+    except Error as e:
+        print(e)
+ 
+    finally:
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+
 def parse_BED (line):
   fields = line.split('\t')
   if len(fields) != 12:
@@ -66,3 +150,13 @@ def parse_BED (line):
   tags['int_start'] = int(chromStart) + int(blockSizes[0] + 1
   tags['int_end'] = int(chromEnd) - int(blockSizes[1])
   return tags
+
+
+def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
+    return ' %s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
+ 
+           
+if __name__ == "__main__":
+    warnings.formatwarning = warning_on_one_line
+    sample_id = sys.argv[1]
+    main(sample_id)
