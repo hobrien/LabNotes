@@ -17,109 +17,228 @@ library(tufte)
 rm(list=ls())
 source("~/BTSync/Code/R/FormatGGplot.R")
 folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15240/15240",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15240.wasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15240.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15240.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15468/15468",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15468.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15468.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15468.dedup",
              #"/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_2/15533_2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15533_2.nrwasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15641/15641",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15641.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15641.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15641.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15655/15655",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15655.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15655.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15655.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15768/15768",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15768.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15768.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15768.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16024/16024",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16024.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16024.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16024.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16115/16115",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16115.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16115.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16115.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16286/16286",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16286.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16286.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16286.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16385/16385",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16385.nrwasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16428/16428",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16428.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16428.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16428.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16438/16438",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16438.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16438.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16438.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16483/16483",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16483.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16483.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16483.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16488/16488",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16488.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16488.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16488.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16491/16491",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16491.nrwasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16640/16640",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16640.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16640.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16640.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16649/16649",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16649.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16649.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16649.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16810/16810",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16810.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16810.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16810.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16826/16826",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16826.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16826.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16826.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16840/16840",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16840.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16840.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16840.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/16972/16972",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16972.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16972.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16972.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16929/16929",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16929.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16929.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17013/17013",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17013.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17013.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17048/17048",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17048.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17048.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17048.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17049/17049",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17049.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17049.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17053/17053",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17053.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17053.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17053.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17054/17054",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17054.wasp",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17087/17087",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17109/17109",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17054.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17054.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17068/17068",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17068.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17068.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17071/17071",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17071.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17071.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17072/17072",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17072.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17072.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17081/17081",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17081.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17081.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17087/17087",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17087.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17087.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17109/17109",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17109.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17109.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17115/17115",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17115.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17115.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17130/17130",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17130.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17130.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17160/17160",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17160.wasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17160.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17160.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17167/17167",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17167.wasp"
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17701/17701",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18294/18294",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18655/18655",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17068/17068",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17081/17081",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17115/17115",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17130/17130",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17812/17812",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18349/18349",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18596/18596",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/16929/16929",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17049/17049",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18687/18687",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/16385/16385",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/16491/16491",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17167.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17167.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17175/17175",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17175.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17175.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17198/17198",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17198.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17198.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17229/17229",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17229.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17229.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17333/17333",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17333.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17369/17369",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17369.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17369.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17475/17475",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17475.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17475.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17543/17543",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17543.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17543.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17629/17629",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17629.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17629.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17671/17671",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17671.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17671.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17701/17701",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17701.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17701.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17812/17812",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17812.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17812.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17835/17835",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17835.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17835.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17921-l1/17921-l1",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17921-l1.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17921-l1.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17922/17922",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17922.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17922.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17923/17923",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17923.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17923.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18055/18055",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18055.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18055.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18121/18121",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18121.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18121.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18134/18134",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18134.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18134.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18153/18153",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18153.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18153.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18241/18241",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18241.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18241.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18249/18249", 
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18249.nrwasp", 
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18249.dedup", 
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18266/18266",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18266.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18266.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18282/18282",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18282.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18282.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18294/18294",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18294.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18349/18349",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18349.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18349.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18355/18355",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18355.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18355.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18372/18372",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18372.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18372.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18432/18432",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18432.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18432.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18559/18559",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18559.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18559.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18596/18596",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18596.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18596.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18655/18655",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18655.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18655.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18666/18666",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18666.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18666.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18687/18687",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18687.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18687.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18694/18694",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/18694.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18694.dedup",
              #"/Users/heo3/BTSync/FetalRNAseq/BamQC/16548/16548",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/16810/16810",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17071/17071",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17921-l1/17921-l1",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17013/17013",
              # < 2000 reads "/Users/heo3/BTSync/FetalRNAseq/BamQC/17025/17025",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17198/17198",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17229/17229",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17333/17333",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17475/17475",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17543/17543",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17629/17629",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17835/17835",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18249/18249", 
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18372/18372",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18666/18666",
              #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18983/18983",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/19043/19043",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/19052/19052",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/A138/A138",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/A226/A226",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17072/17072",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17175/17175",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17671/17671",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17922/17922",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17923/17923",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18121/18121",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18134/18134",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18153/18153",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18241/18241",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18266/18266",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18355/18355",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18432/18432",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18559/18559",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18694/18694",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/17369/17369",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18055/18055",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_2/15533_2",
-             #"/Users/heo3/BTSync/FetalRNAseq/BamQC/18282/18282"
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/19043/19043",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/19043.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/19052/19052",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/19052.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/19052.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A138/A138",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/A138.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A138.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A226/A226",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/A226.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A226.dedup"
              )
 ```
 
@@ -130,6 +249,7 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15240/15240",
 ``` {r warnings=FALSE }
 RSeQCstats <- data.frame()
 for (folder in folders) {
+  #print(folder)
   temp <- suppressWarnings(tryCatch({
     read.delim(paste(folder, ".ex.stats.txt", sep=""), 
                      header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
@@ -144,12 +264,15 @@ for (folder in folders) {
   temp <- temp[c(6,7,14),]
   temp[,1] <- c("Multimapped", "Unique", "Paired")
   temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$rownum <-nrow(RSeQCstats)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 RSeQCstats <- spread(RSeQCstats, V1, V2)
+RSeQCstats <- arrange(RSeQCstats, rownum)
+
 #mutate(RSeQCstats, Perc_rDNA = as.numeric(rDNA)/(as.numeric(Unique)+as.numeric(Multimapped)+as.numeric(rDNA))) %>% arrange(Perc_rDNA)
-ReadNumbers <- RSeQCstats[,c(1,4)]
-RSeQCstats <- RSeQCstats[c(1,4,3,2)]
+ReadNumbers <- RSeQCstats[,c(1,5)]
+RSeQCstats <- RSeQCstats[c(1,5,4,3)]
 RSeQCstats[,2:4] <- sapply(RSeQCstats[,2:4], function(x) formatC(as.numeric(x), format='d', big.mark=','))
 knitr::kable(
   RSeQCstats
@@ -165,6 +288,7 @@ knitr::kable(
 RSeQCdistribution <- data.frame()
 ReadNumbers$ExpressedTags = NA
 for (folder in folders) {
+  #print(folder)
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp <- read.delim(paste(folder, ".dist.txt", sep=""), 
                            header=TRUE, stringsAsFactors=FALSE, skip=4, sep=''
@@ -228,7 +352,7 @@ for (folder in folders) {
                      )
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp$sample <- sample
-  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', 'All')
+  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', ifelse(grepl("dedup",folder), 'Dedup', 'All'))
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 ```
@@ -240,7 +364,8 @@ ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=mapping, group=sample)) +
   xlab('inner distance') +
   theme(legend.position=c(.8,.8)) +
   scale_colour_brewer(type = "qual", palette = 6) +
-  tufte_theme() 
+  tufte_theme() +
+  theme(legend.position=c(0.1,.9))
 
 ```
 
@@ -258,7 +383,7 @@ for (folder in folders) {
   temp <-  as.data.frame(t(temp[,-1]))
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp$sample <- sample
-  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', 'All')
+  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', ifelse(grepl("dedup",folder), 'Dedup', 'All'))
   temp$V2 <- temp$V2
   temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags)
   RSeQCstats <- rbind(RSeQCstats, temp)
@@ -276,45 +401,6 @@ ggplot(RSeQCstats, aes(x=V1, y=V2/ReadNumbers, colour=mapping, group=sample)) +
   
 ```
 
-## Sequence Duplication
-
-`r margin_note("- Looks like WASP remapping reduces duplication slightely")`
-
-```{r include=FALSE}
-RSeQCstats <- data.frame()
-for (folder in folders) {
-  eval(parse(file = paste(folder, ".DupRate_plot.r", sep=""))[2:6])
-  temp <- rbind(data.frame(Reads=pos_uniqRead, 
-                            Duplication_level=pos_occ, 
-                            Method='Position-based'
-                            ),
-                 data.frame(Reads=seq_uniqRead, 
-                            Duplication_level=seq_occ, 
-                            Method='Sequence-based'
-                            )
-                )
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', 'All')
-  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)
-  RSeQCstats <- rbind(RSeQCstats, temp)
-}
-
-```
-
-```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads/ReadNumbers, colour=mapping, group=sample)) +
-  geom_point(alpha=.2) +
-  xlim(c(0,500)) +
-  scale_y_log10() +
-  tufte_theme() +
-  theme(legend.position=c(.8,.8)) +
-  scale_colour_brewer(type = "qual", palette = 6) +
-  facet_wrap(~ Method) +
-  ylab("Proportion of Reads")
-
-
-```
 
 ## Splice Junction Saturation
 
@@ -332,7 +418,7 @@ for (folder in folders) {
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp$sample <- sample
   temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,2])
-  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', 'All')
+  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', ifelse(grepl("dedup",folder), 'Dedup', 'All'))
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 
