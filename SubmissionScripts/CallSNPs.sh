@@ -20,5 +20,5 @@ filename=${filename%%.bam}
 ~/bin/samtools mpileup -uf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa $@ \
    | ~/bin/bcftools call -mv -Ob > /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.raw.bcf
    
-bcftools view /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.raw.bcf \
-   | vcfutils.pl varFilter -D1000 > /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.filt.vcf
+#bcftools view /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.raw.bcf \
+#   | vcfutils.pl varFilter -D1000 > /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.filt.vcf
