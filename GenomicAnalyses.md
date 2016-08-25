@@ -418,3 +418,19 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 ##Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
 - Cuffquant produces a binary .cxb file. I'll need to run this on everything, then run cuffnorm to get FPKM values
+
+#SNP calling
+- This is needed to ensure that the samples used for RNAseq match the ones used for genotyping
+- In theory, SNPs called from the RNAseq mappings should match the SNPs in the imputed VCF
+- I don't need a huge number of SNPs for this analysis, so I extracted the mappings to chr22:
+    - ```qsub ~/LabNotes/SubmissionScripts/DivideBAM.sh 22```
+- Call SNPs using samtools mpileup and bcftools call
+    - ```find /c8000xd3/rnaseq-heath/Mappings/ -name *chr22.bam | xargs qsub ~/LabNotes/SubmissionScripts/CallSNPs.sh```
+- Change names so that they match the ones in the reference VCF
+    - ```find /c8000xd3/rnaseq-heath/Mappings/ -name *chr22.bam | perl -pe 's/\/c8000xd3\/rnaseq-heath\/Mappings\/([\w-]+)\/BAM\/Chromosomes\/[\w-]+.chr22.bam/$1/' 
+> /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/SampleNames.txt```
+    - ```bcftools reheader -s /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/SampleNames.txt -o /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/chr22.renamed.bcf /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/chr22.raw.bcf```
+    - ```bcftools index /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/chr22.renamed.bcf```
+- Use bcftools gtcheck to confirm that samples match:
+    - ```bash ~/LabNotes/SubmissionScripts/SubmitGTcheck.sh```
+
