@@ -21,9 +21,24 @@ library(gridExtra)
 
 lengths <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/seq_lengths.txt", header=FALSE, stringsAsFactors=FALSE)
 lengths$Million_reads <- lengths$V2/1000000
-lengths <- filter(lengths, !grepl("_R2_",V1)) %>% filter(!grepl("_2$",V1))
-lengths$Centre<-ifelse(grepl('_R1_',lengths$V1), 'Exeter','Edinburgh')
-lengths$Billion_bp <-ifelse(grepl('_R1_',lengths$V1), lengths$Million_reads * 200 / 1000, lengths$Million_reads * 250 / 1000)
+lengths <- filter(lengths, !grepl("_R2_",V1))
+LibraryInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt", 
+                     header=TRUE, stringsAsFactors=TRUE, sep='\t'
+                     )
+SeqInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/sequences.txt", 
+                     header=FALSE, stringsAsFactors=TRUE, sep='\t'
+                     )
+lengths <- full_join(LibraryInfo, SeqInfo, by=c("sample" = "V2")) %>% View()
+  right_join(lengths)
+lengths<-mutate(lengths, Billion_bp = ifelse(Centre == 'Exeter', 
+                                    Million_reads * 200 / 1000, 
+                                    ifelse(Centre == 'Edinburgh', 
+                                           Million_reads * 250 / 1000, 
+                                           Million_reads * 150 / 1000
+                                           )
+                                    )
+       )
+lengths <- group_by(lengths, Centre, sample) %>% summarise(Million_reads = sum(Million_reads), Billion_bp = sum(Billion_bp))
 layout(matrix(c(1,2), 2, byrow = TRUE))
 p1<-ggplot(lengths, aes(x=Million_reads, fill=Centre))+geom_histogram(bins=25)+facet_grid(Centre ~ .) + theme(legend.position="none")
 p2<-ggplot(lengths, aes(x=Billion_bp, fill=Centre))+geom_histogram(bins=30)+facet_grid(Centre ~ .) + theme(legend.position="none")
