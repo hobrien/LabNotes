@@ -1,6 +1,6 @@
 ---
 title: "Data QC"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -57,7 +57,7 @@ grid.arrange(p1, p2, ncol=2)
 - 150610_D00125_0239_BC718AANXX_3_IL-TP-013_2.sanfastq looks horible. 150610_D00125_0239_BC718AANXX_3_IL-TP-013_1.sanfastq has fine quality, but A is really over-represented
 - Edinburgh sequences have a lot of adaptor sequence
 
-```{r fig.width=8, fig.height=20}
+```{r fig.width=8, fig.height=32}
 
 summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", header=FALSE, stringsAsFactors=FALSE)
 fastQC_summary <- spread(summary_all, V2, V1)
