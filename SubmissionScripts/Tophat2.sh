@@ -9,7 +9,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 filename=${1##*/}
-sampleID=${filename%%_L00*} #This will remove the lane number and read number
+sampleID=${filename%%_*} #This will remove the library ID, lane number and read number
 echo "Starting mapping for $sampleID"
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500 --mate-std-dev 50 --num-threads 8 \
