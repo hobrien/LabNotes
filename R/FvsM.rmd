@@ -32,8 +32,8 @@ select(all_counts, Id, pvalue, padj) %>%
   ggplot(aes(x=pvalue.x, y=pvalue.y)) + 
     geom_point() + 
     geom_hline(yintercept=.05, colour='red') + 
-    xlab("pvalue(RIN >=5)") + 
-    ylab("pvalue (all samples)")
+    ylab("pvalue(RIN >=5)") + 
+    xlab("pvalue (all samples)")
 select(all_counts, Id, pvalue, padj) %>% 
   full_join(select(counts, Id, pvalue, padj), by='Id') %>%
   filter(padj.x < 0.1) %>%
