@@ -19,7 +19,6 @@ vignettes/*.pdf
 # html output from knitR
 R/*.html
 R/*.pdf
-R/*.png
 
 # Excel files
 *.xls
@@ -30,3 +29,6 @@ Python/.ipynb_checkpoints/*
 
 # Images
 *.png
+
+#Stupid Mac files
+*.DS_Store
