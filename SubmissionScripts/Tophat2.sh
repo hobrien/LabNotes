@@ -10,6 +10,17 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 filename=${1##*/}
 sampleID=${filename%%_*} #This will remove the library ID, lane number and read number
+
+# deal with duplicated samples
+# this will keep incrementing the sampleID until a unique one is found
+replicate=1
+baseID=$sampleID
+while [[ -d /c8000xd3/rnaseq-heath/Mappings/$sampleID ]]
+  do
+  replicate=$((replicate+1))
+  sampleID=$baseID-$replicate
+  done
+  
 echo "Starting mapping for $sampleID"
 mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500 --mate-std-dev 50 --num-threads 8 \
