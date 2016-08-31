@@ -93,8 +93,20 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/18694/18694",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/17369/17369",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/18055/18055",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_2/15533_2",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18282/18282"
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533-2/15533-2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18282/18282",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15329/15329",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16117/16117",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/16859/16859",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17221/17221",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/17372/17372",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/18653/18653",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/19031/19031",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A138-2/A138-2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A151/A151",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A226-2/A226-2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A254/A254",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/A263/A263"
              )
 LibraryInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt", 
                      header=TRUE, stringsAsFactors=TRUE, sep='\t'
@@ -111,9 +123,16 @@ LibraryInfo <- read.delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgres
 #bam_stat.py
 RSeQCstats <- data.frame()
 for (folder in folders) {
-  temp <- read.delim(paste(folder, ".ex.stats.txt", sep=""), 
-                     header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
-                     )
+  #print(folder)
+  if(file.exists(paste(folder, ".ex.stats.txt", sep=""))){
+    temp <- read.delim(paste(folder, ".ex.stats.txt", sep=""), 
+                header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
+                )
+    } else {
+    temp <- read.delim(paste(folder, ".chr.stats.txt", sep=""), 
+                         header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
+                         )
+    }
   temp[4,2] <-strsplit(temp[4,1], ' +')[[1]][4]
   temp[4,1] <- 'Non primary hits'
   temp <- temp[c(6,7,14),]
@@ -317,193 +336,3 @@ ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads/ReadNumbers, colour=centre, 
 
 `r margin_note("- It looks like both known and novel splice sites continue to be found")`
 
-```{r include=FALSE}
-junction_saturation.py
-RSeQCstats <- data.frame()
-for (folder in folders) {
-  eval(parse(file = paste(folder, ".junctionSaturation_plot.r", sep=""))[2:5])
-  temp<-rbind(
-              data.frame(percent_reads=x, junctions=z, Category='All'),
-              data.frame(percent_reads=x, junctions=y, Category='Known'),
-              data.frame(percent_reads=x, junctions=w, Category='Novel')
-              )
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,2])
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
-  RSeQCstats <- rbind(RSeQCstats, temp)
-}
-
-```
-
-```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-ggplot(RSeQCstats, aes(y=junctions, x=ReadNumbers*percent_reads/100, group=sample, colour=centre)) +
-  geom_point() +
-  #xlim(c(0,500)) +
-  #scale_y_log10() +
-  scale_colour_brewer(type = "qual", palette = 6) +
-  tufte_theme() +
-  theme(legend.position=c(.8,.9)) +
-  facet_wrap(~ Category, scales='free') +
-  xlab("Number of Reads")
-
-```
-
-## Mutation Distribution
-
-```{r include=FALSE}
-#deletion_profile.py, insertion_profile.py, mismatch_profile.py
-RSeQCmutations <- data.frame()
-RSeQCspectrum <- data.frame()
-for (folder in folders) {
-  eval(parse(file = paste(folder, ".insertion_profile.r", sep=""))[c(3,9)])
-  eval(parse(file =paste(folder, ".deletion_profile.r", sep=""))[3])
-  eval(parse(file =paste(folder, ".mismatch_profile.r", sep=""))[1:12])
-  read_len = length(A2C)
-  SNP_types<- data.frame(Position=rep(1:read_len, 12), 
-                         num_SNPs=c(A2C, A2G, A2T, C2A, C2G, C2T, G2A, 
-                                    G2C, G2T, T2A, T2C, T2G
-                                    ), 
-                         Mutation=c(rep('A2C', read_len), rep('A2G', read_len), 
-                                    rep('A2T', read_len), rep('C2A', read_len), 
-                                    rep('C2G', read_len), rep('C2T', read_len), 
-                                    rep('G2A', read_len), rep('G2C', read_len), 
-                                    rep('G2T', read_len), rep('T2A', read_len), 
-                                    rep('T2C', read_len), rep('T2G', read_len)
-                                    ), 
-                         NonDirectional=c(rep('AC', read_len), rep('AG', read_len),
-                                          rep('AT', read_len), rep('CA', read_len),
-                                          rep('CG', read_len), rep('CT', read_len),
-                                          rep('CT', read_len), rep('CG', read_len),
-                                          rep('CA', read_len), rep('AT', read_len),
-                                          rep('CT', read_len), rep('AC', read_len)
-                                          ), 
-                         SNPclass=c(rep('Transversion', read_len), 
-                                    rep('Transition', read_len), 
-                                    rep('Transversion', read_len),
-                                    rep('Transversion', read_len),
-                                    rep('Transversion', read_len), 
-                                    rep('Transition', read_len), 
-                                    rep('Transition', read_len), 
-                                    rep('Transversion', read_len),
-                                    rep('Transversion', read_len),
-                                    rep('Transversion', read_len),
-                                    rep('Transition', read_len),
-                                    rep('Transversion', read_len)
-                                    ),
-                      PositionGroup = rep(c('First position', 
-                                            rep('First 5', 4), 
-                                            rep('Middle', read_len - 10),
-                                            rep('Last 5', 4), 'Last position'
-                                            ), 
-                                          12
-                                          ) 
-                     )
-
-  SNPcount <- group_by(SNP_types, Position) %>% summarise(Number = sum(num_SNPs)) 
-
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  mutations <- data.frame(Position=c(1:read_len, 
-                                     1:length(r1_insert_count),
-                                     1:length(r2_insert_count),
-                                     1:length(value)
-                                     ), 
-                          Number=c(SNPcount$Number,
-                                   r1_insert_count, 
-                                   r2_insert_count,
-                                   value
-                                   ), 
-                          ReadNumbers = rep(as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique), 
-                                            read_len + length(r1_insert_count) + length(r2_insert_count) + length(value)),
-                          Type=factor(c(rep('SNP', read_len), 
-                                        rep('Read 1 insertion',
-                                            length(r1_insert_count)
-                                            ),
-                                        rep('Read 2 insertion',
-                                            length(r2_insert_count)
-                                            ),
-                                        rep('Deletion', 
-                                            length(value)
-                                            )
-                                    ))
-                          )
-
-  SNPspectrum <- SNP_types %>% 
-    group_by(Mutation, PositionGroup, SNPclass) %>% 
-    summarise(Number=sum(num_SNPs))
-  SNPspectrum <-rbind(SNPspectrum, 
-                      SNP_types %>% 
-                        group_by(Mutation, SNPclass) %>%
-                        summarise(Number=sum(num_SNPs), 
-                                  PositionGroup = 'All'
-                                 )
-                      )
-  SNPspectrum$Bases <- ifelse(SNPspectrum$PositionGroup == 'First position' |
-                                SNPspectrum$PositionGroup == 'Last position', 1, 
-                              ifelse(SNPspectrum$PositionGroup == 'First 5' |
-                                       SNPspectrum$PositionGroup == 'Last 5', 4,
-                                     ifelse(SNPspectrum$PositionGroup == 'Middle', 
-                                       read_len-10,
-                                       read_len
-                                      )
-                                  )
-                            )
-  SNPspectrum$PositionGroup <- factor(SNPspectrum$PositionGroup, 
-                                    levels=c('First position', 
-                                             'First 5', 
-                                             'Middle', 
-                                             'Last 5', 
-                                             'Last position',
-                                             'All'
-                                             )
-                                    )
-  SNPspectrum$Mutation <- factor(SNPspectrum$Mutation, 
-                               levels=c('A2G', 'T2C', 'G2A', 'C2T', 'A2C', 'T2G',
-                                        'A2T', 'T2A', 'C2G', 'G2C', 'G2T', 'C2A'
-                                        )
-                               )
-  mutations$sample <- sample
-  mutations$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
-  RSeQCmutations <- rbind(RSeQCmutations, mutations)
-  SNPspectrum$sample <- sample
-  RSeQCspectrum <- rbind(RSeQCspectrum, SNPspectrum)
-}
-
-```
-
-
-`r margin_note("- Exeter samples appear to have dropped bases throughout, with big peaks in many samples at bases 83 and 84, especially for 16428 and 15533_2")`
-`r margin_note("- There is a dip in Q scores at positions 78 and 79 of the unclipped reads, which is 5 bp less than 83-84, but I feel like the corresponding bases should be 88 and 89 in the unclipped reads")`
-`r margin_note("- 17922 has a big spike of insertions at the end of read 1")`
-`r margin_note("- The Exeter samples also have slightly more SNPs, which I'm guessing is caused by incorrect placement of the gaps in the alignments")`
-
-
-```{r dev.args = list(bg = 'transparent'), warning=FALSE}
-#ggplot(subset(RSeQCmutations, Position > 84 | Position < 83), aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=centre)) + 
-#ggplot(subset(RSeQCmutations, sample != 16428 & sample != '15533_2' & sample != 17922 & sample != 16385), aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=centre)) + 
-#ggplot(subset(RSeQCmutations, centre !='Exeter' & sample > 18666), aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=sample)) + 
-ggplot(RSeQCmutations, aes(x=Position, y=Number/ReadNumbers*1000000, group=sample, colour=centre)) + 
-  geom_line() + 
-  tufte_theme() +
-  scale_colour_brewer(type = "qual", palette = 6)  + 
-  theme(legend.position=c(.8,.9)) + 
-  #scale_y_log10() +
-  facet_wrap(~ Type, nrow=2) +
-  ylab("Mutations per Million Reads")
-```
-
-`r margin_note("- Because reads 1 and 2 are mixed, equal numbers for symetric mutations")`
-`r margin_note("- A2G/T2C and A2C/T2G mutations dominate at the very ends of reads, with the former dominating at the start and the latter at the end")`
-`r margin_note("- These classes are also disproportionate throughout the reads, with G2A/C2T (transitions) also being higher than other (transversion) mutations")`
-
-
-```{r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=40}
-ggplot(RSeQCspectrum, aes(x=Mutation, y=Number/Bases, fill=SNPclass)) + 
-  geom_bar(stat='identity') + 
-  tufte_theme() + 
-  #facet_grid(sample ~ PositionGroup, scales='free_y') + 
-  facet_grid(sample ~ PositionGroup) + 
-  theme(axis.text.x=element_text(angle=90)) + 
-  scale_fill_brewer(type = "qual", palette = 6) + 
-  theme(legend.position=c(.95,.95))
-```
