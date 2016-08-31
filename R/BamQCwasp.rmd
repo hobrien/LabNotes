@@ -23,8 +23,8 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15240/15240",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15468.nrwasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15468.dedup",
              #"/Users/heo3/BTSync/FetalRNAseq/BamQC/15533/15533",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533_2/15533_2",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15533_2.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/15533-2/15533-2",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15533-2.nrwasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/15641/15641",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/15641.nrwasp",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15641.dedup",
@@ -238,7 +238,19 @@ folders <- c("/Users/heo3/BTSync/FetalRNAseq/BamQC/15240/15240",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A138.dedup",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/A226/A226",
              "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/A226.nrwasp",
-             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A226.dedup"
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A226.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/15329.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/16117.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/16859.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/17221.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/Wasp/17221.nrwasp",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/18653.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/19031.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A138-2.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A151.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A226-2.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A254.dedup",
+             "/Users/heo3/BTSync/FetalRNAseq/BamQC/WaspDedup/A263.dedup"
              )
 ```
 
@@ -374,30 +386,30 @@ ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=mapping, group=sample)) +
 `r margin_note("- For some reason, WASP remapping appears to clean up samples with low proportions. Dono")`
 
 ```{r dev.args = list(bg = 'transparent')}
-RSeQCstats <- data.frame()
-for (folder in folders) {
-  #print(folder)
-  temp <- read.delim(paste(folder, ".geneBodyCoverage.txt", sep=""),
-                     header=FALSE
-                     )
-  temp <-  as.data.frame(t(temp[,-1]))
-  sample <- tail(strsplit(folder, '/')[[1]], 1)
-  temp$sample <- sample
-  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', ifelse(grepl("dedup",folder), 'Dedup', 'All'))
-  temp$V2 <- temp$V2
-  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags)
-  RSeQCstats <- rbind(RSeQCstats, temp)
-}
+#RSeQCstats <- data.frame()
+#for (folder in folders) {
+#  print(folder)
+#  temp <- read.delim(paste(folder, ".geneBodyCoverage.txt", sep=""),
+#                     header=FALSE
+#                     )
+#  temp <-  as.data.frame(t(temp[,-1]))
+#  sample <- tail(strsplit(folder, '/')[[1]], 1)
+#  temp$sample <- sample
+#  temp$mapping <- ifelse(grepl("wasp",folder), 'Wasp', ifelse(grepl("dedup",folder), 'Dedup', 'All'))
+#  temp$V2 <- temp$V2
+#  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags)
+#  RSeQCstats <- rbind(RSeQCstats, temp)
+#}
 
 #ggplot(subset(RSeQCstats, sample != 17175), aes(x=V1, y=V2/ReadNumbers, colour=centre, group=sample)) +
-ggplot(RSeQCstats, aes(x=V1, y=V2/ReadNumbers, colour=mapping, group=sample)) +
-  geom_line() +
-  ylab('reads') +
-  tufte_theme() +
-  theme(legend.position=c(0.1,.9)) +
-  scale_colour_brewer(type = "qual", palette = 6) +
-  xlab('transcript percentile') +
-  ylab("proportion of expressed tags")
+#ggplot(RSeQCstats, aes(x=V1, y=V2/ReadNumbers, colour=mapping, group=sample)) +
+#  geom_line() +
+#  ylab('reads') +
+#  tufte_theme() +
+#  theme(legend.position=c(0.1,.9)) +
+#  scale_colour_brewer(type = "qual", palette = 6) +
+#  xlab('transcript percentile') +
+#  ylab("proportion of expressed tags")
   
 ```
 
