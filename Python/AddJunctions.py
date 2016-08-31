@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 import sys
-import subprocess
 import fileinput
 import warnings
 import mysql.connector 
 from mysql.connector import Error
-from string import maketrans
 
 """
 BED columns are as follows:
@@ -62,58 +60,37 @@ def main(sample_id):
        for line in fileinput.input([]):
            line = line.strip()
            
-           parsed = parse_GTF(line.split('\t'))
+           parsed = parse_BED(line)
            keys = parsed.keys()
-           if parsed['feature'] == 'transcript':
-               try:
-                   cursor.execute('INSERT INTO `CufflinksGTF`(frac,full_read_support,cov,conf_lo,FPKM,feature,start,transcript_id,gene_id,conf_hi,seqid,end,score,strand,source,sample_id) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (
-                          parsed['frac'],
-                          parsed['full_read_support'],
-                          parsed['cov'],
-                          parsed['conf_lo'],
-                          parsed['FPKM'],
-                          parsed['feature'],
-                          parsed['start'],
-                          parsed['transcript_id'],
-                          parsed['gene_id'],
-                          parsed['conf_hi'],
-                          parsed['seqid'],
-                          parsed['end'],
-                          parsed['score'],
-                          parsed['strand'],
-                          parsed['source'],
-                          sample_id,))
-               except mdb.IntegrityError, e:
-                  warnings.warn("%s" % e)
-                  pass
-
-           elif parsed['feature'] == 'exon':
-               try:
-                   cursor.execute('INSERT INTO `CufflinksGTF`(frac,exon_number,cov,conf_lo,FPKM,feature,start,transcript_id,gene_id,conf_hi,seqid,end,score,strand,source,sample_id) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (
-                          parsed['frac'],
-                          parsed['exon_number'],
-                          parsed['cov'],
-                          parsed['conf_lo'],
-                          parsed['FPKM'],
-                          parsed['feature'],
-                          parsed['start'],
-                          parsed['transcript_id'],
-                          parsed['gene_id'],
-                          parsed['conf_hi'],
-                          parsed['seqid'],
-                          parsed['end'],
-                          parsed['score'],
-                          parsed['strand'],
-                          parsed['source'],
-                          sample_id,))
-               except mdb.IntegrityError, e:
-                  warnings.warn("%s" % e)
-                  pass
-
+           cursor.execute("SELECT junc_id FROM NovelJunctions WHERE chr = %s AND int_start = %s AND int_end = %s", (parsed['chr'], parsed['int_start'], parsed['int_end'],))
+           junc_id = cursor.fetchall()
+           if len(junc_id) == 0:
+               cursor.execute("SELECT MAX(junc_id) FROM NovelJunctions")
+               max_id = cursor.fetchone()
+               if max_id[0]:
+                   parsed['junc_id'] = max_id[0] + 1
+               else:    
+                   parsed['junc_id'] = 1
            else:
-               warnings.warn("feature %s not recognised" % parsed['feature'])
-           cursor.execute("SELECT * FROM CufflinksGTF")
-           results = cursor.fetchall()
+               parsed['junc_id'] = junc_id[0][0]         
+           try:
+               cursor.execute('INSERT INTO `NovelJunctions`(junc_id,sample_id,start,end,strand,chr,status,score,int_start,int_end) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (
+                          parsed['junc_id'],
+                          sample_id,
+                          parsed['start'],
+                          parsed['end'],
+                          parsed['strand'],
+                          parsed['chr'],
+                          parsed['status'],
+                          parsed['score'],
+                          parsed['int_start'],
+                          parsed['int_end'],
+                          ))
+           except Error as e:
+                  warnings.warn("%s" % e)
+                  pass
+
+
     except Error as e:
         print(e)
  
@@ -127,7 +104,7 @@ def parse_BED (line):
   fields = line.split('\t')
   if len(fields) != 12:
       sys.exit("this is not a BED12 file. There are %s columns" % len(fields))   
-  if fields[9] != 2:
+  if int(fields[9]) != 2:
       sys.exit("this is not a junctions file. There should be 2 blocks, but there are %s" % fields[9])          
   blockSizes = fields[10].split(',')
   if len(blockSizes) != 2:
@@ -135,10 +112,10 @@ def parse_BED (line):
   blockStarts = fields[11].split(',')
   if len(blockStarts) != 2:
       sys.exit("this is not a properly formatted BED file. There are 2 blocks but %s blockStarts" % len(blockSizes))
-  if blockStarts[0] != 0:
+  if int(blockStarts[0]) != 0:
       sys.exit("this is not a properly formatted BED file. The first block starts %s bases from the chromStart" % blockStarts[0])
-  if fields[2] != int(fields[1]) + int(blockStarts[1]) + int(blockSizes[1])
-      sys.exit("this is not a properly formatted BED file. The second block ends at position %i but chromEnd is %i" % (int(fields[1]) + int(blockStarts[1]) + int(blockSizes[1]), int(fields[2]))
+  if int(fields[2]) != int(fields[1]) + int(blockStarts[1]) + int(blockSizes[1]):
+      sys.exit("this is not a properly formatted BED file. The second block ends at position %i but chromEnd is %i" % (int(fields[1]) + int(blockStarts[1]) + int(blockSizes[1]), int(fields[2])))
   
   tags = {}
   tags['chr'] = fields[0]
@@ -147,8 +124,8 @@ def parse_BED (line):
   tags['status'] = fields[3]
   tags['score'] = fields[4]
   tags['strand'] = fields[5]
-  tags['int_start'] = int(chromStart) + int(blockSizes[0] + 1
-  tags['int_end'] = int(chromEnd) - int(blockSizes[1])
+  tags['int_start'] = int(fields[1]) + int(blockSizes[0]) + 1
+  tags['int_end'] = int(fields[2]) - int(blockSizes[1])
   return tags
 
 

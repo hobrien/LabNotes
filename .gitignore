@@ -27,3 +27,6 @@ R/*.png
 
 # ipython notebook checkpoints
 Python/.ipynb_checkpoints/*
+
+# Images
+*.png
