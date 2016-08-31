@@ -32,4 +32,4 @@ bash ~/SubmissionScripts/GTcheck.sh $sampleID
 index=`grep $name ~/LabNotes/VCFindex.txt | cut -f 2`
 bash ~/LabNotes/SubmissionScripts/WASPnonRef.sh $sampleID $index
 bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam
-bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.dedup.bam
+bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.dedup.bam

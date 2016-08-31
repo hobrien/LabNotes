@@ -48,5 +48,5 @@ echo "Finished WASP Non-ref Remapping on $sampleID"
 #bash ~/LabNotes/SubmissionScripts/htseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.bam
 
 python ~/src/WASP/mapping/rmdup_pe.py /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.dedup.bam
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.dedup.bam
 
