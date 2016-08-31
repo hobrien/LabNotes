@@ -1,5 +1,5 @@
 ---
-title: "COunts"
+title: "Counts"
 author: "Heath O'Brien"
 output:
   tufte::tufte_html: default
@@ -10,7 +10,6 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 rm(list=ls())
 library(dplyr)
-library(data.table)
 library(ggplot2)
 library(tidyr)
 library(tufte)
@@ -25,7 +24,6 @@ source("~/BTSync/Code/R/FormatGGplot.R")
 
 ```
 
-`r margin_note("- 'multiple classes' is the only class that shows evidence of saturation")`
 
 ``` {r dev.args = list(bg = 'transparent'), warning=FALSE, fig.height=8}
 Counts <- read.delim("~/BTSync/FetalRNAseq/Counts/chr18:55403100-55404500.counts.txt", header=FALSE)
