@@ -23,3 +23,6 @@ echo "Sorting and indexing $sampleID"
 samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/accepted_hits.bam /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort
 samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort.bam
 echo "Finished mapping for $sampleID"
+bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort.bam
+bash ~/LabNotes/SubmissionScripts/htseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam
+bash ~/LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam
