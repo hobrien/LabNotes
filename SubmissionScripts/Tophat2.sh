@@ -26,3 +26,7 @@ echo "Finished mapping for $sampleID"
 bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.sort.bam
 bash ~/LabNotes/SubmissionScripts/htseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam
 bash ~/LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam
+bash ~/LabNotes/SubmissionScripts/DivideBAM.sh $sampleID
+bash ~/LabNotes/SubmissionScripts/CallSNPs.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.sort.bam
+bash ~/SubmissionScripts/GTcheck.sh $sampleID
+
