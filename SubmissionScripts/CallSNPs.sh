@@ -14,8 +14,9 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 filename=${1##*/}
-filename=${filename#*.}
+#filename=${filename#*.}
 filename=${filename%%.bam}
+filename=${filename%%.sort}
 #~/bin/samtools mpileup -uf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa /c8000xd3/rnaseq-heath/Mappings/15240/BAM/Chromosomes/15240.chr22.bam | ~/bin/bcftools call -mv -Ob > /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/chr22.raw.bcf
 ~/bin/samtools mpileup -uf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa $@ \
    | ~/bin/bcftools call -mv -Ob > /c8000xd3/rnaseq-heath/Genotypes/SNPcalls/$filename.raw.bcf
