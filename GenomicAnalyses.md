@@ -150,7 +150,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         
         - ``` find Uncompressed/ -name summary.txt | xargs perl -pe 's/\..*//' >>summary.txt```
     - Extract the number of reads for each SampleID
-        - ```find Uncompressed/ -name fastqc_data.txt | xargs grep 'Total Sequences' | grep -v trimmed | perl -pe 's/(\.sanfastq)?_fastqc\/fastqc_data\.txt\:Total Sequences//' | perl -pe 's/\.\///' > seq_lengths.txt```
+        - ```find Uncompressed/ -name fastqc_data.txt | xargs grep 'Total Sequences' | grep -v trimmed | perl -pe 's/(\.sanfastq)?_fastqc\/fastqc_data\.txt\:Total Sequences//' | perl -pe 's/.*\///' > seq_lengths.txt```
     - Results are analysed in FastQC.md
 
 ##Trimming sequences
