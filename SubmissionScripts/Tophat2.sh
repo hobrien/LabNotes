@@ -39,7 +39,7 @@ bash ~/LabNotes/SubmissionScripts/htseq-count.sh /c8000xd3/rnaseq-heath/Mappings
 bash ~/LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam
 bash ~/LabNotes/SubmissionScripts/DivideBAM.sh $sampleID
 bash ~/LabNotes/SubmissionScripts/CallSNPs.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.chr22.bam
-bash ~/SubmissionScripts/GTcheck.sh $sampleID
+bash ~/LabNotes/SubmissionScripts/GTcheck.sh $sampleID
 index=`grep $sampleID ~/LabNotes/VCFindex.txt | cut -f 2`
 bash ~/LabNotes/SubmissionScripts/WASPnonRef.sh $sampleID $index
 bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam
