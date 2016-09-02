@@ -40,7 +40,7 @@ bash ~/LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mapping
 bash ~/LabNotes/SubmissionScripts/DivideBAM.sh $sampleID
 bash ~/LabNotes/SubmissionScripts/CallSNPs.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.chr22.bam
 bash ~/SubmissionScripts/GTcheck.sh $sampleID
-index=`grep $name ~/LabNotes/VCFindex.txt | cut -f 2`
+index=`grep $sampleID ~/LabNotes/VCFindex.txt | cut -f 2`
 bash ~/LabNotes/SubmissionScripts/WASPnonRef.sh $sampleID $index
 bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.sorted.bam
 bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.nonref.merged.dedup.bam
