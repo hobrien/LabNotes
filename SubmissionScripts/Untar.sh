@@ -3,21 +3,21 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
-file=$@
-
-if [[ $file == *"tar.gz" ]]
-then
-    tar -xzf $file
-elif [[ $file == *"tar.bz2" ]]
-then
-    tar -xjf $file
-elif [[ $file == *"tar" ]]
-then
-    tar -xf $file
-elif [[ $file == *"gz" ]]
-then
-    gunzip $file
-else
-    echo "extension not recognised"
-fi   
- 
+for file in $@
+do
+    if [[ $file == *"tar.gz" ]]
+    then
+        tar -xzf $file
+    elif [[ $file == *"tar.bz2" ]]
+    then
+        tar -xjf $file
+    elif [[ $file == *"tar" ]]
+    then
+        tar -xf $file
+    elif [[ $file == *"gz" ]]
+    then
+        gunzip $file
+    else
+        echo "extension not recognised"
+    fi   
+done 
