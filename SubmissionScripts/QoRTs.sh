@@ -12,4 +12,4 @@ java -jar ~/src/QoRTs.jar QC \
 --minMAPQ 50 \
 $1 \
 /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
-/c8000xd3/rnaseq-heath/Carolina
+$2
