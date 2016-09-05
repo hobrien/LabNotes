@@ -20,6 +20,7 @@ brew cask install mactex  # need to update TexShop before it will work
 brew cask install java
 brew cask install skype
 brew cask install bartender
+brew cask install carbon-copy-cloner
 # brew cask install xquartz - this doesn't work. better to install manually. or maybe it's 'cause I didn't log out before trying it
 
 brew cask install anaconda
@@ -47,6 +48,9 @@ brew install mysql  #mysql.server start/stop
 brew install pandoc
 brew install igv
 brew install ImageMagick
+brew install mafft
+brew install trimal
+brew install phyml
 
 # Link pandoc template files
 ln -s ~/BTSync/LaTEX/Templates/letter.latex /usr/local/Cellar/pandoc/1.16.0.2/share/x86_64-osx-ghc-7.10.3/pandoc-1.16.0.2/data/templates/letter.latex
@@ -60,7 +64,17 @@ ln -s ~/BTSync/LaTEX/Templates/report.latex /usr/local/Cellar/pandoc/1.16.0.2/sh
 #    - requires ~/Documents/src/
 
 pip install grip
+pip install ete2
 conda install mysql-connector-python
+conda install -c anaconda biopython=1.67
 
 # this doesn't work no matter how I try to install it: pip install bx-python
 
+# Install bioperl for legacy scripts
+# This has to be done interactively
+# sudo perl -MCPAN -e shell
+#install Module::Build
+#o conf prefer_installer MB
+#o conf commit
+#d /bioperl/
+#install CJFIELDS/BioPerl-1.6.924.tar.gz
