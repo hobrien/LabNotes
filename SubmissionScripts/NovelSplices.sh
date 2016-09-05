@@ -8,8 +8,7 @@
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 
-java -jar ~/src/QoRTs.jar QC \
-                mergeNovelSplices  \
+java -jar ~/src/QoRTs.jar mergeNovelSplices  \
                 --minCount 6 \
                 --stranded \
                 /c8000xd3/rnaseq-heath/Carolina/Counts/ \
