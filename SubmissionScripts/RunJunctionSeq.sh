@@ -5,4 +5,4 @@
 #$ -S /bin/bash
 #
 
-Rscript ~/LabNotyes/R/JunctionSeq.R
+Rscript ~/LabNotes/R/JunctionSeq.R
