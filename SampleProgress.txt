@@ -114,5 +114,5 @@ A263		Cardiff		7489	7506		7526	7552			7675	7675	7675
 18856		Cardiff		7832/7921												
 A139		Cardiff		7833/7960												
 A145		Cardiff		7834/7932												
-18153	both libraries	Edinburgh														
-17054	both libraries	Edinburgh														
+18153-2	both libraries	Edinburgh														
+17054-2	both libraries	Edinburgh														
