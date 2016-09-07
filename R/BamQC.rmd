@@ -15,7 +15,6 @@ library(gridExtra)
 library(RColorBrewer)
 library(tufte)
 rm(list=ls())
-warnings()
 source("~/LabNotes/R/FormatGGplot.R")
 folders <- c("/c8000xd3/rnaseq-heath/Mappings/15533/15533",
              "/c8000xd3/rnaseq-heath/Mappings/16438/16438",
@@ -149,7 +148,7 @@ LibraryInfo <- read.delim("~/LabNotes/SampleProgress.txt",
 #bam_stat.py
 RSeQCstats <- data.frame()
 for (folder in folders) {
-  print(folder)
+  #print(folder)
   if(file.exists(paste(folder, ".ex.stats.txt", sep=""))){
     temp <- read.delim(paste(folder, ".ex.stats.txt", sep=""), 
                 header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
@@ -259,13 +258,13 @@ knitr::kable(
 #inner_distance.py
 RSeQCstats <- data.frame()
 for (folder in folders) {
-  print(folder)
+  #print(folder)
   temp <- read.delim(paste(folder, ".inner_distance_freq.txt", sep=""),
                      header=FALSE
                      )
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp$sample <- sample
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
 ```
@@ -275,9 +274,9 @@ ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=centre, group=sample)) +
   geom_line() +
   ylab('reads') +
   xlab('inner distance') +
-  theme(legend.position=c(.8,.8)) +
   scale_colour_brewer(type = "qual", palette = 6) +
-  tufte_theme() 
+  tufte_theme() +
+  theme(legend.position=c(.8,.8))
 
 ```
 
@@ -297,7 +296,7 @@ for (folder in folders) {
   temp <-  as.data.frame(t(temp[,-1]))
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp$sample <- sample
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
   temp$V2 <- temp$V2
   temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags)
   RSeQCstats <- rbind(RSeQCstats, temp)
@@ -337,7 +336,7 @@ for (folder in folders) {
                 )
   sample <- tail(strsplit(folder, '/')[[1]], 1)
   temp$sample <- sample
-  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
   temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)
   RSeQCstats <- rbind(RSeQCstats, temp)
 }
@@ -346,7 +345,7 @@ for (folder in folders) {
 
 ```{r dev.args = list(bg = 'transparent'), warning=FALSE}
 ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads/ReadNumbers, colour=centre, group=sample)) +
-  geom_point(alpha=.2) +
+  geom_point() +
   xlim(c(0,500)) +
   scale_y_log10() +
   tufte_theme() +
