@@ -10,13 +10,12 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_all"      # working directory for the R session
+workDir <- "/c8000xd3/rnaseq-heath/Counts/MvsF_all"      # working directory for the R session
 
 projectName <- "MvsF"                         # name of the project
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
-targetFile <- "target3.txt"                           # path to the design/target file
-rawDir <- "raw"                                      # path to the directory containing raw counts files
+rawDir <- "/"                                      # path to the directory containing raw counts files
 featuresToRemove <- c("alignment_not_unique",        # names of the features to be removed
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
@@ -42,23 +41,34 @@ colors <- c("dodgerblue","firebrick1",               # vector of colors of each 
 ################################################################################
 setwd(workDir)
 library(devtools)
-load_all(pkg = "~/BTSync/Code/R/SARTools")
+load_all(pkg = "~/src/SARTools")
+#load_all(pkg = "~/BTSync/Code/R/SARTools")
 library(dplyr)
 
 # checking parameters
 # this checks that there is a single batch factor
-checkParameters.DESeq2(projectName=projectName,author=author,targetFile=targetFile,
-                       rawDir=rawDir,featuresToRemove=featuresToRemove,varInt=varInt,
-                       condRef=condRef,batch=batch,fitType=fitType,cooksCutoff=cooksCutoff,
-                       independentFiltering=independentFiltering,alpha=alpha,pAdjustMethod=pAdjustMethod,
-                       typeTrans=typeTrans,locfunc=locfunc,colors=colors)
+#checkParameters.DESeq2(projectName=projectName,author=author,targetFile=targetFile,
+#                       rawDir=rawDir,featuresToRemove=featuresToRemove,varInt=varInt,
+#                       condRef=condRef,batch=batch,fitType=fitType,cooksCutoff=cooksCutoff,
+#                       independentFiltering=independentFiltering,alpha=alpha,pAdjustMethod=pAdjustMethod,
+#                       typeTrans=typeTrans,locfunc=locfunc,colors=colors)
 
 # loading target file
 # this checks the batch so it will need to be modified
 # once this is loaded, I can filter it to remove samples with RIN < 5
-target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=batch)
-sample_info <- read.delim("~/BTSync/FetalRNAseq/Info/sample_info.txt")
+#target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=batch)
+
+target <- read.delim("~/LabNotes/MvsF.txt")                        # path to the design/target file
+#target <- read.delim("~/BTSync/FetalRNAseq/LabNotes/MvsF.txt")                        # path to the design/target file
+
+sample_info <- read.delim("~/LabNotes/sample_info.txt")
+#sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
 target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
+
+sample_progress <- read.delim("~/LabNotes/SampleProgress.txt")
+#sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
+target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample")) %>% View()
+
 if (!is.null(RIN_cutoff)) {
   target <- filter(target, RIN >= RIN_cutoff)
 }
