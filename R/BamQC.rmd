@@ -361,3 +361,32 @@ ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads/ReadNumbers, colour=centre, 
 
 `r margin_note("- It looks like both known and novel splice sites continue to be found")`
 
+```{r include=FALSE}
+#junction_saturation.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  eval(parse(file = paste(folder, ".junctionSaturation_plot.r", sep=""))[2:5])
+  temp<-rbind(
+              data.frame(percent_reads=x, junctions=z, Category='All'),
+              data.frame(percent_reads=x, junctions=y, Category='Known'),
+              data.frame(percent_reads=x, junctions=w, Category='Novel')
+              )
+  sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$sample <- sample
+  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,2])
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+```
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(RSeQCstats, aes(y=junctions, x=ReadNumbers*percent_reads/100, group=sample, colour=centre)) +
+  geom_point() +
+  #xlim(c(0,500)) +
+  #scale_y_log10() +
+  scale_colour_brewer(type = "qual", palette = 6) +
+  tufte_theme() +
+  theme(legend.position=c(.8,.9)) +
+  facet_wrap(~ Category, scales='free') +
+  xlab("Number of Reads")
+  ```
