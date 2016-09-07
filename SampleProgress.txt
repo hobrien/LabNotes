@@ -90,27 +90,29 @@ A226		Edinburgh		3586	3652		6082				5732	6291/6367	5732	5732	3755
 A226-2	duplicate	Cardiff		7487	7505		7524	7550			7673	7673	7673			
 A254		Cardiff		7488	7514		7525	7551			7671	7671	7671			
 A263		Cardiff		7489	7506		7526	7552			7675	7675	7675			
-15296		Cardiff														
-16483-2		Cardiff														
-17046		Cardiff														
-17111		Cardiff														
-17162		Cardiff														
-17193		Cardiff														
-17264		Cardiff														
-17486		Cardiff														
-17521		Cardiff														
-17666		Cardiff														
-17753		Cardiff														
-17754		Cardiff														
-17932		Cardiff														
-18015		Cardiff														
-18139		Cardiff														
-18382		Cardiff														
-18528		Cardiff														
-18529		Cardiff														
-18540		Cardiff														
-18611		Cardiff														
-18655-2		Cardiff														
-18856		Cardiff														
-A139		Cardiff														
-A145		Cardiff														
+15296		Cardiff		7811/7910												
+16483-2		Cardiff		7812/7935												
+17046		Cardiff		7813/7906												
+17111		Cardiff		7814/7913												
+17162		Cardiff		7815/7934												
+17193		Cardiff		7816/7907												
+17264		Cardiff		7817/7914												
+17486		Cardiff		7818/7958												
+17521		Cardiff		7819/7919												
+17666		Cardiff		7820/7912												
+17753		Cardiff		7821/7962												
+17754		Cardiff		7822												
+17932		Cardiff		7823/7959												
+18015		Cardiff		7824/7920												
+18139		Cardiff		7825/7961												
+18382		Cardiff		7826/7916												
+18528		Cardiff		7827/7933												
+18529		Cardiff		7828/7915												
+18540		Cardiff		7829/7909												
+18611		Cardiff		7830/7917												
+18655-2		Cardiff		7831/7911												
+18856		Cardiff		7832/7921												
+A139		Cardiff		7833/7960												
+A145		Cardiff		7834/7932												
+18153	both libraries	Edinburgh														
+17054	both libraries	Edinburgh														
