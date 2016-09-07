@@ -148,9 +148,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - Uncompress all files and concatenate
         - ``` unzip -d FastQC/Uncompressed 'FastQC/*.zip'```
         
-        - ``` find Uncompressed/ -name summary.txt | xargs perl -pe 's/.*\///' >summary.txt```
+        - ``` find Uncompressed/ -name summary.txt | grep -v SRR | grep -v Undetermined | grep -v _CER_ | grep -v _T_ctx_ | grep -v trim | xargs perl -pe 's/.*\///' >summary.txt```
     - Extract the number of reads for each SampleID
-        - ```find Uncompressed/ -name fastqc_data.txt | xargs grep 'Total Sequences' | grep -v trimmed | perl -pe 's/(\.sanfastq)?_fastqc\/fastqc_data\.txt\:Total Sequences//' | perl -pe 's/.*\///' > seq_lengths.txt```
+        - ```find Uncompressed/ -name fastqc_data.txt | xargs grep 'Total Sequences' | grep -v trim | grep -v SRR | grep -v Undetermined | grep -v _CER_ | grep -v _T_ctx_ | perl -pe 's/(\.sanfastq)?_fastqc\/fastqc_data\.txt\:Total Sequences//' | perl -pe 's/.*\///' > seq_lengths.txt```
     - Results are analysed in FastQC.md
 
 ##Trimming sequences
