@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_medium_noA"      # working directory for the R session
+workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_young"      # working directory for the R session
 
 projectName <- "MvsF"                         # name of the project
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
@@ -24,7 +24,7 @@ varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
 batch <- c("Centre", "PCW", "RIN")                  # blocking factor: NULL (default) or "batch" for example
 RIN_cutoff <- 0
-PCW_cutoff <- c(14, 20)
+PCW_cutoff <- c(10, 14)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- TRUE                                  # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
@@ -72,7 +72,7 @@ if (!is.null(RIN_cutoff)) {
   target <- filter(target, RIN >= RIN_cutoff)
 }
 if (!is.null(PCW_cutoff)) {
-  target <- filter(target, PCW >= PCW_cutoff[1] & PCW <= PCW_cutoff[2])
+  target <- filter(target, PCW >= PCW_cutoff[1] & PCW < PCW_cutoff[2])
 }
 target <- filter(target, ! grepl('A', label))
 # loading counts
@@ -150,14 +150,14 @@ write.table(MalevsFemale.complete, file="tables/Background.txt", sep="\t", quote
 ggplot(target, aes(x=PCW)) +
   geom_histogram(binwidth=1) +
   facet_grid(Sex ~ .) +
-  scale_y_continuous(breaks=c(0,2,4,6,8,10)) +
-  tufte_theme()
+  tufte_theme() +
+  scale_y_continuous(breaks=seq(0,100, 2))
 ggsave("figures/PCW_hist.png")
 
 ggplot(target, aes(x=RIN)) +
   geom_histogram(binwidth=1) +
   facet_grid(Sex ~ .) +
-  scale_y_continuous(breaks=c(0,2,4,6,8,10)) +
-  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9)) +
+  scale_y_continuous(breaks=seq(0,100,2)) +
+  scale_x_continuous(breaks=seq(0,12,1)) +
   tufte_theme()
 ggsave("figures/RIN_hist.png")
