@@ -16,7 +16,7 @@ library(tidyr)
 library(readr)
 library(tufte)
 rm(list=ls())
-source("~/BTSync/Code/R/FormatGGplot.R")
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 ```
 
 #AS3MT (Deduplicated)
@@ -24,21 +24,45 @@ source("~/BTSync/Code/R/FormatGGplot.R")
 `r margin_note("- There appear to be two cases of samples with the incorrect genotype (one T|T genotype with 55% C and one T|C genotype with 100% C (3 others have very low read counts)")`
 
 
+```{r }
+GetCounts<-function(count_file, riskVar_file, ExpressedSNP_file) {
+    counts <- read_tsv(count_file, 
+                       col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'),
+                       col_types = cols(chr="c", 
+                                        pos="i", 
+                                        ref_base="c", 
+                                        ref="i",
+                                        alt="i",
+                                        sample="c"
+                                        )
+                       )
+    riskVar <- read_tsv(riskVar_file, 
+                        col_names=c('chr', 'pos', 'riskVar', 'sample'), 
+                        col_types =cols(chr='c', 
+                                        pos='i', 
+                                        riskVar='c', 
+                                        sample='c'
+                                        )
+                        )
+    ExpressedSNP <- read_tsv(ExpressedSNP_file,
+                             col_names=c('chr', 'pos', 'ExpressedSNP', 'sample'),
+                             col_types =cols(chr='c', 
+                                             pos='i', 
+                                             ExpressedSNP='c', 
+                                             sample='c'
+                                             )
+                             )
+    counts <- left_join(counts, riskVar[,c(3,4)]) %>% 
+      left_join(ExpressedSNP[,c(3,4)])
+}
+```
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr10:102901727-102901727.counts.txt", 
-                   col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'), 
-                   col_types = cols(chr="c", pos="i", ref_base="c", ref="i", alt="i", sample="c")
-                   )
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs11191419.txt", 
-                    col_names=c('chr', 'pos', 'riskVar', 'sample'),
-                    col_types = cols(chr="c", pos="i", riskVar="c", sample="c")
-                    )
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs1046778.txt", 
-                    col_names=c('chr', 'pos', 'ExpressedSNP', 'sample'),
-                    col_types = cols(chr="c", pos="i", ExpressedSNP="c", sample="c")
-                    )
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr10:102901727-102901727.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191419.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1046778.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
+
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -111,13 +135,10 @@ ggplot(counts2, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt, colour = match)) +
 `r margin_note("- All Expressed SNP hets are heterozygous for risk var")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr1:98046571-98046571.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs1625579.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2660304.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr1:98046571-98046571.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1625579.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2660304.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -135,13 +156,10 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
 `r margin_note("- Expressed at VERY low levels in developing brain")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr2:192775750-192775750.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
+counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr2:192775750-192775750.counts.txt", col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'))
 counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs17662626.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs13419834.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
+riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs17662626.txt", col_names=c('chr', 'pos', 'riskVar', 'sample'), col_types =cols(chr='c', pos='i', riskVar='c', sample='c'))
+ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs13419834.txt", col_names=c('chr', 'pos', 'ExpressedSNP', 'sample'), col_types =cols(chr='c', pos='i', ExpressedSNP='c', sample='c'))
 counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
@@ -159,14 +177,10 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
 `r margin_note("- Expression of alt allele is higher in the heterozygote, but not significant")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/chr6:30186422-30186422.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2021722.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2074473.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/chr6:30186422-30186422.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2021722.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2074473.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -191,8 +205,7 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 
 ## deduplicated
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr6:30186422-30186422.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
+counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr6:30186422-30186422.counts.txt", col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'))
 counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
 
 counts <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% mutate(riskVar = ifelse(riskVar == 'T|C', 'C|T', as.character(riskVar)))
@@ -212,14 +225,10 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- Non-significant")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/chr8:2937908-2937908.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs10503253.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2291319.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/chr8:2937908-2937908.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs10503253.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2291319.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -242,9 +251,8 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 
 ## deduplicated
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr8:2937908-2937908.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr8:2937908-2937908.counts.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 
 counts <- filter(counts, ExpressedSNP == 'G|T' | ExpressedSNP == 'T|G') %>% mutate(riskVar = ifelse(riskVar == 'C|A', 'A|C', as.character(riskVar)))
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
@@ -262,14 +270,10 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- Non-significant")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr8:88039069-88039069.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs7004633.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2664370.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr8:88039069-88039069.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7004633.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2664370.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -295,9 +299,8 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- After deduplication, expression of the alt allele is slightly higher for the heterozygote")`
 `r margin_note("- It is worth pointing out that the sample size is also higher for the deduplicated dataset because the remapping has completed for additional samples")`
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr8:88039069-88039069.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr8:88039069-88039069.counts.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 
 counts <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
 ggplot(counts, aes(x=riskVar, y=alt/ref, size=ref+alt)) +
@@ -315,13 +318,10 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- All samples that are heterozygose for the expressed SNP are also heterozygous for the risk SNP")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr10:103054405-103054405.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs7914558.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2275271.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr10:103054405-103054405.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7914558.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2275271.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
@@ -339,14 +339,10 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
 `r margin_note("- Slight decrease in alt allele, which is marginally significant")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/chr10:103089711-103089711.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs11191580.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs3740387.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/chr10:103089711-103089711.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191580.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs3740387.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -372,9 +368,8 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- After deduplication, decrease in alt allele expression is highely significant")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr10:103089711-103089711.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr10:103089711-103089711.counts.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 
 counts <- filter(counts, ExpressedSNP == 'A|G' | ExpressedSNP == 'G|A') %>% mutate(riskVar = ifelse(riskVar == 'T|C', 'C|T', as.character(riskVar)))
 ggplot(counts, aes(x=riskVar, y=alt/ref, size=ref+alt)) +
@@ -394,14 +389,10 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- No significant difference")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/chr11:125609468-125609468.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs548181.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs2241502.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/chr11:125609468-125609468.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs548181.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2241502.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -427,9 +418,8 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- Deduplication does not change result")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr11:125609468-125609468.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr11:125609468-125609468.counts.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 
 counts <- filter(counts, ExpressedSNP == 'A|G' | ExpressedSNP == 'G|A') %>% mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
@@ -448,14 +438,10 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 
 `r margin_note("- Differences are not significant")`
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/chr18:54903114-54903114.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs12966547.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs1944362.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/chr18:54903114-54903114.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs12966547.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1944362.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
@@ -481,9 +467,8 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- After deduplication, the G homozygote has significantly higher alt allele expression")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr18:54903114-54903114.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr18:54903114-54903114.counts.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 
 counts <- filter(counts, ExpressedSNP == 'A|C' | ExpressedSNP == 'C|A') %>% mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
@@ -502,14 +487,10 @@ summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 `r margin_note("- risk allele is EXTREMELY rare")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr18:55228300-55228300.counts.txt", col_names=FALSE)
-colnames(counts) <- c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample')
-counts$sample <- as.character(counts$sample)
-riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs17512836.txt", col_names=FALSE)
-colnames(riskVar) <- c('chr', 'pos', 'riskVar', 'sample')
-ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs8766.txt", col_names=FALSE)
-colnames(ExpressedSNP) <- c('chr', 'pos', 'ExpressedSNP', 'sample')
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr18:55228300-55228300.counts.txt"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs17512836.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs8766.txt"
+counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   geom_jitter(alpha=.2, height=0, width=.25) +
   facet_grid(ExpressedSNP ~ .) +
