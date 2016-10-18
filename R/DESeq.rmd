@@ -1,0 +1,145 @@
+---
+title: "DESeq2 Results"
+author: "Heath O'Brien"
+subtitle: "An implementation in R Markdown"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
+rm(list=ls())
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+```
+
+```{r}
+PlotExpression<-function(geneID, file=All_Samples, geneName='', id="A value that hopefully isn't in the dataset") {
+  maxCooks <-filter(file, Id==geneID)$maxCooks
+  data <- filter(file, Id == geneID) %>%  
+    select(starts_with('norm')) %>%
+    gather() %>%
+    separate(key, into=c('norm', 'label'), sep='[.]') %>%
+    select(label, value) %>%
+    left_join(target, by='label')
+  plot<-  ggplot(data, aes(x=PCW, y=value, colour=Sex)) + 
+      geom_point() + 
+      geom_point(data=subset(data, label==id), colour='orange') +
+      geom_smooth() +
+      ylab("normalised counts") +
+      tufte_theme() +
+      scale_colour_brewer(type = "qual", palette = 6) +
+      ggtitle(paste(geneName, "maxCooks = ", maxCooks)) +
+      theme(legend.position=c(0.1,.9)) +
+      theme(plot.background=element_blank())
+    plot
+}
+```
+
+```{r }
+targetFile <- "~/BTSync/FetalRNAseq/LabNotes/MvsFmac.txt"
+target <- read.delim(targetFile)                        # path to the design/target file
+
+sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
+target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
+
+sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
+target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
+target <- arrange(target, Sex)
+
+All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt")
+
+```
+
+
+```{r}
+PlotExpression('ENSG00000049323.15', All_Samples, 'LTPB1')
+```
+```{r}
+PlotExpression('ENSG00000254338.1', All_Samples, 'MAFA-AS1') # not so clear
+```
+```{r}
+PlotExpression('ENSG00000204054.11', All_Samples, 'LINC00963') # not so clear
+```
+```{r}
+PlotExpression('ENSG00000102967.11', All_Samples, 'DHODH')
+```
+```{r}
+PlotExpression('ENSG00000105137.12', All_Samples, 'SYDE1')
+```
+```{r}
+PlotExpression('ENSG00000077935.16', All_Samples, 'SMC1B', '15641')
+```
+```{r}
+PlotExpression('ENSG00000218536.1', All_Samples, 'AP002530.2', '19052')
+```
+```{r}
+PlotExpression('ENSG00000187416.11', All_Samples, 'LHFPL3')
+```
+```{r}
+PlotExpression('ENSG00000233593.6', All_Samples, 'RP4-665J23.1', '19052')
+```
+
+```{r}
+PlotExpression('ENSG00000170537.12', All_Samples, 'TMC7')
+```
+
+Genes that have a significant sex-by-age interaction are due to outliers at age extremes
+
+nbinomLRT(dds, 
+          full=formula('~ Sex * PCW + Centre + RIN'), 
+          reduced=formula('~ Sex + PCW + Centre + RIN')
+          )
+          
+```{r dev.args = list(bg = 'transparent')}
+PlotExpression('ENSG00000173714.7', All_Samples)
+```
+```{r}
+PlotExpression('ENSG00000187783.11', All_Samples)
+```
+
+```{r}
+PlotExpression('ENSG00000165125.17', All_Samples)
+```
+
+```{r}
+PlotExpression('ENSG00000111405.8', All_Samples)
+```
+
+```{r}
+PlotExpression('ENSG00000118271.9', All_Samples)
+```
+
+```{r}
+#PlotExpression('ENSG00000151962.7', 'RBM46', MalevsFemale.down, '15641')
+#PlotExpression('ENSG00000131914.10', 'LIN28A', MalevsFemale.down, '15641')
+#PlotExpression('ENSG00000205089.7', 'CCNI2', MalevsFemale.down, '15641')
+#PlotExpression('ENSG00000086548.8', 'CEACAM6', MalevsFemale.down, '17812')
+#PlotExpression('ENSG00000238269.8', 'PAGE2B', MalevsFemale.down, '15641')
+#PlotExpression('ENSG00000260822.1', 'GS1-358P8.4', MalevsFemale.down)
+#PlotExpression('ENSG00000167077.12', 'MEI1', MalevsFemale.down, '15641')
+#PlotExpression('ENSG00000102837.6', 'OLMF4', MalevsFemale.down, '17812')
+#PlotExpression('ENSG00000001461.16', 'NIPAL3', MalevsFemale.down)
+#PlotExpression('ENSG00000185053.12', 'SGCZ', MalevsFemale.down)
+#PlotExpression('ENSG00000249937.5', 'RP11-454P21.1', MalevsFemale.down)
+#PlotExpression('ENSG00000240032.1', 'RP11-274H2.3', MalevsFemale.down)
+#PlotExpression('ENSG00000159374.17', 'M1AP', MalevsFemale.down, '15641')
+#PlotExpression('ENSG00000159110.19', 'IFNAR2', MalevsFemale.down)
+
+
+MalevsFemale.down <- read_tsv("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.down.txt",
+                             col_types =cols_only(maxCooks='n')
+                             )
+MalevsFemale.up <- read_tsv("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.up.txt",
+                             col_types =cols_only(maxCooks='n')
+                             )
+maxCooksDF <- bind_rows(data.frame(maxCooks=MalevsFemale.down$maxCooks, Direction="FemaleUp"), data.frame(maxCooks=MalevsFemale.up$maxCooks, Direction="MaleUp"))
+
+ggplot(maxCooksDF, aes(x=maxCooks)) + geom_histogram() +scale_x_log10()+facet_grid(Direction ~ .)
+
+```

@@ -1,0 +1,62 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+
+```
+
+```{r}
+PlotExpression<-function(geneID, file=All_Samples, geneName='', id="A value that hopefully isn't in the dataset") {
+  maxCooks <-filter(file, Id==geneID)$maxCooks
+  data <- filter(file, Id == geneID) %>%  
+    select(starts_with('norm')) %>%
+    gather() %>%
+    separate(key, into=c('norm', 'label'), sep='[.]') %>%
+    select(label, value) %>%
+    left_join(target)
+  plot<-  ggplot(data, aes(x=PCW, y=value, colour=Sex)) + 
+      geom_point() + 
+      geom_point(data=subset(data, label==id), colour='orange') +
+      geom_smooth() +
+      ylab("normalised counts") +
+      tufte_theme() +
+      scale_colour_brewer(type = "qual", palette = 6) +
+      ggtitle(paste(geneName, "maxCooks = ", maxCooks)) +
+      theme(legend.position=c(0.1,.9)) +
+      theme(plot.background=element_blank())
+    plot
+}
+```
+
+```{r }
+targetFile <- "~/BTSync/FetalRNAseq/LabNotes/MvsFmac.txt"
+target <- read.delim(targetFile)                        # path to the design/target file
+
+sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
+target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
+
+sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
+target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
+target <- arrange(target, Sex)
+
+All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt")
+
+```
+
+
+```{r}
+PlotExpression('ENSG00000049323.15', All_Samples, 'LTPB1')
+```
