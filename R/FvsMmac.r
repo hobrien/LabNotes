@@ -10,9 +10,9 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_young"      # working directory for the R session
+workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA"      # working directory for the R session
 
-projectName <- "MvsF"                         # name of the project
+projectName <- "MvsF_12_14_noA"                         # name of the project
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
 rawDir <- "~/BTSync/FetalRNAseq/Counts/raw"                                      # path to the directory containing raw counts files
@@ -22,15 +22,16 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
-batch <- c("Centre", "PCW", "RIN")                  # blocking factor: NULL (default) or "batch" for example
+batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+interact <- NULL #c("PCW")
 RIN_cutoff <- 0
-PCW_cutoff <- c(10, 14)
+PCW_cutoff <- c(12, 14)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- TRUE                                  # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
-alpha <- 0.1                                        # threshold of statistical significance
+alpha <- 0.05                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
-
+testMethod <- 'Wald'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
@@ -45,6 +46,7 @@ setwd(workDir)
 library(devtools)
 load_all(pkg = "~/BTSync/Code/R/SARTools")
 library(dplyr)
+library(tidyr)
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 
 # checking parameters
@@ -75,6 +77,7 @@ if (!is.null(PCW_cutoff)) {
   target <- filter(target, PCW >= PCW_cutoff[1] & PCW < PCW_cutoff[2])
 }
 target <- filter(target, ! grepl('A', label))
+#target <- mutate(target, PCW = factor(floor(PCW)))
 # loading counts
 # this doesn't use the batch info
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
@@ -84,9 +87,17 @@ counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresT
 majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)
 
 # analysis with DESeq2
-out.DESeq2 <- run.DESeq2(counts=counts, target=target, varInt=varInt, batch=batch,
+if (testMethod=='Wald' ) {
+  out.DESeq2 <- run.DESeq2(counts=counts, target=target, varInt=varInt, batch=batch, interact=interact,
                          locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
                          cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
+} else if (testMethod=='LRT' ) {
+  out.DESeq2 <- run.DESeq2.LRT(counts=counts, target=target, varInt=varInt, batch=batch, interact=interact,
+                           locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
+                           cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
+  } else {
+  stop("testMethod nor recognised")
+}
 
 # PCA + clustering
 exploreCounts(object=out.DESeq2$dds, group=target[,varInt], typeTrans=typeTrans, col=colors)
@@ -129,7 +140,8 @@ GetGeneIDs <- function(Ids) {
   geneIDs
 }
 MalevsFemale.up <- read.delim("tables/MalevsFemale.up.txt", check.names=FALSE)
-MalevsFemale.up <- filter(MalevsFemale.up, padj < 0.05) %>% select(Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+MalevsFemale.up <- filter(MalevsFemale.up, padj < 0.05) 
+MalevsFemale.up <- select(MalevsFemale.up, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
 MalevsFemale.up <- bind_cols(GetGeneIDs(MalevsFemale.up$Id), MalevsFemale.up)
 write.table(MalevsFemale.up, file="tables/MaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
 
@@ -148,7 +160,7 @@ write.table(MalevsFemale.complete, file="tables/Background.txt", sep="\t", quote
 
 # Include histograms of PCW and RIN
 ggplot(target, aes(x=PCW)) +
-  geom_histogram(binwidth=1) +
+  geom_histogram(binwidth=1/7) +
   facet_grid(Sex ~ .) +
   tufte_theme() +
   scale_y_continuous(breaks=seq(0,100, 2))
@@ -161,3 +173,4 @@ ggplot(target, aes(x=RIN)) +
   scale_x_continuous(breaks=seq(0,12,1)) +
   tufte_theme()
 ggsave("figures/RIN_hist.png")
+
