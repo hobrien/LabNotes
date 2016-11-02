@@ -37,7 +37,7 @@ locfunc <- "median"                                  # "median" (default) or "sh
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-
+exclude <- c('15641')
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -75,6 +75,9 @@ if (!is.null(RIN_cutoff)) {
 }
 if (!is.null(PCW_cutoff)) {
   target <- filter(target, PCW >= PCW_cutoff[1] & PCW < PCW_cutoff[2])
+}
+if (length(exclude) > 0) {
+  target <- filter(target, !label %in% exclude)
 }
 target <- filter(target, ! grepl('A', label))
 #target <- mutate(target, PCW = factor(floor(PCW)))
