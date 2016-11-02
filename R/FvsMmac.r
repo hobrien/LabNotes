@@ -150,9 +150,12 @@ MalevsFemale.down <- filter(MalevsFemale.down, padj < 0.05) %>% select(Id, Femal
 MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
 write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
 
+# This produces slightly different numbers than the independent filtering used by DESeq2
+# (eg; filtering 40298 vs. 40342). I assume this has something to do with rounding error
+# when means are calculated?
 MalevsFemale.complete <- read.delim("tables/MalevsFemale.complete.txt")
 MalevsFemale.complete$CountMean <- select(MalevsFemale.complete, starts_with('norm')) %>% rowMeans()
-MalevsFemale.complete <- filter(MalevsFemale.complete, CountMean >= as.numeric(tabIndepFiltering(results)[2])) %>% 
+MalevsFemale.complete <- filter(MalevsFemale.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2])) %>% 
   separate(Id, c("Id", "version"), sep='[.]') %>%
   select(Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj)
 write.table(MalevsFemale.complete, file="tables/Background.txt", sep="\t", quote=FALSE, row.names=FALSE)
