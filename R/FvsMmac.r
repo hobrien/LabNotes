@@ -177,3 +177,10 @@ ggplot(target, aes(x=RIN)) +
   tufte_theme()
 ggsave("figures/RIN_hist.png")
 
+# Plot histogram of Cooks distances for DE genes
+# last bin should be read as '100+')
+# counts of 10 should be read as '10+'
+DE.cooks <- as.data.frame(assays(out.DESeq2$dds)[["cooks"]][as.character(rbind(MalevsFemale.up, MalevsFemale.down)$Id),])
+gather(DE.cooks, 'Sample', 'Cooks')  %>% mutate(Cooks = ifelse(Cooks > 100, 100, Cooks)) %>%
+  ggplot(aes(x=Cooks))+geom_histogram(bins=100)+ facet_wrap(~Sample) + coord_cartesian(ylim=c(0, 10))
+ggsave("figures/CooksHist.png")
