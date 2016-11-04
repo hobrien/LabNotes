@@ -54,12 +54,53 @@ target <- arrange(target, Sex)
 
 All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt")
 
+FinalSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks2/tables/MalevsFemale.complete.txt")
+```
+
+# Running DEseq2 via SARTools (at FDR < 0.05)
+- Note that all 'A' samples are >14 weeks and all samples >20 weeks are labelled A
+- When M vs. F Wald test run on all samples (N=108), there are 68 DE genes (mostly on sex chromosomes)
+    - When samples labeled A are excluded (N=100), there are 105 DE genes
+    - When samples < 14 weeks are excluded (N=61), there are 633 DE genes
+    - When samples < 14 and >= 20 weeks are excluded (N=58), there are 1747 DE genes
+        - When samples labeled A are excluded (N=53), there are 2665 DE genes
+
+        
+    - When samples >= 14 weeks are excluded (N=47), there are 47 DE genes
+- When LRT is run on all samples not labeled A (N=100), using Sex * Age in the full model and dropping Sex in the reduced model, there are 154 DE genes
+    - When samples < 14 and >= 20 weeks and labeled A are excluded (N=53), there are 868 DE genes
+
+When the two samples with the most high Cooks distances (15641 and 18432), the number of DE genes actually increases to 2961
+
+When genes with a high maximum Cooks distance (>2) are filtered out, the number of DE genes drops to 1738
+
+This still includes genes where a single sample has a large impact on the results
+```{r}
+PlotExpression('ENSG00000163519.13', FinalSamples, '')
+PlotExpression('ENSG00000244056.3', FinalSamples, '')
+```
+
+Dropping the cutoff to 1 actually increases the number of DE genes slightly to 1763 (presumably because the number of comparasons used in the FDR correction is reduced )
+
+The outliers are still very obvious, but it no longer looks like they are driving all of the differences
+```{r}
+PlotExpression('ENSG00000257531.2', FinalSamples, '')
+PlotExpression('ENSG00000139865.16', FinalSamples, '')
+```
+
+Dropping the cutoff to .75 decreases the number of DE genes very slightly to 1756 
+
+At this cutoff, there is still a lot of spread, but nothing identifiable as an outlier
+```{r}
+PlotExpression('ENSG00000170017.12', FinalSamples, '')
+PlotExpression('ENSG00000231535.5', FinalSamples, '')
 ```
 
 
 ```{r}
 PlotExpression('ENSG00000049323.15', All_Samples, 'LTPB1')
 ```
+
 ```{r}
 PlotExpression('ENSG00000254338.1', All_Samples, 'MAFA-AS1') # not so clear
 ```
@@ -139,7 +180,13 @@ MalevsFemale.up <- read_tsv("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/M
                              col_types =cols_only(maxCooks='n')
                              )
 maxCooksDF <- bind_rows(data.frame(maxCooks=MalevsFemale.down$maxCooks, Direction="FemaleUp"), data.frame(maxCooks=MalevsFemale.up$maxCooks, Direction="MaleUp"))
+```
 
-ggplot(maxCooksDF, aes(x=maxCooks)) + geom_histogram() +scale_x_log10()+facet_grid(Direction ~ .)
+```{r}
+ggplot(maxCooksDF, aes(x=maxCooks)) + 
+  geom_histogram() +
+  scale_x_log10() +
+  tufte_theme() +
+  facet_grid(Direction ~ .)
 
 ```
