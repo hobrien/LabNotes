@@ -10,9 +10,9 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA"      # working directory for the R session
+workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75"      # working directory for the R session
 
-projectName <- "MvsF_12_14_noA"                         # name of the project
+projectName <- "MvsF_14_20_noA_excl_15641_18432_Cooks.75"                         # name of the project
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
 rawDir <- "~/BTSync/FetalRNAseq/Counts/raw"                                      # path to the directory containing raw counts files
@@ -25,9 +25,9 @@ condRef <- "Female"                                      # reference biological 
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 interact <- NULL #c("PCW")
 RIN_cutoff <- 0
-PCW_cutoff <- c(12, 14)
+PCW_cutoff <- c(14, 20)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
-cooksCutoff <- TRUE                                  # TRUE/FALSE to perform the outliers detection (default is TRUE)
+cooksCutoff <- 100000                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
 alpha <- 0.05                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
@@ -37,7 +37,7 @@ locfunc <- "median"                                  # "median" (default) or "sh
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-exclude <- c('15641')
+exclude <- c('15641', '18432', '16428')
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -101,6 +101,9 @@ if (testMethod=='Wald' ) {
   } else {
   stop("testMethod nor recognised")
 }
+mcols(out.DESeq2$dds)$maxCooks <- apply(assays(out.DESeq2$dds)[["cooks"]], 1, max)
+out.DESeq2$results$Male_vs_Female$pvalue[mcols(out.DESeq2$dds)$maxCooks > cooksCutoff] <- NA
+out.DESeq2$results$Male_vs_Female$padj <- p.adjust(out.DESeq2$results$Male_vs_Female$pvalue, method="BH")
 
 # PCA + clustering
 exploreCounts(object=out.DESeq2$dds, group=target[,varInt], typeTrans=typeTrans, col=colors)
