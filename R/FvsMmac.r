@@ -161,11 +161,26 @@ write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE
 # when means are calculated?
 MalevsFemale.complete <- read.delim("tables/MalevsFemale.complete.txt")
 MalevsFemale.complete$CountMean <- select(MalevsFemale.complete, starts_with('norm')) %>% rowMeans()
-MalevsFemale.complete <- filter(MalevsFemale.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2])) %>% 
-  separate(Id, c("Id", "version"), sep='[.]') %>%
-  select(Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj)
-write.table(MalevsFemale.complete, file="tables/Background.txt", sep="\t", quote=FALSE, row.names=FALSE)
+MalevsFemale.complete <- filter(MalevsFemale.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2]))
 
+MalevsFemale.complete <- bind_cols(GetGeneIDs(MalevsFemale.complete$Id), MalevsFemale.complete)
+MalevsFemale.complete <-  separate(MalevsFemale.complete, Id, c("Id"), sep='[.]', extra='drop')
+select(MalevsFemale.complete, Id, GeneID,Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj) %>% 
+  write.table(file="tables/Background2.txt", sep="\t", quote=FALSE, row.names=FALSE)
+
+# Make gtc file for GSEA
+write('#1.2', file = "tables/MvsF.gct")
+MalevsFemale.gct <- select(MalevsFemale.complete, NAME=GeneID, DESCRIPTION=Id, starts_with('norm'))
+colnames(MalevsFemale.gct) <- gsub("norm.", "", colnames(MalevsFemale.gct))
+write(c(nrow(MalevsFemale.gct), ncol(MalevsFemale.gct)-2), file = "tables/MvsF.gct",
+      #ncolumns = if(is.character(x)) 1 else 5,
+      append = TRUE, sep = "\t")
+write.table(MalevsFemale.gct, file="tables/MvsF.gct", sep="\t", quote=FALSE, row.names=FALSE, append=TRUE)
+
+# Make cls file for GSEA
+write(paste(nrow(target), 2, 1), file = "tables/MvsF.cls")
+write("# Female Male", file = "tables/MvsF.cls", append=TRUE)
+write(paste(target$Sex, collapse= " "), file = "tables/MvsF.cls", append=TRUE)
 
 # Include histograms of PCW and RIN
 ggplot(target, aes(x=PCW)) +
