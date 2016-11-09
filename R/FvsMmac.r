@@ -172,6 +172,7 @@ select(MalevsFemale.complete, Id, GeneID,Female,	Male,	FoldChange,	log2FoldChang
 write('#1.2', file = "tables/MvsF.gct")
 MalevsFemale.gct <- select(MalevsFemale.complete, NAME=GeneID, DESCRIPTION=Id, starts_with('norm'))
 colnames(MalevsFemale.gct) <- gsub("norm.", "", colnames(MalevsFemale.gct))
+MalevsFemale.gct <- group_by(MalevsFemale.gct, NAME) %>% do(head(.,1)) 
 write(c(nrow(MalevsFemale.gct), ncol(MalevsFemale.gct)-2), file = "tables/MvsF.gct",
       #ncolumns = if(is.character(x)) 1 else 5,
       append = TRUE, sep = "\t")
