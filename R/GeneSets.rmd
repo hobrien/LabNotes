@@ -1,0 +1,223 @@
+---
+title: "Gene Set Analyses"
+author: "Heath O'Brien"
+subtitle: "An implementation in R Markdown"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
+rm(list=ls())
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggbiplot)
+library(gridExtra)
+library(tufte)
+library(DESeq2)
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+```
+
+```{r}
+# code to convert list of gene names to ENSEMBL IDs
+GetGeneIDs <- function(genes) {
+  geneIDs <- tibble(GeneID=character())
+  for (gene in genes) {
+    geneIDs <- collect(tbl(my_db, sql(paste0("SELECT DISTINCT GencodeFeatures.value AS
+                                             'GeneID' FROM 
+                                             GencodeFeatures, GencodeGTF WHERE 
+                                             GencodeGTF.id = GencodeFeatures.id AND 
+                                             GencodeFeatures.feature = 'gene_id' AND 
+                                             GencodeFeatures.id IN (
+                                             SELECT GencodeGTF.id FROM GencodeGTF, GencodeFeatures WHERE 
+                                             GencodeGTF.id = GencodeFeatures.id AND GencodeFeatures.Value =",
+                                             paste0("'", gene, "'"),
+                                             ")"
+                                             )))) %>%
+      bind_rows(geneIDs, .)
+  }
+  geneIDs
+}
+```
+
+
+```{r }
+PlotPCA <- function(pca, group) {
+  p1 <- ggbiplot::ggbiplot(pca, obs.scale = 1, var.scale = 1, 
+                    groups = group, ellipse = TRUE, 
+                    circle = FALSE, var.axes = FALSE) + 
+                    tufte_theme() +
+                    theme(aspect.ratio=1) +
+                    scale_colour_brewer(type = "qual", palette = 6)
+
+	# axes 1 et 3
+  p2 <- ggbiplot::ggbiplot(pca, choices = c(1,3), obs.scale = 1, var.scale = 1, 
+                    groups = group, ellipse = TRUE, 
+                    circle = FALSE, var.axes = FALSE) +
+                    tufte_theme() +
+                    theme(aspect.ratio=1) +
+                    scale_colour_brewer(type = "qual", palette = 6) +
+                    theme(legend.position=c(.9,.9))
+  
+  grid.arrange(p1, p2, ncol=2)
+}
+```
+
+# Read in data from MvsF_all2 (which includes newer samples) and plot default PCA
+
+`r margin_note("- Modest separation on PC3 when 500 most variable genes used")`
+
+
+```{r }
+load("~/BTSync/FetalRNAseq/Counts/MvsF_all2/MvsF.RData")
+counts.trans <- assay(varianceStabilizingTransformation(out.DESeq2$dds))
+n=min(500,nrow(counts.trans))
+rv = apply(counts.trans, 1, var, na.rm=TRUE)
+pca = prcomp(t(counts.trans[order(rv, decreasing = TRUE), ][1:n,]))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Large seperation on PC2 when Neuronal genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967 used")`
+
+```{r }
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+NeuronalGeneNames <- c("STMN2", "MEF2C", "SCG5", "SLA", "C1orf61", "GPM6B", "SATB2", "NNAT", "MIR100HG", "GNG3", "LOC150568", "MAPT", "GAP43", "MLLT11", "RTN1", "CXADR", "GRIA2", "MEG3", "ARPC5", "KIFAP3", "SNRPN", "BLOC1S3", "SEC11C", "SEMA3C", "FAM110B", "CAMKV", "BHLHE22", "TSPAN7", "STXBP1", "FGF12", "MRFAP1L1", "PLXNA4", "BCL11A", "PPP2R2B", "SNURF", "PHACTR3", "KIAA1598", "ZNF286B", "NREP", "CDK5R1", "MN1", "ETNK1", "RBFOX2", "DLG1", "ZNF238", "SNAP25", "MTSS1", "EIF1B", "ATP6V1G2", "SLC38A1", "CLASP2", "SAT1", "ARPP21", "DCX", "BLCAP", "ATP6V0B", "GRIA1", "CD24", "NFIB", "ATP6V0D1", "EIF2S1", "GPM6A", "VDAC3", "TAGLN3", "ATAT1", "PPP3CA", "CRMP1", "RAP1GDS1", "CELF2", "SERINC1", "WSB2", "ATP6V1B2", "RDH11", "SSU72", "BRK1", "PRKAR2B", "LIN7C", "PPFIA2", "SSR2", "C20orf112", "KIF3C", "SNCA", "UTP6", "CDH13", "TTC3", "TTC28", "CADM2", "LRRC7", "DPYSL3", "REEP5", "PIAS1", "ZFX", "YWHAB", "PKIA", "GNG2", "RASSF2", "LOC494141", "MPC1", "MLLT3", "DLG2", "ACOT7", "ZNF195", "ID2", "PAR-SN", "AK1", "BEX1", "SPIN1", "KIDINS220", "PIP4K2B", "ST6GAL2", "ARPC3", "INA", "ADCY1", "ZNF451", "ATP6AP2", "ACVR2A", "CD200", "STRAP", "GATAD2B", "GNAZ", "BZW2", "TIMM17A", "SPTAN1", "ARPC4", "YWHAH", "BLVRA", "ATP5G3", "FARSB", "COMMD3", "MYT1L", "ATP1B1", "ABLIM1", "FAM190A", "PTPRD", "EZR", "XIST", "FLJ31306", "NEUROD6", "GABRB3", "C3orf70", "SYT11", "SYT1", "LOC647979", "NCALD", "MYL12B", "FRMD6-AS1", "CACUL1", "MIAT", "ZNF286A", "NAV2", "CEP170", "ASNS", "DHX15", "KIF5C", "ZNF512", "NPTN", "PPID", "CAP1", "GUK1", "ARPC2", "TUBB2A", "CSNK1A1", "NME1", "PIP4K2A", "SRM", "LRRC40", "HIST1H1E", "SCG2", "CNR1", "SLC44A5", "AFF3", "ZNF253", "ETFB", "YWHAG", "TRIM2", "SPIRE1", "SEPT3", "ATP6V1A", "CDH11", "PAPSS1")
+write(paste(c("Neuronal", 
+              "PollenEtAl2014", 
+              NeuronalGeneNames
+              ), 
+            collapse= "\t"), 
+      file = "/Users/heo3/BTSync/FetalRNAseq/GSEA/MSigDB/PollenEtAl.gmt", append=FALSE)
+NeuronalGeneIDs <- GetGeneIDs(NeuronalGeneNames)
+counts.trans <- as.data.frame(counts.trans)
+counts.trans$GeneID <- rownames(counts.trans)
+NeuronalGeneCounts <- inner_join(counts.trans, NeuronalGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(NeuronalGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Clear seperation on PC3 when Neural Progenetor Cell genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967 used")`
+
+`r margin_note("- ZNFX1-AS1 converted to ZNFX1")`
+
+```{r }
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+NPCGeneNames <- c("HMGB2", "PSMA6", "ATPIF1", "ACP1", "ACTL6A", "UBE2C", "TSPAN6", "PSMB3", "DAD1", "LSM5", "PTTG1", "TRIM59", "ZFP36L1", "OTX2", "ELP2", "CKS2", "MIF", "ATRAID", "SLMO2", "TPT1", "NUSAP1", "GLT25D1", "CD99", "HIGD2A", "RFC4", "BIRC5", "CDKN3", "PCNA", "GLO1", "CDC123", "LDHA", "GPC3", "ATOX1", "C19orf48", "NUP37", "CKS1B", "CLIC1", "GSTP1", "ECI2", "ENY2", "ENO1", "ESD", "EIF3E", "PTPLAD1", "SLC25A3", "CCNB2", "FABP5", "CDCA3", "QARS", "NAE1", "MAD2L1", "EXOSC8", "KIF15", "FANCD2", "RAB13", "ANP32E", "NUF2", "RPS2", "CCNB1IP1", "LSM4", "ANXA2", "PSMA2", "RRM1", "CNIH4", "MEST", "DLK1", "ODC1", "UQCRC1", "TMEM106C", "SSBP1", "IFITM3", "HSPD1", "KIF23", "PCMT1", "DTYMK", "RPS4Y1", "ALDOA", "MRPS24", "NDUFB11", "TUBA1B", "TOP2A", "COX8A", "ZNFX1", "ATP5G2", "NDUFB3", "CDK1", "MYL12A", "UBL5", "CKAP2L", "WBP5", "VIM", "FABP7", "PABPC1", "MRPS21", "TLK1", "CCNB1", "B2M", "TMBIM6", "EEF1D", "PLK1", "CSRP2", "KIF22", "FRZB", "HMGA2", "AKR1B1", "TOMM5", "ASPM", "GMNN", "TMPO", "LIX1", "DLGAP5", "TECR", "NDUFV2", "KPNA2", "MNF1", "EEF1B2", "SNRPA1", "PRDX6", "CCDC167", "CENPE", "PSMA4", "UBE2T", "CENPW", "HMMR", "UBE2D3", "HSPA5", "SNHG5", "SPCS1", "TMEM60", "FAM162A", "NDUFA6", "SFRP1", "ZCRB1", "MRPL51", "DBI", "TPM1", "KIF20B", "AURKB", "ERH", "PSMA1", "ANXA5", "MDK", "PTPRZ1", "C19orf53", "CNIH", "ZIC2", "SRI", "PHPT1", "POLR2L", "RPL21", "PRDX3", "CD63", "PDCD4", "CENPF", "EIF3M", "ATP5H", "SLC16A1", "NDUFS4", "TPI1", "PSME1", "PSMC6", "HAUS1", "BUB3", "MIS18BP1", "IFT81", "BCAT1", "PAIP2", "CUTA", "SLC39A10", "OSTC", "LOC100507246", "COX6B1", "UBE2E3", "TUBA1C", "PAICS", "NDC80", "SMS", "SHISA2", "PPP2R5C", "EIF4E", "VKORC1", "SEPT2", "CCT5", "DYNLL1", "HSBP1", "C15orf23", "EFNA5", "FAM96A", "PBK", "NUDCD2", "CKAP2", "SAE1", "PGAM1", "TPX2", "SMC4", "IDI1", "PCNP", "SPARC", "RPS15A", "LSM3", "MRPL13", "FDPS", "PSMA3", "NCAPG", "MND1", "CDC20", "CCNG1", "PDIA6", "TXNIP", "GNG5", "TUBB4B", "HBXIP", "CALU", "TCTEX1D2", "SOX9", "WDR54", "DEPDC1B", "C11orf10", "RPS27L", "SCD", "BANF1")
+write(paste(c("NPC", 
+              "PollenEtAl2014", 
+              NPCGeneNames
+              ), 
+            collapse= "\t"), 
+      file = "/Users/heo3/BTSync/FetalRNAseq/GSEA/MSigDB/PollenEtAl.gmt", append=TRUE
+      )
+
+NPCGeneIDs <- GetGeneIDs(NPCGeneNames)
+NPCGeneCounts <- inner_join(counts.trans, NPCGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(NPCGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- No seperation when Radial Glia Cell genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967 used")`
+
+```{r }
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+RadialGliaGeneNames <- c("FOS", "AKAP12", "EGR1", "DKK3", "SLC1A3", "PMP2", "TFAP2C", "SGCE", "TAGLN2", "DOK5", "NFIA", "SLITRK2", "HOPX", "HIST1H1C", "CLU", "TSPAN3", "PTN", "ATP1B2", "HEPN1", "STAM2", "PEA15", "ADK", "FAM107A", "OAT", "GPX3", "DAXX", "BCAN", "HES1", "CDO1", "MRPS26", "DHRS3", "PRTFDC1", "PLCE1", "IRF2BP2", "ITGB8", "DNAJC3", "SBDS", "ZNF434", "GPR98", "HSPH1", "PON2", "NAA15", "DDIT3", "SEC61A1", "ECH1", "SPRY2", "JUN", "HSPA1B", "PSAP", "STIP1", "PDPN", "RFTN2", "C8orf4", "UROD", "FOSB", "STX12", "MOXD1", "SBDSP1", "ADAM9", "GFAP", "TWSG1", "CTNNA1", "ATP1A2", "KLF6", "DDAH1", "MDP1", "DUSP10", "CERS5", "DNAJB1", "SCHIP1", "LIMCH1", "CLIP3", "NDUFV1", "COMT", "CA12", "RRM2B", "PEG3", "CDCA7", "SEMA6A", "GLUD1", "FBXO32", "MLC1", "ILK", "SRR", "NEDD9", "WIPF3", "VIMP", "JAM3", "LTBP1", "PPM1K", "TMX1", "ZWINT", "NPY", "PPT1", "STON2", "AIF1L", "GATM", "GINS2", "F3")
+write(paste(c("RadialGlia", 
+              "PollenEtAl2014", 
+              RadialGliaGeneNames
+              ), 
+            collapse= "\t"), 
+      file = "/Users/heo3/BTSync/FetalRNAseq/GSEA/MSigDB/PollenEtAl.gmt", append=TRUE
+      )
+
+RadialGliaGeneIDs <- GetGeneIDs(RadialGliaGeneNames)
+counts.trans <- as.data.frame(counts.trans)
+counts.trans$GeneID <- rownames(counts.trans)
+RadialGliaGeneCounts <- inner_join(counts.trans, RadialGliaGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(RadialGliaGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+# Read in data from MvsF_14_20_noA (which is the dataset with the most DE genes) and plot default PCA
+
+`r margin_note("- Some separation on PC1 and PC2 when 500 most variable genes used")`
+
+
+```{r }
+load("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA/MvsF_14_20_noA.RData")
+counts.trans2 <- assay(varianceStabilizingTransformation(out.DESeq2$dds))
+n=min(500,nrow(counts.trans2))
+rv = apply(counts.trans2, 1, var, na.rm=TRUE)
+pca = prcomp(t(counts.trans2[order(rv, decreasing = TRUE), ][1:n,]))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Some separation on PC1 for Neuronal genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967")`
+
+```{r }
+counts.trans2 <- as.data.frame(counts.trans2)
+counts.trans2$GeneID <- rownames(counts.trans2)
+NeuronalGeneCounts <- inner_join(counts.trans2, NeuronalGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(NeuronalGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Some separation on PC1 and PC2 for NPC genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967")`
+
+```{r }
+NPCGeneCounts <- inner_join(counts.trans2, NPCGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(NPCGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Slight separation on PC1 for Radial glia genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967")`
+
+```{r }
+RadialGliaGeneCounts <- inner_join(counts.trans2, RadialGliaGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(RadialGliaGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+# Read in data from MvsF_12_14_noA and plot default PCA
+
+`r margin_note("- Some separation on PC1 and PC2 when 500 most variable genes used")`
+
+
+```{r }
+load("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA/MvsF_12_14_noA.RData")
+counts.trans3 <- assay(varianceStabilizingTransformation(out.DESeq2$dds))
+n=min(500,nrow(counts.trans3))
+rv = apply(counts.trans3, 1, var, na.rm=TRUE)
+pca = prcomp(t(counts.trans3[order(rv, decreasing = TRUE), ][1:n,]))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Large separation on PC2 for Neuronal genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967")`
+
+```{r }
+counts.trans3 <- as.data.frame(counts.trans3)
+counts.trans3$GeneID <- rownames(counts.trans3)
+NeuronalGeneCounts <- inner_join(counts.trans3, NeuronalGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(NeuronalGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- Large separation on PC2 for NPC genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967")`
+
+```{r }
+NPCGeneCounts <- inner_join(counts.trans3, NPCGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(NPCGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
+
+`r margin_note("- No separation for Radial glia genes from table S5 of Pollen et al. 2014 doi:10.1038/nbt.2967")`
+
+```{r }
+RadialGliaGeneCounts <- inner_join(counts.trans3, RadialGliaGeneIDs) %>% select(-GeneID)
+pca <- prcomp(t(RadialGliaGeneCounts))
+PlotPCA(pca, target[,varInt])
+```
