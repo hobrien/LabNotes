@@ -16,7 +16,7 @@ library(tidyr)
 library(readr)
 library(tufte)
 rm(list=ls())
-source("~/BTSync/Code/R/FormatGGplot.R")
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 ```
 
 #Compare Effect of Excluding samples with low RIN (< 5)
