@@ -1,0 +1,45 @@
+---
+title: "tSNR"
+output: html_notebook
+---
+
+Calculating tSNR (= transcript Signal to Noise Ratio = Euclidean distance of average gene expression profiles between groups / overall variation among individuals).
+
+```{r}
+library(readr)
+library(dplyr)
+sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
+
+calc_dif_sq<-function(a, b) { (a-b)^2}
+
+calc_tSNR <- function(counts, sample_info) {
+  norm_counts <- select(counts, starts_with('norm'))
+  colnames(norm_counts) <- gsub('norm.', '', colnames(norm_counts))
+  maleIDs <- sample_info %>% filter(BrainBankID %in% colnames(norm_counts)) %>% filter(Sex == 'Male') %>% select(BrainBankID)
+  male_sd <- norm_counts[,as.vector(maleIDs$BrainBankID)] %>%
+    calc_dif_sq(counts$Male) %>% 
+    as.data.frame() %>% 
+    summarise_each(funs(sqrt_sum=sqrt(sum(.)))) %>%
+    rowSums()/(nrow(maleIDs)-1)
+
+  femaleIDs <- sample_info %>% filter(BrainBankID %in% colnames(norm_counts)) %>% filter(Sex == 'Female') %>% select(BrainBankID)
+  female_sd <- norm_counts[,as.vector(femaleIDs$BrainBankID)] %>%
+    calc_dif_sq(counts$Female) %>% 
+    as.data.frame() %>% 
+    summarise_each(funs(sqrt_sum=sqrt(sum(.)))) %>%
+    rowSums()/(nrow(femaleIDs)-1)
+
+  signal <- MalevsFemale_complete %>% mutate(dif_sq=(Male-Female)^2) %>% summarise(sqrt(sum(dif_sq)))
+  tSNR <- signal/(sqrt(male_sd/nrow(maleIDs))+(female_sd/nrow(femaleIDs)))
+  tSNR
+}
+MvsF_14_20_noA_excl_15641_18432_Cooks.75 <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+calc_tSNR(MvsF_14_20_noA_excl_15641_18432_Cooks.75, sample_info)
+
+MvsF_12_14_noA <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+calc_tSNR(MvsF_12_14_noA, sample_info)
+```
+
+Signal to noise ratio is higher for the 12-14 week samples. That was ...unexpected.
