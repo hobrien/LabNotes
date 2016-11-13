@@ -10,9 +10,10 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-workDir <- "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75"      # working directory for the R session
+projectName <- "MvsF_12_20_noA"                         # name of the project
 
-projectName <- "MvsF_14_20_noA_excl_15641_18432_Cooks.75"                         # name of the project
+workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
+
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
 rawDir <- "~/BTSync/FetalRNAseq/Counts/raw"                                      # path to the directory containing raw counts files
@@ -25,9 +26,9 @@ condRef <- "Female"                                      # reference biological 
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 interact <- NULL #c("PCW")
 RIN_cutoff <- 0
-PCW_cutoff <- c(14, 20)
+PCW_cutoff <- c(12, 20)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
-cooksCutoff <- 100000                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
+cooksCutoff <- 1000000                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
 alpha <- 0.05                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
@@ -37,7 +38,7 @@ locfunc <- "median"                                  # "median" (default) or "sh
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-exclude <- c('15641', '18432', '16428')
+exclude <- c() #c('15641', '18432', '16428')
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -99,7 +100,7 @@ if (testMethod=='Wald' ) {
                            locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
                            cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
   } else {
-  stop("testMethod nor recognised")
+  stop("testMethod not recognised")
 }
 mcols(out.DESeq2$dds)$maxCooks <- apply(assays(out.DESeq2$dds)[["cooks"]], 1, max)
 out.DESeq2$results$Male_vs_Female$pvalue[mcols(out.DESeq2$dds)$maxCooks > cooksCutoff] <- NA
@@ -113,6 +114,10 @@ summaryResults <- summarizeResults.DESeq2(out.DESeq2, group=target[,varInt], col
                                           independentFiltering=independentFiltering,
                                           cooksCutoff=cooksCutoff, alpha=alpha)
 
+vst <-as.data.frame(assay(varianceStabilizingTransformation(out.DESeq2$dds)))
+vst$Id <-row.names(vst)
+write.table(vst, file="tables/VST.txt", sep="\t", quote=FALSE, row.names=TRUE)
+
 # save image of the R session
 save.image(file=paste0(projectName, ".RData"))
 
@@ -125,6 +130,10 @@ writeReport.DESeq2(target=target, counts=counts, out.DESeq2=out.DESeq2, summaryR
                    typeTrans=typeTrans, locfunc=locfunc, colors=colors)
 
 # Filter 
+
+# most of the workflow to filter out low counts
+# notAllZero = (rowSums(counts(cds))>0) (need to count rows with coutns <10 and fiter if > 10%)
+# meanSdPlot(vsd[notAllZero, ])
 
 my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
 GetGeneIDs <- function(Ids) {
@@ -163,25 +172,12 @@ MalevsFemale.complete <- read.delim("tables/MalevsFemale.complete.txt")
 MalevsFemale.complete$CountMean <- select(MalevsFemale.complete, starts_with('norm')) %>% rowMeans()
 MalevsFemale.complete <- filter(MalevsFemale.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2]))
 
-MalevsFemale.complete <- bind_cols(GetGeneIDs(MalevsFemale.complete$Id), MalevsFemale.complete)
+#MalevsFemale.complete <- bind_cols(GetGeneIDs(MalevsFemale.complete$Id), MalevsFemale.complete)
 MalevsFemale.complete <-  separate(MalevsFemale.complete, Id, c("Id"), sep='[.]', extra='drop')
-select(MalevsFemale.complete, Id, GeneID,Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj) %>% 
-  write.table(file="tables/Background2.txt", sep="\t", quote=FALSE, row.names=FALSE)
+select(MalevsFemale.complete, Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj) %>% 
+  write.table(file="tables/Background.txt", sep="\t", quote=FALSE, row.names=FALSE)
 
-# Make gtc file for GSEA
-write('#1.2', file = "tables/MvsF.gct")
-MalevsFemale.gct <- select(MalevsFemale.complete, NAME=GeneID, DESCRIPTION=Id, starts_with('norm'))
-colnames(MalevsFemale.gct) <- gsub("norm.", "", colnames(MalevsFemale.gct))
-MalevsFemale.gct <- group_by(MalevsFemale.gct, NAME) %>% do(head(.,1)) 
-write(c(nrow(MalevsFemale.gct), ncol(MalevsFemale.gct)-2), file = "tables/MvsF.gct",
-      #ncolumns = if(is.character(x)) 1 else 5,
-      append = TRUE, sep = "\t")
-write.table(MalevsFemale.gct, file="tables/MvsF.gct", sep="\t", quote=FALSE, row.names=FALSE, append=TRUE)
 
-# Make cls file for GSEA
-write(paste(nrow(target), 2, 1), file = "tables/MvsF.cls")
-write("# Female Male", file = "tables/MvsF.cls", append=TRUE)
-write(paste(target$Sex, collapse= " "), file = "tables/MvsF.cls", append=TRUE)
 
 # Include histograms of PCW and RIN
 ggplot(target, aes(x=PCW)) +
