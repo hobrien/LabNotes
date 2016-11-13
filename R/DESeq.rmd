@@ -27,13 +27,15 @@ source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 `r margin_note("- Very few DE genes when samples > 14 weeks included, and most are on sex chromosomes")`
 `r margin_note("- Excluding non HDBR samples increases the number of DE genes")`
 `r margin_note("- LRT results in slightly more DE genes when analysing all HDBR samples, but far less when analysing samples > 14 PCW")`
+`r margin_note("- For some reason, when I reran the 12-20 week anaysis, the number of DE genes dropped from 105 to 88 (ole results  are in MvsF_12_20_noA_bk)")`
 
 
 ```{r}
+CountFolder <- "~/BTSync/FetalRNAseq/Counts/"
 DESeq2results <- data.frame(BrainBank=c( "All", 
                                          "HDBR only", 
                                          rep("All", 2), 
-                                         rep("HDBR only", 10)
+                                         rep("HDBR only", 12)
                                          ), 
                             AgeRange=c("12-22", 
                                        "12-20", 
@@ -41,33 +43,54 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                        rep("14-20", 2),
                                        "12-14",
                                        "12-20",
-                                       rep("14-20", 7)
+                                       rep("14-20", 7),
+                                       rep("12-14", 2)
                                        ),
-                            RIN=c(rep("All", 14)),
+                            RIN=c(rep("All", 16)),
                             Excluded=c(rep("None", 8), 
                                        "15641", 
                                        rep("15641/18432", 4), 
-                                       "15641/18432/16428"
+                                       "15641/18432/16428",
+                                       rep("16491", 2)
                                        ),
-                            n=c(108, 100, 61, 58, 53, 47, 100, 53, 52, rep(51, 4), 50),
-                            test=c(rep("Wald", 6), rep("LRT", 2), rep("Wald", 6)),
-                            CooksCutoff=c(rep("None", 10), 2, 1, 0.75, "None"),
-                            DEgenes=c(68, 105, 633, 1747, 2665, 
-                                      47, 154, 868, 2305, 2961, 1738, 1763, 1756, 1170),
-                            results=c("~/BTSync/FetalRNAseq/Counts/MvsF_all2",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_old",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20A",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_LRT_12_20_noA",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_LRT_14_20_noA",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks2",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks1",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75",
-                                      "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_16428"
+                            n=c(108, 100, 61, 58, 53, 47, 100, 53, 52, 
+                                rep(51, 4), 50, rep(46, 2)
+                                ),
+                            test=c(rep("Wald", 6), rep("LRT", 2), rep("Wald", 8)),
+                            CooksCutoff=c(rep("None", 10), 2, 1, 0.75, rep("None", 2), 0.75),
+                            DEgenes=c(68, 88, 633, 1747, 2665, 47, 154, 868,
+                                      2305, 2961, 1738, 1763, 1756, 1170, 46, 48
+                                      ),
+                            results=c(paste0(CountFolder, "Counts/MvsF_all2"),
+                                      paste0(CountFolder, "Counts/MvsF_12_20_noA"),
+                                      paste0(CountFolder, "Counts/MvsF_old"),
+                                      paste0(CountFolder, "Counts/MvsF_14_20A"),
+                                      paste0(CountFolder, "ounts/MvsF_14_20_noA"),
+                                      paste0(CountFolder, "Counts/MvsF_12_14_noA"),
+                                      paste0(CountFolder, "MvsF_LRT_12_20_noA"),
+                                      paste0(CountFolder, "MvsF_LRT_14_20_noA"),
+                                      paste0(CountFolder, "MvsF_14_20_noA_excl_15641"),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_15641_18432"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_15641_18432_Cooks2"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_15641_18432_Cooks1"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_15641_18432_Cooks.75"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_15641_18432_16428"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_16491"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_16491_Cooks.75"
+                                            )
                                       )
                             )
 kable(select(DESeq2results, -results) %>% filter(Excluded == "None"))
@@ -78,17 +101,8 @@ kable(select(DESeq2results, -results) %>% filter(Excluded == "None"))
 `r margin_note("- Cooks = 100 should read 100+ and Count = 10.0 should read 10+")`
 `r margin_note("- Cooks Distance is << 1 for the vast majority of datapoints, but 15641, 18432 and possibly 16428 stand out as having many high values")`
 
-![Distribution of Cooks Distances by Sample](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA/figures/CooksHist.png)
 
-`r margin_note("- removing 15641 reduces the number of DE genes by 14% while removing 15641 and 18432 actually increases the number of DE genes by 11%")`
-`r margin_note("- also removing 16428 reduces the number of DE 60%")`
-`r margin_note("- This is presumably due to a reduction in variance when the outliers are removed")`
 
-```{r}
-kable(select(DESeq2results, -results) %>% 
-        filter(BrainBank ==  "HDBR only" & AgeRange == "14-20" & test == 'Wald' & CooksCutoff == "None")
-      )
-```
 
 # Filtering out genes that include samples with high Cooks Distance
 `r margin_note("- removing samples with Cooks values > 2 reduces the number of DE genes by 40%")`
@@ -124,6 +138,7 @@ PlotExpression<-function(geneID, file=All_Samples, geneName='', id="A value that
       theme(plot.background=element_blank())
     plot
 }
+
 GetID <- function(file, row_num) {
   read.delim(file, stringsAsFactors = FALSE) %>% 
     arrange(desc(maxCooks)) %>%
@@ -145,7 +160,9 @@ target <- arrange(target, Sex)
 
 All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 
-FinalSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks2/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
+LateSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
+
+EarlySamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_excl_16491_Cooks.75/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 ```
 
 #Plot counts for gene with the highest Cooks Distances when cutoff is 2
@@ -166,7 +183,7 @@ PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
 topCooksMale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks1/tables/MalevsFemale.up.txt", 1)
 PlotExpression(topCooksMale[,1], All_Samples, '', maxCooks=topCooksMale[,2])
 
-topCooksFemale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks1/tables/MalevsFemale.down.txt", 1)
+topCooksFemale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks1/tables/MalevsFemale.complete.txt", 1)
 PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
 ```
 #Plot counts for gene with the highest Cooks Distances when cutoff is 0.75
@@ -180,3 +197,112 @@ topCooksFemale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_1
 PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
 ```
 
+![Distribution of Cooks Distances by Sample (14-20 PCW)](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA/figures/CooksHist.png)
+
+`r margin_note("- removing 15641 reduces the number of DE genes by 14% while removing 15641 and 18432 actually increases the number of DE genes by 11%")`
+`r margin_note("- also removing 16428 reduces the number of DE 60%")`
+`r margin_note("- This is presumably due to a reduction in variance when the outliers are removed")`
+
+# Outliers in 12-14 PCW samples
+
+![Distribution of Cooks Distances by Sample (12-14 PCW)](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA/figures/CooksHist.png)
+`r margin_note("- DE analysis is robust to the removal of 16491 (46 DE genes vs 46 or 47 with, depending on run) and maxCooks filtering (48genes)")`
+
+```{r}
+kable(select(DESeq2results, -results) %>% 
+        filter(BrainBank ==  "HDBR only" & AgeRange == "12-14" & test == 'Wald')
+      )
+```
+
+# Genes of interest
+
+```{r}
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+GetGeneID <- function(gene_name) {
+  geneID <- collect(tbl(my_db, 
+                        sql(paste0("SELECT gene_id FROM GencodeGenes WHERE gene_name = '",
+                                   gene_name, 
+                                   "'"
+                                   )
+                            )
+                        )) 
+  as.character(geneID[1,1])
+}
+
+NoteSig <- function(gene_id, gene_name, EarlySamples, LateSamples) {
+  pvalues <-filter(EarlySamples, Id==gene_id) %>% 
+    select(pvalue, padj) %>% 
+    mutate(Gene=gene_name, 
+                       Age='12-14 weeks', 
+                       pvalue=prettyNum(pvalue, digits=2),
+                       padj=prettyNum(padj, digits=2)
+           ) %>%
+    bind_rows(filter(LateSamples, Id==gene_id) %>% 
+                select(pvalue, padj) %>% 
+                mutate(Gene=gene_name, 
+                       Age='14-20 weeks', 
+                       pvalue=prettyNum(pvalue, digits=2),
+                       padj=prettyNum(padj, digits=2)
+                       )
+              )
+  pvalues[,c(3,4,1,2)]
+}
+InitializePvalues <- function() {
+  data.frame(Gene=as.character(), 
+                      Age=as.character(), 
+                      pvalue=as.character(), 
+                      padj=as.character(),
+                      stringsAsFactors = FALSE)
+}
+```
+
+In males, there is significantly (P < 0.05, uncorrected) higher expression (relative to females) of key markers of basal neural progenitor cells  (PAX6, SOX2 and EOMES, with PAX6 FDR< 0.05) after 14 weeks. (None of these differ significantly from females < 14 weeks.) 
+
+```{r}
+pvalues <- InitializePvalues()
+for (gene_name in c('PAX6', 'SOX2', 'EOMES')) {
+  gene_id <- GetGeneID(gene_name)
+
+  print(PlotExpression(gene_id, All_Samples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+}
+kable(pvalues)
+```
+
+In females, there is significantly higher relative expression of a key marker of differentiated (post-mitotic) GABAergic neurons (GAD1, FDR < 0.01).  There is also significantly greater (although not FDR < 0.05) synaptophysin expression (a classic synaptic marker).
+
+```{r}
+pvalues <- InitializePvalues()
+for (gene_name in c('GAD1', 'SYP')) {
+  gene_id <- GetGeneID(gene_name)
+  print(PlotExpression(gene_id, All_Samples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+}
+kable(pvalues)
+
+```
+
+After 14 weeks, there is also higher expression of a Type 2 astrocyte marker in males (MSI1, FDR < 0.05), whereas there is increased expression of markers of oligodendrocytes progenitors (OLIG1 FDR < 0.05, OLIG2 FDR = 0.06) and mature oligodendrocytes (GALC, FDR < 0.01) in females. My knowledge of glial cell development isn't so good, but I think oligodendrocytes again develop later (their main function is to myelinate neurites).
+
+```{r}
+pvalues <- InitializePvalues()
+for (gene_name in c('MSI1', 'OLIG1', 'OLIG2', 'GALC')) {
+  gene_id <- GetGeneID(gene_name)
+  print(PlotExpression(gene_id, All_Samples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+}
+kable(pvalues)
+
+```
+
+... and there is also increased expression of the glutamatergic neuron marker vGluT2 (SLC17A6) in females after 4 weeks (FDR = ~0.01). So that's both neuronal subtypes of the cerebral cortex (Glu and GABA)!
+
+```{r}
+pvalues <- InitializePvalues()
+for (gene_name in c('SLC17A6')) {
+  gene_id <- GetGeneID(gene_name)
+  print(PlotExpression(gene_id, All_Samples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+}
+kable(pvalues)
+```
