@@ -27,15 +27,15 @@ source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 `r margin_note("- Very few DE genes when samples > 14 weeks included, and most are on sex chromosomes")`
 `r margin_note("- Excluding non HDBR samples increases the number of DE genes")`
 `r margin_note("- LRT results in slightly more DE genes when analysing all HDBR samples, but far less when analysing samples > 14 PCW")`
-`r margin_note("- For some reason, when I reran the 12-20 week anaysis, the number of DE genes dropped from 105 to 88 (ole results  are in MvsF_12_20_noA_bk)")`
-
+`r margin_note("- For some reason, when I reran the 12-20 week anaysis, the number of DE genes dropped from 105 to 88 (old results  are in MvsF_12_20_noA_bk)")`
+`r margin_note("- Excluding 3 female samples >= 18 weeks reduces the number of DE genes dramatically")`
 
 ```{r}
 CountFolder <- "~/BTSync/FetalRNAseq/Counts/"
 DESeq2results <- data.frame(BrainBank=c( "All", 
                                          "HDBR only", 
                                          rep("All", 2), 
-                                         rep("HDBR only", 12)
+                                         rep("HDBR only", 13)
                                          ), 
                             AgeRange=c("12-22", 
                                        "12-20", 
@@ -44,22 +44,26 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                        "12-14",
                                        "12-20",
                                        rep("14-20", 7),
-                                       rep("12-14", 2)
+                                       rep("12-14", 2),
+                                       "14-18"
                                        ),
-                            RIN=c(rep("All", 16)),
+                            RIN=c(rep("All", 17)),
                             Excluded=c(rep("None", 8), 
                                        "15641", 
                                        rep("15641/18432", 4), 
                                        "15641/18432/16428",
-                                       rep("16491", 2)
-                                       ),
+                                       rep("16491", 2),
+                                       "15641/18432"),
                             n=c(108, 100, 61, 58, 53, 47, 100, 53, 52, 
-                                rep(51, 4), 50, rep(46, 2)
+                                rep(51, 4), 50, rep(46, 2), 48
                                 ),
-                            test=c(rep("Wald", 6), rep("LRT", 2), rep("Wald", 8)),
-                            CooksCutoff=c(rep("None", 10), 2, 1, 0.75, rep("None", 2), 0.75),
+                            test=c(rep("Wald", 6), rep("LRT", 2), rep("Wald", 9)),
+                            CooksCutoff=c(rep("None", 10), 2, 1, 0.75,
+                                          rep("None", 2), rep(0.75, 2)
+                                          ),
                             DEgenes=c(68, 88, 633, 1747, 2665, 47, 154, 868,
-                                      2305, 2961, 1738, 1763, 1756, 1170, 46, 48
+                                      2305, 2961, 1738, 1763, 1756, 1170, 46, 
+                                      48, 105
                                       ),
                             results=c(paste0(CountFolder, "Counts/MvsF_all2"),
                                       paste0(CountFolder, "Counts/MvsF_12_20_noA"),
@@ -90,10 +94,13 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                             ),
                                       paste0(CountFolder, 
                                             "MvsF_14_20_noA_excl_16491_Cooks.75"
+                                            ),
+                                      paste0(CountFolder, 
+                                            "MvsF_14_20_noA_excl_15641_18432_Cooks.75"
                                             )
                                       )
                             )
-kable(select(DESeq2results, -results) %>% filter(Excluded == "None"))
+kable(select(DESeq2results, -results) %>% filter(Excluded == "None" | AgeRange == "14-18"))
 ```
 
 # Dealing with outliers
@@ -101,7 +108,19 @@ kable(select(DESeq2results, -results) %>% filter(Excluded == "None"))
 `r margin_note("- Cooks = 100 should read 100+ and Count = 10.0 should read 10+")`
 `r margin_note("- Cooks Distance is << 1 for the vast majority of datapoints, but 15641, 18432 and possibly 16428 stand out as having many high values")`
 
-
+![Distribution of Cooks Distances by Sample](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA/figures/CooksHist.png)
+ 
+ 
+`r margin_note("- removing 15641 reduces the number of DE genes by 14% while removing 15641 and 18432 actually increases the number of DE genes by 11%")`
+`r margin_note("- also removing 16428 reduces the number of DE 60%")`
+`r margin_note("- This is presumably due to a reduction in variance when the outliers are removed")`
+ 
+ 
+```{r}
+kable(select(DESeq2results, -results) %>% 
+        filter(BrainBank ==  "HDBR only" & AgeRange == "14-20" & test == 'Wald' & CooksCutoff == "None")
+      )
+```
 
 
 # Filtering out genes that include samples with high Cooks Distance
@@ -300,6 +319,26 @@ kable(pvalues)
 ```{r}
 pvalues <- InitializePvalues()
 for (gene_name in c('SLC17A6')) {
+  gene_id <- GetGeneID(gene_name)
+  print(PlotExpression(gene_id, All_Samples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+}
+kable(pvalues)
+```
+
+```{r}
+pvalues <- InitializePvalues()
+for (gene_name in c('NES', 'DCX', 'GFAP', 'MAP2', 'TUBB3', 'TH', 'FOXG1', 'TBR1', 'EMX1', 'ACTB')) {
+  gene_id <- GetGeneID(gene_name)
+  print(PlotExpression(gene_id, All_Samples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+}
+kable(pvalues)
+
+```
+```{r}
+pvalues <- InitializePvalues()
+for (gene_name in c('MYOT', 'IGLV4-69', 'NR2F6', 'TOPORS')) {
   gene_id <- GetGeneID(gene_name)
   print(PlotExpression(gene_id, All_Samples, gene_name))
   pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
