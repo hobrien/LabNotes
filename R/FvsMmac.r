@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_12_20_noA"                         # name of the project
+projectName <- "MvsF_14_18_noA_excl_15641_18432_Cooks.75"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -26,9 +26,9 @@ condRef <- "Female"                                      # reference biological 
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 interact <- NULL #c("PCW")
 RIN_cutoff <- 0
-PCW_cutoff <- c(12, 20)
+PCW_cutoff <- c(14, 20)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
-cooksCutoff <- 1000000                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
+cooksCutoff <- .75                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
 alpha <- 0.05                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
@@ -38,7 +38,7 @@ locfunc <- "median"                                  # "median" (default) or "sh
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-exclude <- c() #c('15641', '18432', '16428')
+exclude <- c('15641', '18432')
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -114,9 +114,18 @@ summaryResults <- summarizeResults.DESeq2(out.DESeq2, group=target[,varInt], col
                                           independentFiltering=independentFiltering,
                                           cooksCutoff=cooksCutoff, alpha=alpha)
 
-vst <-as.data.frame(assay(varianceStabilizingTransformation(out.DESeq2$dds)))
-vst$Id <-row.names(vst)
-write.table(vst, file="tables/VST.txt", sep="\t", quote=FALSE, row.names=TRUE)
+#Save VST counts
+vst <- as.data.frame(assay(varianceStabilizingTransformation(out.DESeq2$dds)))
+vst$Id <- row.names(vst)
+vst <- vst[,c(ncol(vst), 1:ncol(vst)-1)]
+write.table(vst, file="tables/VST.txt", sep="\t", quote=FALSE, row.names = FALSE)
+
+#filter out genes with counts < 10 in more than 10% of samples
+filterSet <- rowSums(ifelse(counts(out.DESeq2$dds) > 9, 1, 0)) > (ncol(vst)-1)*.9
+write.table(vst[filterSet, ], file="tables/VST_filtered.txt", sep="\t", quote=FALSE, row.names = FALSE)
+
+filterSet <- rowSums(ifelse(counts(out.DESeq2$dds) > 9, 1, 0)) > (ncol(vst)-1)*.5
+write.table(vst[filterSet, ], file="tables/VST_filtered2.txt", sep="\t", quote=FALSE, row.names = FALSE)
 
 # save image of the R session
 save.image(file=paste0(projectName, ".RData"))
@@ -129,11 +138,9 @@ writeReport.DESeq2(target=target, counts=counts, out.DESeq2=out.DESeq2, summaryR
                    independentFiltering=independentFiltering, alpha=alpha, pAdjustMethod=pAdjustMethod,
                    typeTrans=typeTrans, locfunc=locfunc, colors=colors)
 
-# Filter 
 
-# most of the workflow to filter out low counts
-# notAllZero = (rowSums(counts(cds))>0) (need to count rows with coutns <10 and fiter if > 10%)
-# meanSdPlot(vsd[notAllZero, ])
+
+
 
 my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
 GetGeneIDs <- function(Ids) {
