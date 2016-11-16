@@ -35,7 +35,9 @@ CountFolder <- "~/BTSync/FetalRNAseq/Counts/"
 DESeq2results <- data.frame(BrainBank=c( "All", 
                                          "HDBR only", 
                                          rep("All", 2), 
-                                         rep("HDBR only", 13)
+                                         rep("HDBR only", 13),
+                                         "All",
+                                         rep("HDBR only", 6)
                                          ), 
                             AgeRange=c("12-22", 
                                        "12-20", 
@@ -45,49 +47,64 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                        "12-20",
                                        rep("14-20", 7),
                                        rep("12-14", 2),
-                                       "14-18"
+                                       rep("14-18", 2),
+                                       "14-17.75",
+                                       rep("14-17.15", 3),
+                                       rep("12-20", 2)
                                        ),
-                            RIN=c(rep("All", 17)),
+                            RIN=c(rep("All", 19), rep("4", 3), rep("All", 2)),
+                            FDR=c(rep(0.05, 20), 0.1, rep(0.05, 3)),
                             Excluded=c(rep("None", 8), 
                                        "15641", 
                                        rep("15641/18432", 4), 
                                        "15641/18432/16428",
                                        rep("16491", 2),
-                                       "15641/18432"),
+                                       rep("15641/18432", 3),
+                                       rep("19 samples", 3),
+                                       rep("15641/18432/16491", 2)
+                                       ),
                             n=c(108, 100, 61, 58, 53, 47, 100, 53, 52, 
-                                rep(51, 4), 50, rep(46, 2), 48
+                                rep(51, 4), 50, rep(46, 2), 48, 50, 47, 
+                                rep(34, 3), rep(97, 2)
                                 ),
-                            test=c(rep("Wald", 6), rep("LRT", 2), rep("Wald", 9)),
+                            test=c(rep("Wald", 6), 
+                                   rep("LRT", 2), 
+                                   rep("Wald", 13),
+                                   rep("LRT", 3)
+                                   ),
                             CooksCutoff=c(rep("None", 10), 2, 1, 0.75,
-                                          rep("None", 2), rep(0.75, 2)
+                                          rep("None", 2), rep(0.75, 6),
+                                          rep("None", 3)
                                           ),
                             DEgenes=c(68, 88, 633, 1747, 2665, 47, 154, 868,
                                       2305, 2961, 1738, 1763, 1756, 1170, 46, 
-                                      48, 105
+                                      48, 105, 63, 286, 71, 140, 48, 312, 8009
                                       ),
-                            results=c(paste0(CountFolder, "Counts/MvsF_all2"),
-                                      paste0(CountFolder, "Counts/MvsF_12_20_noA"),
-                                      paste0(CountFolder, "Counts/MvsF_old"),
-                                      paste0(CountFolder, "Counts/MvsF_14_20A"),
-                                      paste0(CountFolder, "ounts/MvsF_14_20_noA"),
-                                      paste0(CountFolder, "Counts/MvsF_12_14_noA"),
+                            results=c(paste0(CountFolder, "MvsF_all2"),
+                                      paste0(CountFolder, "MvsF_12_20_noA"),
+                                      paste0(CountFolder, "MvsF_old"),
+                                      paste0(CountFolder, "MvsF_14_20A"),
+                                      paste0(CountFolder, "MvsF_14_20_noA"),
+                                      paste0(CountFolder, "MvsF_12_14_noA"),
                                       paste0(CountFolder, "MvsF_LRT_12_20_noA"),
                                       paste0(CountFolder, "MvsF_LRT_14_20_noA"),
-                                      paste0(CountFolder, "MvsF_14_20_noA_excl_15641"),
+                                      paste0(CountFolder,
+                                             "MvsF_14_20_noA_excl_15641"
+                                             ),
                                       paste0(CountFolder, 
                                             "MvsF_14_20_noA_excl_15641_18432"
                                             ),
                                       paste0(CountFolder, 
-                                            "MvsF_14_20_noA_excl_15641_18432_Cooks2"
+                                      "MvsF_14_20_noA_excl_15641_18432_Cooks2"
                                             ),
                                       paste0(CountFolder, 
-                                            "MvsF_14_20_noA_excl_15641_18432_Cooks1"
+                                      "MvsF_14_20_noA_excl_15641_18432_Cooks1"
                                             ),
                                       paste0(CountFolder, 
-                                            "MvsF_14_20_noA_excl_15641_18432_Cooks.75"
+                                      "MvsF_14_20_noA_excl_15641_18432_Cooks.75"
                                             ),
                                       paste0(CountFolder, 
-                                            "MvsF_14_20_noA_excl_15641_18432_16428"
+                                      "MvsF_14_20_noA_excl_15641_18432_16428"
                                             ),
                                       paste0(CountFolder, 
                                             "MvsF_14_20_noA_excl_16491"
@@ -96,11 +113,48 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                             "MvsF_14_20_noA_excl_16491_Cooks.75"
                                             ),
                                       paste0(CountFolder, 
-                                            "MvsF_14_20_noA_excl_15641_18432_Cooks.75"
+                                      "MvsF_14_20_noA_excl_15641_18432_Cooks.75"
+                                            ),
+                                      paste0(CountFolder, 
+                                      "MvsF_14_20_excl_15641_18432_Cooks.75"
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "17.75", 
+                                                   "noA", "excl", "15641",
+                                                   "18432", "Cooks.75", 
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "18", 
+                                                   "noA", "excl", "19",
+                                                   "Cooks.75", 
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "18", 
+                                                   "noA", "excl", "19",
+                                                   "Cooks.75", "FDR.1", 
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "18", 
+                                                   "noA", "excl", "19",
+                                                   "lrt", 
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             "MvsF_12_20_noA_lrt"
+                                            ),
+                                      paste0(CountFolder,
+                                             "MvsF_12_20_noA_lrt_age"
                                             )
                                       )
                             )
-kable(select(DESeq2results, -results) %>% filter(Excluded == "None" | AgeRange == "14-18"))
+kable(select(DESeq2results, -results) %>% filter(Excluded == "None" | AgeRange == "14-18" | AgeRange == "14-17.75" | AgeRange == "14-17.15" | AgeRange == "12-20"))
 ```
 
 # Dealing with outliers
@@ -177,7 +231,9 @@ sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt"
 target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
 target <- arrange(target, Sex)
 
-All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
+#All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
+
+All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_lrt_age/tables/dropPCW.complete.txt", stringsAsFactors = FALSE)
 
 LateSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 
@@ -248,29 +304,41 @@ GetGeneID <- function(gene_name) {
   as.character(geneID[1,1])
 }
 
-NoteSig <- function(gene_id, gene_name, EarlySamples, LateSamples) {
+NoteSig <- function(gene_id, gene_name, EarlySamples, LateSamples, All_Samples) {
   pvalues <-filter(EarlySamples, Id==gene_id) %>% 
-    select(pvalue, padj) %>% 
+    select(FoldChange, pvalue, padj) %>% 
     mutate(Gene=gene_name, 
                        Age='12-14 weeks', 
+                       FoldChange=prettyNum(FoldChange, digits=3),
                        pvalue=prettyNum(pvalue, digits=2),
                        padj=prettyNum(padj, digits=2)
            ) %>%
     bind_rows(filter(LateSamples, Id==gene_id) %>% 
-                select(pvalue, padj) %>% 
+                select(FoldChange, pvalue, padj) %>% 
                 mutate(Gene=gene_name, 
                        Age='14-20 weeks', 
+                       FoldChange=prettyNum(FoldChange, digits=3),
+                       pvalue=prettyNum(pvalue, digits=2),
+                       padj=prettyNum(padj, digits=2)
+                       )
+              ) %>%
+    bind_rows(filter(All_Samples, Id==gene_id) %>% 
+                select(FoldChange, pvalue, padj) %>% 
+                mutate(Gene=gene_name, 
+                       Age='dev', 
+                       FoldChange=prettyNum(FoldChange, digits=3),
                        pvalue=prettyNum(pvalue, digits=2),
                        padj=prettyNum(padj, digits=2)
                        )
               )
-  pvalues[,c(3,4,1,2)]
+  pvalues[,c(3,4,5,1,2)]
 }
 InitializePvalues <- function() {
   data.frame(Gene=as.character(), 
                       Age=as.character(), 
                       pvalue=as.character(), 
                       padj=as.character(),
+                      FoldChange=as.character(),
                       stringsAsFactors = FALSE)
 }
 ```
@@ -283,7 +351,7 @@ for (gene_name in c('PAX6', 'SOX2', 'EOMES')) {
   gene_id <- GetGeneID(gene_name)
 
   print(PlotExpression(gene_id, All_Samples, gene_name))
-  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
 ```
@@ -295,7 +363,7 @@ pvalues <- InitializePvalues()
 for (gene_name in c('GAD1', 'SYP')) {
   gene_id <- GetGeneID(gene_name)
   print(PlotExpression(gene_id, All_Samples, gene_name))
-  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
 
@@ -308,7 +376,7 @@ pvalues <- InitializePvalues()
 for (gene_name in c('MSI1', 'OLIG1', 'OLIG2', 'GALC')) {
   gene_id <- GetGeneID(gene_name)
   print(PlotExpression(gene_id, All_Samples, gene_name))
-  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
 
@@ -321,7 +389,7 @@ pvalues <- InitializePvalues()
 for (gene_name in c('SLC17A6')) {
   gene_id <- GetGeneID(gene_name)
   print(PlotExpression(gene_id, All_Samples, gene_name))
-  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
 ```
@@ -330,8 +398,8 @@ kable(pvalues)
 pvalues <- InitializePvalues()
 for (gene_name in c('NES', 'DCX', 'GFAP', 'MAP2', 'TUBB3', 'TH', 'FOXG1', 'TBR1', 'EMX1', 'ACTB')) {
   gene_id <- GetGeneID(gene_name)
-  print(PlotExpression(gene_id, All_Samples, gene_name))
-  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+  print(PlotExpression(gene_id, EarlySamples, gene_name))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
 
@@ -341,7 +409,7 @@ pvalues <- InitializePvalues()
 for (gene_name in c('MYOT', 'IGLV4-69', 'NR2F6', 'TOPORS')) {
   gene_id <- GetGeneID(gene_name)
   print(PlotExpression(gene_id, All_Samples, gene_name))
-  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples))
+  pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
 ```
