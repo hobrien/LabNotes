@@ -32,12 +32,13 @@ source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 
 ```{r}
 CountFolder <- "~/BTSync/FetalRNAseq/Counts/"
+
 DESeq2results <- data.frame(BrainBank=c( "All", 
                                          "HDBR only", 
                                          rep("All", 2), 
                                          rep("HDBR only", 13),
                                          "All",
-                                         rep("HDBR only", 6)
+                                         rep("HDBR only", 9)
                                          ), 
                             AgeRange=c("12-22", 
                                        "12-20", 
@@ -49,36 +50,47 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                        rep("12-14", 2),
                                        rep("14-18", 2),
                                        "14-17.75",
-                                       rep("14-17.15", 3),
+                                       rep("14-17.15", 6),
                                        rep("12-20", 2)
                                        ),
-                            RIN=c(rep("All", 19), rep("4", 3), rep("All", 2)),
-                            FDR=c(rep(0.05, 20), 0.1, rep(0.05, 3)),
+                            RIN=c(rep("All", 19), rep("4", 6), rep("All", 2)),
+                            FDR=c(rep(0.05, 20), 
+                                  0.1, 
+                                  rep(0.05, 2), 
+                                  rep(0.1, 2), 
+                                  rep(0.05, 2)
+                                  ),
                             Excluded=c(rep("None", 8), 
                                        "15641", 
                                        rep("15641/18432", 4), 
                                        "15641/18432/16428",
                                        rep("16491", 2),
                                        rep("15641/18432", 3),
-                                       rep("19 samples", 3),
+                                       rep("19 samples", 6),
                                        rep("15641/18432/16491", 2)
                                        ),
                             n=c(108, 100, 61, 58, 53, 47, 100, 53, 52, 
                                 rep(51, 4), 50, rep(46, 2), 48, 50, 47, 
-                                rep(34, 3), rep(97, 2)
+                                rep(34, 6), rep(97, 2)
                                 ),
                             test=c(rep("Wald", 6), 
                                    rep("LRT", 2), 
                                    rep("Wald", 13),
-                                   rep("LRT", 3)
+                                   rep("LRT", 6)
+                                   ),
+                            model=c(rep("?", 6), 
+                                   rep("?", 2), 
+                                   rep("?", 11),
+                                   "+", "+", "+", "*", "+", "*",
+                                   rep("?", 2)
                                    ),
                             CooksCutoff=c(rep("None", 10), 2, 1, 0.75,
                                           rep("None", 2), rep(0.75, 6),
-                                          rep("None", 3)
+                                          rep("None", 6)
                                           ),
                             DEgenes=c(68, 88, 633, 1747, 2665, 47, 154, 868,
                                       2305, 2961, 1738, 1763, 1756, 1170, 46, 
-                                      48, 105, 63, 286, 71, 140, 48, 312, 8009
+                                      48, 105, 63, 286, 71, 140, 96, 48, 79, 478, 312, 8009
                                       ),
                             results=c(paste0(CountFolder, "MvsF_all2"),
                                       paste0(CountFolder, "MvsF_12_20_noA"),
@@ -143,6 +155,27 @@ DESeq2results <- data.frame(BrainBank=c( "All",
                                              paste("MvsF", "14", "18", 
                                                    "noA", "excl", "19",
                                                    "lrt", 
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "18", 
+                                                   "noA", "excl", "19",
+                                                   "lrt", "interact",
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "18", 
+                                                   "noA", "excl", "19",
+                                                   "lrt", 'FDR.1',
+                                                   sep="_"
+                                                   )
+                                            ),
+                                      paste0(CountFolder,
+                                             paste("MvsF", "14", "18", 
+                                                   "noA", "excl", "19",
+                                                   "lrt", 'FDR.1', "interact",
                                                    sep="_"
                                                    )
                                             ),
