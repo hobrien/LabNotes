@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_14_18_noA_excl_19_lrt"                         # name of the project
+projectName <- "MvsF_14_18_noA_excl_19_cooks.75_FDR.1_interact"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -23,23 +23,25 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
-batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
-interact <- c()
+batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+interact <- c("PCW")
 RIN_cutoff <- 0
 PCW_cutoff <- c(14, 18)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- .75                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
-alpha <- 0.05                                        # threshold of statistical significance
+alpha <- 0.1                                      # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
-testMethod <- 'LRT'
+testMethod <- 'Wald'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
-colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
-            "MediumVioletRed","SpringGreen")
+BrainBank <- 'HDBR'
 #exclude <- c('15641', '18432', '16491')
 exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
+colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
+            "MediumVioletRed","SpringGreen")
+
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -81,7 +83,9 @@ if (!is.null(PCW_cutoff)) {
 if (length(exclude) > 0) {
   target <- filter(target, !label %in% exclude)
 }
-target <- filter(target, ! grepl('A', label))
+if (BrainBank == 'HDBR') {
+    target <- filter(target, ! grepl('A', label))
+}
 #target <- mutate(target, PCW = factor(floor(PCW)))
 # loading counts
 # this doesn't use the batch info
@@ -171,6 +175,7 @@ if (testMethod == 'Wald') {
   MalevsFemale.down <- select(MalevsFemale.down, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
   MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
   write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
+  DEgenes <- nrow(MalevsFemale.down) + nrow(MalevsFemale.up)
   DESeq.complete <- read.delim("tables/MalevsFemale.complete.txt")
 } else if (testMethod=='LRT' ) {
   lrt.up <- read.delim(paste0("tables/drop", varInt, ".up.txt"), check.names=FALSE)
@@ -181,6 +186,7 @@ if (testMethod == 'Wald') {
   lrt.down <- select(lrt.down, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
   lrt.down <- bind_cols(GetGeneIDs(lrt.down$Id), lrt.down)
   write.table(lrt.down, paste0("tables/drop", varInt, ".down.gene_name.txt"), sep="\t", quote=FALSE, row.names=FALSE)
+  DEgenes <- nrow(lrt.up) + nrow(lrt.down)
   DESeq.complete <- read.delim(paste0("tables/drop", varInt, ".down.txt"))
 } else {
   stop("testMethod not recognised")
@@ -193,10 +199,38 @@ DESeq.complete$CountMean <- select(DESeq.complete, starts_with('norm')) %>% rowM
 DESeq.complete <- filter(DESeq.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2]))
 
 #MalevsFemale.complete <- bind_cols(GetGeneIDs(MalevsFemale.complete$Id), MalevsFemale.complete)
-DESeq.complete <-  separate(MalevsFDESeq.completeemale.complete, Id, c("Id"), sep='[.]', extra='drop')
+DESeq.complete <-  separate(DESeq.complete, Id, c("Id"), sep='[.]', extra='drop')
 select(DESeq.complete, Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj) %>% 
   write.table(file="tables/Background.txt", sep="\t", quote=FALSE, row.names=FALSE)
 
+#write summary of analysis to file
+summary <- data.frame(BrainBank=c(BrainBank), 
+                      AgeRange=c(paste(PCW_cutoff, collapse='-')), 
+                      RIN=c(ifelse(RIN_cutoff==0, "All", RIN_cutoff)),
+                      FDR=c(alpha), 
+                      Excluded=c(ifelse(length(exclude)==0,
+                                        "None",
+                                        ifelse(length(exclude)>3,
+                                               length(exclude),
+                                               paste(exclude, collapse="/")
+                                              )
+                                       )
+                                ),
+                      n=c(ncol(counts)),
+                      test=c(testMethod),
+                      model=c(ifelse(length(interact)==0, '+', '*')), 
+                      CooksCutoff=c(cooksCutoff),
+                      DEgenes=c(DEgenes),
+                      res=c(workDir)                     
+                      )                                              
+write.table(summary, 
+            file="~/BTSync/FetalRNAseq/Counts/Summary.txt", 
+            sep="\t", 
+            quote=FALSE, 
+            row.names=FALSE, 
+            col.names=FALSE,
+            append=TRUE
+            )
 
 
 # Include histograms of PCW and RIN
