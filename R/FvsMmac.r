@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_14_18_noA_excl_15641_18432_Cooks.75"                         # name of the project
+projectName <- "MvsF_14_18_noA_excl_19_lrt"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -24,21 +24,22 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
-interact <- NULL #c("PCW")
+interact <- c()
 RIN_cutoff <- 0
-PCW_cutoff <- c(14, 20)
+PCW_cutoff <- c(14, 18)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- .75                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
 alpha <- 0.05                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
-testMethod <- 'Wald'
+testMethod <- 'LRT'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-exclude <- c('15641', '18432')
+#exclude <- c('15641', '18432', '16491')
+exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -95,16 +96,16 @@ if (testMethod=='Wald' ) {
   out.DESeq2 <- run.DESeq2(counts=counts, target=target, varInt=varInt, batch=batch, interact=interact,
                          locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
                          cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
-} else if (testMethod=='LRT' ) {
+  mcols(out.DESeq2$dds)$maxCooks <- apply(assays(out.DESeq2$dds)[["cooks"]], 1, max)
+  out.DESeq2$results$Male_vs_Female$pvalue[mcols(out.DESeq2$dds)$maxCooks > cooksCutoff] <- NA
+  out.DESeq2$results$Male_vs_Female$padj <- p.adjust(out.DESeq2$results$Male_vs_Female$pvalue, method="BH")
+  } else if (testMethod=='LRT' ) {
   out.DESeq2 <- run.DESeq2.LRT(counts=counts, target=target, varInt=varInt, batch=batch, interact=interact,
                            locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
                            cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
   } else {
   stop("testMethod not recognised")
 }
-mcols(out.DESeq2$dds)$maxCooks <- apply(assays(out.DESeq2$dds)[["cooks"]], 1, max)
-out.DESeq2$results$Male_vs_Female$pvalue[mcols(out.DESeq2$dds)$maxCooks > cooksCutoff] <- NA
-out.DESeq2$results$Male_vs_Female$padj <- p.adjust(out.DESeq2$results$Male_vs_Female$pvalue, method="BH")
 
 # PCA + clustering
 exploreCounts(object=out.DESeq2$dds, group=target[,varInt], typeTrans=typeTrans, col=colors)
@@ -161,27 +162,39 @@ GetGeneIDs <- function(Ids) {
   }
   geneIDs
 }
-MalevsFemale.up <- read.delim("tables/MalevsFemale.up.txt", check.names=FALSE)
-MalevsFemale.up <- filter(MalevsFemale.up, padj < 0.05) 
-MalevsFemale.up <- select(MalevsFemale.up, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
-MalevsFemale.up <- bind_cols(GetGeneIDs(MalevsFemale.up$Id), MalevsFemale.up)
-write.table(MalevsFemale.up, file="tables/MaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
-
-MalevsFemale.down <- read.delim("tables/MalevsFemale.down.txt", check.names=FALSE)
-MalevsFemale.down <- filter(MalevsFemale.down, padj < 0.05) %>% select(Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
-MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
-write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
+if (testMethod == 'Wald') {
+  MalevsFemale.up <- read.delim("tables/MalevsFemale.up.txt", check.names=FALSE)
+  MalevsFemale.up <- select(MalevsFemale.up, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+  MalevsFemale.up <- bind_cols(GetGeneIDs(MalevsFemale.up$Id), MalevsFemale.up)
+  write.table(MalevsFemale.up, file="tables/MaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
+  MalevsFemale.down <- read.delim("tables/MalevsFemale.down.txt", check.names=FALSE)
+  MalevsFemale.down <- select(MalevsFemale.down, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+  MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
+  write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
+  DESeq.complete <- read.delim("tables/MalevsFemale.complete.txt")
+} else if (testMethod=='LRT' ) {
+  lrt.up <- read.delim(paste0("tables/drop", varInt, ".up.txt"), check.names=FALSE)
+  lrt.up <- select(lrt.up, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+  lrt.up <- bind_cols(GetGeneIDs(lrt.up$Id), lrt.up)
+  write.table(lrt.up, file=paste0("tables/drop", varInt, ".up.gene_name.txt"), sep="\t", quote=FALSE, row.names=FALSE)
+  lrt.down <- read.delim(paste0("tables/drop", varInt, ".down.txt"), check.names=FALSE)
+  lrt.down <- select(lrt.down, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+  lrt.down <- bind_cols(GetGeneIDs(lrt.down$Id), lrt.down)
+  write.table(lrt.down, paste0("tables/drop", varInt, ".down.gene_name.txt"), sep="\t", quote=FALSE, row.names=FALSE)
+  DESeq.complete <- read.delim(paste0("tables/drop", varInt, ".down.txt"))
+} else {
+  stop("testMethod not recognised")
+}
 
 # This produces slightly different numbers than the independent filtering used by DESeq2
 # (eg; filtering 40298 vs. 40342). I assume this has something to do with rounding error
 # when means are calculated?
-MalevsFemale.complete <- read.delim("tables/MalevsFemale.complete.txt")
-MalevsFemale.complete$CountMean <- select(MalevsFemale.complete, starts_with('norm')) %>% rowMeans()
-MalevsFemale.complete <- filter(MalevsFemale.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2]))
+DESeq.complete$CountMean <- select(DESeq.complete, starts_with('norm')) %>% rowMeans()
+DESeq.complete <- filter(DESeq.complete, CountMean >= as.numeric(tabIndepFiltering(out.DESeq2$results)[2]))
 
 #MalevsFemale.complete <- bind_cols(GetGeneIDs(MalevsFemale.complete$Id), MalevsFemale.complete)
-MalevsFemale.complete <-  separate(MalevsFemale.complete, Id, c("Id"), sep='[.]', extra='drop')
-select(MalevsFemale.complete, Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj) %>% 
+DESeq.complete <-  separate(MalevsFDESeq.completeemale.complete, Id, c("Id"), sep='[.]', extra='drop')
+select(DESeq.complete, Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	padj) %>% 
   write.table(file="tables/Background.txt", sep="\t", quote=FALSE, row.names=FALSE)
 
 
@@ -205,7 +218,9 @@ ggsave("figures/RIN_hist.png")
 # Plot histogram of Cooks distances for DE genes
 # last bin should be read as '100+')
 # counts of 10 should be read as '10+'
-DE.cooks <- as.data.frame(assays(out.DESeq2$dds)[["cooks"]][as.character(rbind(MalevsFemale.up, MalevsFemale.down)$Id),])
-gather(DE.cooks, 'Sample', 'Cooks')  %>% mutate(Cooks = ifelse(Cooks > 100, 100, Cooks)) %>%
-  ggplot(aes(x=Cooks))+geom_histogram(bins=100)+ facet_wrap(~Sample) + coord_cartesian(ylim=c(0, 10))
-ggsave("figures/CooksHist.png")
+if (testMethod == 'Wald') {
+  DE.cooks <- as.data.frame(assays(out.DESeq2$dds)[["cooks"]][as.character(rbind(MalevsFemale.up, MalevsFemale.down)$Id),])
+  gather(DE.cooks, 'Sample', 'Cooks')  %>% mutate(Cooks = ifelse(Cooks > 100, 100, Cooks)) %>%
+    ggplot(aes(x=Cooks))+geom_histogram(bins=100)+ facet_wrap(~Sample) + coord_cartesian(ylim=c(0, 10))
+  ggsave("figures/CooksHist.png")
+}
