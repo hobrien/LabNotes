@@ -19,7 +19,7 @@ rm(list=ls())
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 ```
 
-#AS3MT (Deduplicated)
+#AS3MT (Deduplicated, Clipped)
 
 `r margin_note("- There appear to be two cases of samples with the incorrect genotype (one T|T genotype with 55% C and one T|C genotype with 100% C (3 others have very low read counts)")`
 
@@ -55,10 +55,35 @@ GetCounts<-function(count_file, riskVar_file, ExpressedSNP_file) {
     counts <- left_join(counts, riskVar[,c(3,4)]) %>% 
       left_join(ExpressedSNP[,c(3,4)])
 }
+
+PlotDistortion <- function(counts) {
+  p1 <- ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
+          geom_jitter(alpha=.2, height=0, width=.25) +
+          geom_abline(intercept=0.5, slope=0, colour='red') +
+          scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
+          ylab('% Alternate Allele') +
+          xlab('GWAS Risk Variant') +
+          tufte_theme() +
+          theme(legend.position="top")
+  print(p1)
+  }
+
+PlotRatio <- function(counts) {
+  p1 <- ggplot(counts, aes(x=riskVar, y=log2(alt/ref), size=ref+alt)) +
+          geom_jitter(alpha=.2, height=0, width=.25) +
+          geom_abline(intercept=0, slope=0, colour='red') +
+          scale_y_continuous(breaks=c(-3,-2,-1,0,1,2,3), labels=c(2^-3,2^-2,2^-1,2^0,2^1,2^2,2^3)) +
+          ylab('alt/ref ratio') +
+          xlab('GWAS Risk Variant') +
+          tufte_theme() +
+          theme(legend.position="top")
+  print(p1)
+  }
+
 ```
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr10:102901727-102901727.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:102901727-102901727.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191419.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1046778.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -74,6 +99,7 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
 ```
 `r margin_note("- If 16972 (het with 16 C to 0 T) is excluded, difference is ALMOST significant (p=0.0565))")`
 `r margin_note("- Removing T|T homozygotes makes no difference")`
+`r margin_note("- After adding additional samples, result is non significant")`
 
 ```{r }
 hets <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% 
@@ -100,7 +126,11 @@ SNAPshotExpression <- read_tsv("~/BTSync/FetalRNAseq/Info/ASMT.txt",
                     col_types = cols(sample="c", rs1046778="d")
                     )
 left_join(SNAPshotExpression, hets) %>% 
-  ggplot(aes(x=rs1046778, y=ref/alt, size=ref+alt))+geom_point() + geom_text(aes(label=sample), size=5, hjust=-.2) + geom_abline(slope=1, intercept = 0)
+  ggplot(aes(x=rs1046778, y=ref/alt, size=ref+alt)) +
+  geom_point() + 
+  geom_text(aes(label=sample), size=5, hjust=-.2) + 
+  geom_abline(slope=1, intercept = 0) +
+  tufte_theme()
 ```
 
 
@@ -130,12 +160,12 @@ ggplot(counts2, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt, colour = match)) +
 ```
 
 
-#MIR137HG (Deduplicated)
+#MIR137HG (Deduplicated, Clipped)
 
 `r margin_note("- All Expressed SNP hets are heterozygous for risk var")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr1:98046571-98046571.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr1:98046571-98046571.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1625579.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2660304.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -151,12 +181,12 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
 ```
 
 
-#PCGEM1 (Deduplicated)
+#PCGEM1 (Deduplicated, Clipped)
 
 `r margin_note("- Expressed at VERY low levels in developing brain")`
 
 ```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr2:192775750-192775750.counts.txt", col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'))
+counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Clip/chr2:192775750-192775750.clip.counts.txt", col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'))
 counts$sample <- as.character(counts$sample)
 riskVar <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs17662626.txt", col_names=c('chr', 'pos', 'riskVar', 'sample'), col_types =cols(chr='c', pos='i', riskVar='c', sample='c'))
 ExpressedSNP <- read_tsv("~/BTSync/FetalRNAseq/Genotypes/rs13419834.txt", col_names=c('chr', 'pos', 'ExpressedSNP', 'sample'), col_types =cols(chr='c', pos='i', ExpressedSNP='c', sample='c'))
@@ -169,15 +199,17 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   xlab('GWAS Risk Variant') +
   tufte_theme() +
   theme(legend.position="top")
+PlotDistortion(counts)
 
 ```
 
-#TRIM26
+#TRIM26 (Deduplicated, Clipped)
 
 `r margin_note("- Expression of alt allele is higher in the heterozygote, but not significant")`
+`r margin_note("- Alternate allele has significnatly higher expression independent of risk SNP")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/chr6:30186422-30186422.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr6:30186422-30186422.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2021722.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2074473.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -191,41 +223,19 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   theme(legend.position="top")
 
 counts <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% mutate(riskVar = ifelse(riskVar == 'T|C', 'C|T', as.character(riskVar)))
-ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-  geom_jitter(alpha=.2, height=0, width=.25) +
-  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
-  ylab('% Alternate Allele') +
-  xlab('GWAS Risk Variant') +
-  tufte_theme() +
-  theme(legend.position="top")
+PlotDistortion(counts)
+
+PlotRatio(counts)
 summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 ```
 
-`r margin_note("- Deduplication increases the effect, but it is still non-significant")`
 
-## deduplicated
-```{r }
-counts <- read_tsv("~/BTSync/FetalRNAseq/Counts/Dedup/chr6:30186422-30186422.counts.txt", col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'))
-counts <- left_join(counts, riskVar[,c(3,4)]) %>% left_join(ExpressedSNP[,c(3,4)])
-
-counts <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% mutate(riskVar = ifelse(riskVar == 'T|C', 'C|T', as.character(riskVar)))
-ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-  geom_jitter(alpha=.2, height=0, width=.25) +
-  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
-  ylab('% Alternate Allele') +
-  xlab('GWAS Risk Variant') +
-  tufte_theme() +
-  theme(legend.position="top")
-summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
-
-```
-
-#CSMD1
+#CSMD1 (Deduplicated, Clipped)
 
 `r margin_note("- Non-significant")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/chr8:2937908-2937908.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr8:2937908-2937908.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs10503253.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2291319.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -239,38 +249,18 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   theme(legend.position="top")
 
 counts <- filter(counts, ExpressedSNP == 'G|T' | ExpressedSNP == 'T|G') %>% mutate(riskVar = ifelse(riskVar == 'C|A', 'A|C', as.character(riskVar)))
-ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-  geom_jitter(alpha=.2, height=0, width=.25) +
-  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
-  ylab('% Alternate Allele') +
-  xlab('GWAS Risk Variant') +
-  tufte_theme() +
-  theme(legend.position="top")
+PlotDistortion(counts)
 summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
 ```
 
-## deduplicated
-```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr8:2937908-2937908.counts.txt"
-counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
 
-counts <- filter(counts, ExpressedSNP == 'G|T' | ExpressedSNP == 'T|G') %>% mutate(riskVar = ifelse(riskVar == 'C|A', 'A|C', as.character(riskVar)))
-ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-  geom_jitter(alpha=.2, height=0, width=.25) +
-  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
-  ylab('% Alternate Allele') +
-  xlab('GWAS Risk Variant') +
-  tufte_theme() +
-  theme(legend.position="top")
-summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
-
-```
-
-#MMP16
-`r margin_note("- Non-significant")`
+#MMP16  (Deduplicated, Clipped)
+`r margin_note("- Alt allele expressed significantly higher then ref in hets")`
+`r margin_note("- AA homozygotes not significantly different from hets")`
+`r margin_note("- GG homozygotes have significantly lower expression of Alt compared to hets")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr8:88039069-88039069.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr8:88039069-88039069.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7004633.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2664370.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -284,41 +274,22 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
   theme(legend.position="top")
 
 counts <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
-ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-  geom_jitter(alpha=.2, height=0, width=.25) +
-  scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
-  ylab('% Alternate Allele') +
-  xlab('GWAS Risk Variant') +
-  tufte_theme() +
-  theme(legend.position="top")
-summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
+PlotDistortion(counts)
+# fit additive model by counting G alleles
+counts$numG <-as.numeric(factor(counts$riskVar))
+summary(glm(cbind(alt, ref) ~ numG, data=counts, family = binomial))
+
+# fit epistatic model with independent levels for homozygotes, hets
+counts$riskVar <- relevel(factor(counts$riskVar), ref='G|G')
+summary(glm(cbind(alt, ref) ~ riskVar, data=counts, family = binomial))
 ```
 
-## deduplicated
 
-`r margin_note("- After deduplication, expression of the alt allele is slightly higher for the heterozygote")`
-`r margin_note("- It is worth pointing out that the sample size is also higher for the deduplicated dataset because the remapping has completed for additional samples")`
-```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr8:88039069-88039069.counts.txt"
-counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
-
-counts <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>% mutate(riskVar = ifelse(riskVar == 'G|A', 'A|G', as.character(riskVar)))
-ggplot(counts, aes(x=riskVar, y=alt/ref, size=ref+alt)) +
-  geom_jitter(alpha=.2, height=0, width=.25) +
-  #scale_y_continuous(limits=c(.2, .8), breaks=c(.2,.4,.6,.8)) +
-  ylab('% Alternate Allele') +
-  xlab('GWAS Risk Variant') +
-  tufte_theme() +
-  theme(legend.position="top")
-summary(glm(cbind(ref, alt) ~ riskVar, data=counts, family = binomial))
-
-```
-
-#CNNM2 (deduplicated)
+#CNNM2 (deduplicated, clipped)
 `r margin_note("- All samples that are heterozygose for the expressed SNP are also heterozygous for the risk SNP")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr10:103054405-103054405.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:103054405-103054405.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7914558.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2275271.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -334,12 +305,12 @@ ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
 
 ```
 
-#NT5C2
+#NT5C2 (deduplicated, clipped)
 `r margin_note("- Risk variant is very rare")`
 `r margin_note("- Slight decrease in alt allele, which is marginally significant")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/chr10:103089711-103089711.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:103089711-103089711.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191580.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs3740387.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
