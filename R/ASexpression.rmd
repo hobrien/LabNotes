@@ -4,7 +4,7 @@ title: "Allele-specific Expression"
 author: "Heath O'Brien"
 output:
   tufte::tufte_html: default
-  #tufte::tufte_handout: default
+  '#tufte::tufte_handout': default
 ---
 <!-- see http://rstudio.github.io/tufte/ for info about tufte -->
 ```{r setup, include=FALSE}
@@ -16,84 +16,12 @@ library(tidyr)
 library(readr)
 library(tufte)
 rm(list=ls())
-source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+source("~/BTSync/FetalRNAseq/LabNotes/R/ASexpressionFunctions.R")
 ```
 
 #AS3MT (Deduplicated, Clipped)
 
 `r margin_note("- There appear to be two cases of samples with the incorrect genotype (one T|T genotype with 55% C and one T|C genotype with 100% C (3 others have very low read counts)")`
-
-
-```{r }
-GetCounts<-function(count_file, riskVar_file, ExpressedSNP_file) {
-    counts <- read_tsv(count_file, 
-                       col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'),
-                       col_types = cols(chr="c", 
-                                        pos="i", 
-                                        ref_base="c", 
-                                        ref="i",
-                                        alt="i",
-                                        sample="c"
-                                        )
-                       )
-    riskVar <- read_tsv(riskVar_file, 
-                        col_names=c('chr', 'pos', 'riskVar', 'sample'), 
-                        col_types =cols(chr='c', 
-                                        pos='i', 
-                                        riskVar='c', 
-                                        sample='c'
-                                        )
-                        )
-    ExpressedSNP <- read_tsv(ExpressedSNP_file,
-                             col_names=c('chr', 'pos', 'ExpressedSNP', 'sample'),
-                             col_types =cols(chr='c', 
-                                             pos='i', 
-                                             ExpressedSNP='c', 
-                                             sample='c'
-                                             )
-                             )
-    counts <- left_join(counts, riskVar[,c(3,4)]) %>% 
-      left_join(ExpressedSNP[,c(3,4)])
-}
-
-PlotDistortion <- function(counts) {
-  p1 <- ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-          geom_jitter(alpha=.2, height=0, width=.25) +
-          geom_abline(intercept=0.5, slope=0, colour='red') +
-          scale_y_continuous(limits=c(-.05, 1.05), breaks=c(0,.2,.4,.6,.8,1)) +
-          ylab('% Alternate Allele') +
-          xlab('GWAS Risk Variant') +
-          tufte_theme() +
-          theme(legend.position="top")
-  print(p1)
-  }
-
-PlotRatio <- function(counts) {
-  p1 <- ggplot(counts, aes(x=riskVar, y=log2(alt/ref), size=ref+alt)) +
-          geom_jitter(alpha=.2, height=0, width=.25) +
-          geom_abline(intercept=0, slope=0, colour='red') +
-          scale_y_continuous(limits=c(-2,2), breaks=c(-2,-1,0,1,2), labels=c(2^-2,2^-1,2^0,2^1,2^2)) +
-          ylab('alt/ref ratio') +
-          xlab('GWAS Risk Variant') +
-          tufte_theme() +
-          theme(legend.position="top")
-  print(p1)
-}
-
-PlotASE <- function(counts) {
-  counts <- filter(counts, !is.na(ExpressedSNP))
-  p1 <- ggplot(counts, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt)) +
-          geom_jitter(alpha=.2, height=0, width=.25) +
-          facet_grid(ExpressedSNP ~ .) +
-          scale_y_continuous(limits=c(-.1, 1.1), breaks=c(0,.2,.4,.6,.8,1)) +
-          ylab('% Alternate Allele') +
-          xlab('GWAS Risk Variant') +
-          tufte_theme() +
-          theme(legend.position="top")
-  print(p1)
-}
-
-```
 
 ```{r }
 count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:102901727-102901727.clip.counts.txt"
@@ -278,7 +206,7 @@ hets <- filter(counts, ExpressedSNP == 'C|T' | ExpressedSNP == 'T|C') %>%
 
 PlotDistortion(hets)
 PlotRatio(hets)
-summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
+#summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 
 ```
 
