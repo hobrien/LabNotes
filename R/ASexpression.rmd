@@ -24,7 +24,7 @@ source("~/BTSync/FetalRNAseq/LabNotes/R/ASexpressionFunctions.R")
 `r margin_note("- There appear to be two cases of samples with the incorrect genotype (one T|T genotype with 55% C and one T|C genotype with 100% C (3 others have very low read counts)")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:102901727-102901727.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr10:102901727-102901727.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191419.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1046778.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -94,7 +94,7 @@ ggplot(counts2, aes(x=riskVar, y=alt/(ref+alt), size=ref+alt, colour = match)) +
 `r margin_note("- All Expressed SNP but one are hets are heterozygous for risk var")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr1:98046571-98046571.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr1:98046571-98046571.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1625579.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2660304.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -115,7 +115,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- Expressed at VERY low levels in developing brain")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr2:192775750-192775750.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr2:192775750-192775750.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs17662626.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs13419834.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -136,7 +136,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- Alternate allele has significnatly higher expression independent of risk SNP")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr6:30186422-30186422.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr6:30186422-30186422.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2021722.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2074473.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -156,7 +156,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- Non-significant")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr8:2937908-2937908.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr8:2937908-2937908.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs10503253.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2291319.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -175,7 +175,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- Non-significant")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr8:88039069-88039069.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr8:88039069-88039069.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7004633.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2664370.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -195,7 +195,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- All samples that are heterozygose for the expressed SNP are also heterozygous for the risk SNP")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:103054405-103054405.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr10:103054405-103054405.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7914558.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2275271.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -215,7 +215,7 @@ PlotRatio(hets)
 `r margin_note("- Slight decrease in alt allele, which is significant")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:103089711-103089711.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr10:103089711-103089711.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191580.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs3740387.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -233,7 +233,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- Risk variant is rare, but hets have significantly lower expression of alt allele")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr11:125609468-125609468.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr11:125609468-125609468.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs548181.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2241502.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -253,7 +253,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 
 `r margin_note("- Differences are not significant")`
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr18:54903114-54903114.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr18:54903114-54903114.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs12966547.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1944362.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
@@ -274,7 +274,7 @@ summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 `r margin_note("- risk allele is EXTREMELY rare")`
 
 ```{r }
-count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr18:55228300-55228300.clip.counts.txt"
+count_file <- "~/BTSync/FetalRNAseq/Counts/AlleleSpecific/chr18:55228300-55228300.clip.counts.txt"
 riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs17512836.txt"
 ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs8766.txt"
 counts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
