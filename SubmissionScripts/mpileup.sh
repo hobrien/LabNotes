@@ -7,6 +7,7 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
+rm /c8000xd3/rnaseq-heath/Counts/$1.counts.txt
 for input in `find /c8000xd3/rnaseq-heath/Mappings/ -name *.chr.nonref.merged.sorted.bam`
 do
     filename1=${input##*/}
@@ -20,6 +21,7 @@ do
     echo "Finished processing raw mapping of $sampleID"
 done
 
+rm /c8000xd3/rnaseq-heath/Counts/$1.dedup.counts.txt
 for input in `find /c8000xd3/rnaseq-heath/Mappings/ -name *.chr.nonref.merged.dedup.sort.bam`
 do
     filename1=${input##*/}
@@ -33,6 +35,7 @@ do
     echo "Finished processing deduplicated mapping of $sampleID"
 done
 
+rm /c8000xd3/rnaseq-heath/Counts/$1.clip.counts.txt
 for input in `find /c8000xd3/rnaseq-heath/Mappings/ -name *.chr.nonref.merged.dedup.sort.clip.bam`
 do
     filename1=${input##*/}
