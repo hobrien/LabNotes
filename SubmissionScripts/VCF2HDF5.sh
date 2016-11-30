@@ -5,6 +5,8 @@
 #$ -S /bin/bash
 #
 
+cd /c8000xd3/rnaseq-heath/Genotypes/Imputation2/
+
 ~/src/WASP-0.2.1/snp2h5/snp2h5 \
   -- chrom /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/chromInfo.txt
   --format vcf \
