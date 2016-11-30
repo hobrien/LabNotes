@@ -462,6 +462,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - this is the case for me whenever the mate is not mapped ([flag 8](https://broadinstitute.github.io/picard/explain-flags.html))
         - [FixMateInformation](https://broadinstitute.github.io/picard/command-line-overview.html#FixMateInformation) from Picard can supposedly fix this (I think. the documentation just says 'fix if needed'), but it doesn't appear to be doing anything to my mappings
         - I'm actually really confused by this because the output file is 1 GB bigger than the input, but ValidateSAM gives the same number of missing mates. I guess it's done SOMETHING to the non-missing ones?
+            - Tophat produces a second bam file called unmapped.bam. I'm hoping that if I combine this with accempted_hits.bam, all will be right with the world
+            - It looks like [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) from picard is designed to do just this
         - WASP somehow fixes this missing mate problem, but creates a new problem where reads with properly mapped mates have the mates removed
         - I suspect that this is due to poor mate read quality
     
