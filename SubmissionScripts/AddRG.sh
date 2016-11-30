@@ -7,11 +7,16 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
+infile=$1
+outfile=${1%.*}_RG.bam
+SampleID=$2
+rgid=`find /c8000xd3/databank/foetal-rna/ -name $(grep $SampleID ~/LabNotes/sequences.txt | head -1 | cut -f 1)* | xargs zcat | head -1 | cut -d: -f 3,4,10 | perl -pe 's/:/./g'`
+
 java -Xmx2g -jar ~/src/picard-tools-1.139/picard.jar AddOrReplaceReadGroups \
-      I=$1 \
-      O=${1%.*}_RG.bam \
-      RGID=$3 \
+      I=$infile \
+      O=$outfile \
+      RGID=$rgid \
       RGLB=lib1 \
       RGPL=illumina \
-      RGPU=$3 \
-      RGSM=$2
+      RGPU=$rgid \
+      RGSM=$SampleID
