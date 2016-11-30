@@ -304,6 +304,18 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - This gives 309k SNPs as compared to 3.7M  
     - Get index position for each sample in VCF files:
         - ```bcftools query -l ../../ImputedGenotypes/Imputation2/chr_1/chr1.dose.vcf.gz | head -96 | python GetVCFindex.py > ../VCFindex.txt```  
+    - This tool has been [updated](https://github.com/bmvdgeijn/WASP/releases/tag/v0.2), including a bunch of fixes to things that have been vexing me
+        - uses HDF5 to store SNP info instead of hokey text file
+        - considers only SNPs that are polymorphic in the sample
+        - "fixed several mapping pipeline bugs related to paired-end reads" (hopefully including the problems with mates being dropped and reads being duplicated)
+        - some other fixes that will hopefully solve the taking forever problem
+        - I had to update a number of things in anaconda to get this to work properly
+            - ```conda install -c anaconda gmp=5.1.2```
+            - ```conda update pysam```
+        - Working on generating HDF5 from VCF, but I'm getting segfaults for a couple of the VCF files (/c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr14.GRCh38.sort.vcf.gz, /c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr19.GRCh38.sort.vcf.gz)
+            - I changed the names of the samples in the VCF headers to match the samples
+                - ```cut -f 1 ~/LabNotes/VCFindex.txt | cut -d'/' -f 1 | cut -d'-' -f 1 > ~/LabNotes/VCFindex2.txt```
+                - ```for chr in {1..22}; do bcftools reheader -s ~/LabNotes/VCFindex2.txt -o /c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr$chr.GRCh38.sort.vcf.gz /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr$chr.GRCh38.sort.vcf.gz; done```
 
 ##Clip overlapping reads
 - the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
