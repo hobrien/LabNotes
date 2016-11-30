@@ -434,3 +434,35 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - Use bcftools gtcheck to confirm that samples match:
     - ```bash ~/LabNotes/SubmissionScripts/SubmitGTcheck.sh```
 
+#[ASEReadCounter](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_ASEReadCounter.php)
+- This tool from GATK seems like it's probably the best bet to extract AS read counts (tho it looks like WASP has a tool now also?)
+- Unfortunately, GATK it awful picky about input BAM files. I need to run [ValidateSAM](https://broadinstitute.github.io/picard/command-line-overview.html#ValidateSamFile) from Picard and fix all the issues with them before proceeding
+    - see info [here](https://software.broadinstitute.org/gatk/documentation/article?id=7571)
+    - MISSING_READ_GROUP/RECORD_MISSING_READ_GROUP
+        - this info can be added with [AddOrReplaceReadGroups](https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups) from Picard
+        - according to [this](http://gatkforums.broadinstitute.org/gatk/discussion/6472/read-groups) extremely confusing explanation, RGID and RGPU are somehow different, but each is unique for each sample/lane
+        - I have opted to use the flow cell ID, lane, and barcode to fill both of these fields
+            - ```find /c8000xd3/databank/foetal-rna/ -name $(grep 15240 ~/LabNotes/sequences.txt | head -1 | cut -f 1)* | xargs zcat | head -1 | cut -d: -f 3,4,10 | perl -pe 's/:/./g'```
+        - RGLB is 'lib1' (or lib2 in the case of 15533-2) and RGPL is illumina
+        - RGSM is the sample name
+    - MATE_NOT_FOUND
+        - this is triggered if the read is flagged as paired in sequencing ([flag 1](https://broadinstitute.github.io/picard/explain-flags.html)), but mate not present in the bam file
+        - this is the case for me whenever the mate is not mapped ([flag 8](https://broadinstitute.github.io/picard/explain-flags.html))
+        - [FixMateInformation](https://broadinstitute.github.io/picard/command-line-overview.html#FixMateInformation) from Picard can supposedly fix this (I think. the documentation just says 'fix if needed'), but it doesn't appear to be doing anything to my mappings
+        - I'm actually really confused by this because the output file is 1 GB bigger than the input, but ValidateSAM gives the same number of missing mates. I guess it's done SOMETHING to the non-missing ones?
+        - WASP somehow fixes this missing mate problem, but creates a new problem where reads with properly mapped mates have the mates removed
+        - I suspect that this is due to poor mate read quality
+    
+        	| BAM_file	                                 | MATE_NOT_FOUND |
+        	| ------------------------------------------ | -------------- |
+        	| accepted_hits.bam	                         | 4357912        |
+        	| 15240.chr.bam		                         | 4319245        |
+        	| 15240.chr.sort_RG_mateFix.bam		         | 4319245        |
+        	| 15240.chr.nonref.merged.bam		         | 121069         |
+        	| 15240.chr.nonref.merged.sorted.bam		 | 121069         |
+        	| 15240.chr.nonref.merged.sorted_mateFix.bam | 121069         |
+        	| 15240.chr.nonref.merged.sorted_RG.bam      | 121069         |
+
+    - SAMException: Value was put into PairInfoMap more than once
+        - somewhat ironically, the WASP deduplication script duplicated the entry for one of the reads
+        - hopefully this is fixed with the new version of WASP
