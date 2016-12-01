@@ -316,6 +316,17 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - I changed the names of the samples in the VCF headers to match the samples
                 - ```cut -f 1 ~/LabNotes/VCFindex.txt | cut -d'/' -f 1 | cut -d'-' -f 1 > ~/LabNotes/VCFindex2.txt```
                 - ```for chr in {1..22}; do bcftools reheader -s ~/LabNotes/VCFindex2.txt -o /c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr$chr.GRCh38.sort.vcf.gz /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr$chr.GRCh38.sort.vcf.gz; done```
+            - There is also a problem with chr22 that gives an error saying "SNP position (89346516) is outside of chromomosome  range:1-72058697861300481"
+            - I have no idea why it gives the range as 1-72058697861300481, which is 25 million x the total size of the genome, but 89346516 is outside the range of chr22 (50818468)
+            - The VCF for chr22 actually goes up to position 154768956, which is more than the length of all be ut the first 7 chromosomes
+            - the name of the SNP at this position is chr22:18047467, which refers to the position in the hg19 build
+            - rs188965487 is at this position in hg19, but the position is listed as "no hit" in GRCh38.p2
+            - rs575160859 is the last SNP in chr22.GRCh38.vcf.gz (unsorted). It's position is listed as 50805809, which is it's position in GRCh38.p2. It's name is listed as 22:51244237, which corresponds to it's position in hg19
+            - It very much looks like most of the SNPs in chr22.GRCh38.vcf.gz are correct, and in the correct order, but for some reason, some SNPs that are not present in GRCh38 were given extremely high coordinates that are throwing up sort order issues and are outside of the range of the chromosome
+            - There are a total of 8 SNPs that have coordinates beyond the length of the chromosome, 5 within 44 bp in hg19 and 3 others within 241 bp. I haven't checked all of them, but both of these clusters have SNPS with no hit in GRCh38
+            - These are easy enough to exclude, but what I really need is a sanity check that ensures that all SNPs in the lift-over file have a matching reference base at the listed position in GRCh38
+            
+            
 
 ##Clip overlapping reads
 - the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
