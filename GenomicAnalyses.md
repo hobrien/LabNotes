@@ -465,7 +465,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - Tophat produces a second bam file called unmapped.bam. I'm hoping that if I combine this with accempted_hits.bam, all will be right with the world
             - It looks like [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) from picard is designed to do just this
             - This is a nightmare. There's all manner of problems with the unmapped.bam file form tophat that cause picard to choke
-            - fortunately, I'm not the first to encounter this problem, and I've found a [tool](https://github.com/cbrueffer/tophat-recondition) that is meant to solve these problems
+            - fortunately, I'm not the first to encounter this problem, and I've found a tool called [tophat-recondition](https://github.com/cbrueffer/tophat-recondition) that is meant to solve these problems
+            - [AddOrReplaceReadGroups](https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups) is now complaining about the sort order. I am going to try [SortSam](https://broadinstitute.github.io/picard/command-line-overview.html#SortSam) to sort the unmpped reads by queryname and see if that helps
+            - This seems to work, but I should also run it on the accepted_hits because [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) complains about it
+            - [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) STILL doesn't work. Now it's complaining about identical Program Record ID's in the headers from the mapped and unmapped files
+            - This is because both have ID:Tophat in the @PG line of the header. I think I have managed to solve this by adding a line to [tophat-recondition](https://github.com/cbrueffer/tophat-recondition) to modify the PGID of the unmapped file to be "Tophat-unmapped". This is running right now, so we'll see how it goes
         - WASP somehow fixes this missing mate problem, but creates a new problem where reads with properly mapped mates have the mates removed
         - I suspect that this is due to poor mate read quality
     
