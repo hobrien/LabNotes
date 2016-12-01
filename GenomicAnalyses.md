@@ -325,8 +325,10 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - It very much looks like most of the SNPs in chr22.GRCh38.vcf.gz are correct, and in the correct order, but for some reason, some SNPs that are not present in GRCh38 were given extremely high coordinates that are throwing up sort order issues and are outside of the range of the chromosome
             - There are a total of 8 SNPs that have coordinates beyond the length of the chromosome, 5 within 44 bp in hg19 and 3 others within 241 bp. I haven't checked all of them, but both of these clusters have SNPS with no hit in GRCh38
             - These are easy enough to exclude, but what I really need is a sanity check that ensures that all SNPs in the lift-over file have a matching reference base at the listed position in GRCh38
-            
-            
+            - FixVCF.py flags 7 of these as 'FailedGetBase' in file called test.check.ref (absolutely no idea why it missed chr22:89346549)
+            - There is also a SNP in the same file flagged as MismatchRefBase, but it's a mismatch in both the original VCF and the liftover. Looks like a case of a strand swap during imputation
+            - It also flags 4000 duplicate sites, which are different alternate alleles at the same position
+            - There are also complaints about Alternative alleles with freq > 50% and monomorphic sites, but I think I can safely ignore them
 
 ##Clip overlapping reads
 - the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
@@ -480,6 +482,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - [AddOrReplaceReadGroups](https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups) is now complaining about the sort order. I am going to try [SortSam](https://broadinstitute.github.io/picard/command-line-overview.html#SortSam) to sort the unmpped reads by queryname and see if that helps
             - This seems to work, but I should also run it on the accepted_hits because [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) complains about it
             - Alternatively, I'm going to try coordinate-sorting the unmapped file (which seems like a weird thing to do) to see if that works
+                - coordinate sorting the unmapped file before adding read groups does work, but it doesn't make the warning (Exception merging bam alignment - attempting to sort aligned reads and try again: Underlying iterator is not queryname sorted) doesn't go away
             - [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) STILL doesn't work. Now it's complaining about identical Program Record ID's in the headers from the mapped and unmapped files
             - This is because both have ID:Tophat in the @PG line of the header. I think I have managed to solve this by adding a line to [tophat-recondition](https://github.com/cbrueffer/tophat-recondition) to modify the PGID of the unmapped file to be "Tophat-unmapped". This is running right now, so we'll see how it goes
         - WASP somehow fixes this missing mate problem, but creates a new problem where reads with properly mapped mates have the mates removed
