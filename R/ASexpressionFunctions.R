@@ -72,3 +72,36 @@ PlotASE <- function(counts) {
     theme(legend.position="top")
   print(p1)
 }
+
+GetAllCounts <- function(snp_pos, riskVar_file, ExpressedSNP_file) {
+  count_file <- paste0("~/BTSync/FetalRNAseq/Counts/AlleleSpecific/", snp_pos, ".counts.txt")
+  RawCounts<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
+  count_file <- paste0("~/BTSync/FetalRNAseq/Counts/AlleleSpecific/", snp_pos, ".dedup.counts.txt")     
+  Deduplicated<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
+  count_file <- paste0("~/BTSync/FetalRNAseq/Counts/AlleleSpecific/", snp_pos, ".clip.counts.txt")
+  Clipped<-GetCounts(count_file, riskVar_file, ExpressedSNP_file)
+  CombineCounts(RawCounts, Deduplicated, Clipped)
+}
+
+CombineCounts <- function(RawCounts, Deduplicated, Clipped) {
+   rename(RawCounts, ref.raw = ref, alt.raw = alt) %>%
+          full_join(select(Deduplicated, 
+                           sample, 
+                           ref.dedup = ref, 
+                           alt.dedup = alt
+                           ), by=c("sample")) %>%
+          full_join(select(Clipped, 
+                          sample, 
+                          ref.clip = ref, 
+                          alt.clip = alt
+                          ), by=c("sample")) 
+}  
+
+PlotCounts <- function(Combined) {
+  p1 <- mutate(Combined, raw = ref.raw + alt.raw, 
+         dedup = ref.dedup + alt.dedup, 
+         clip =  ref.clip + alt.clip) %>%
+    select(raw, dedup, clip) %>%
+    ggpairs() +tufte_theme()
+  print(p1)
+}
