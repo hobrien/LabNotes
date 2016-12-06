@@ -20,6 +20,9 @@ vignettes/*.pdf
 R/*.html
 R/*.pdf
 
+# R lib files
+R/libs/*
+
 # Excel files
 *.xls
 *.xlsx

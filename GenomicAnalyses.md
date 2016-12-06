@@ -23,12 +23,20 @@
       * [LiftoverVcf (picard\-tools)](#liftovervcf-picard-tools)
       * [CrossMap](#crossmap)
     * [WASP](#wasp)
+    * [Clip overlapping reads](#clip-overlapping-reads)
   * [Transcript Identification](#transcript-identification)
     * [Cufflinks](#cufflinks)
     * [Cuffcompare](#cuffcompare)
     * [Make DB of GencodeGTF:](#make-db-of-gencodegtf)
+    * [Run Cufflinks on SRA data from Liu:2016ji (GSE71315)](#run-cufflinks-on-sra-data-from-liu2016ji-gse71315)
   * [Expression analysis](#expression-analysis)
   * [Cell\-type deconvolution](#cell-type-deconvolution)
+    * [HTSeq\-count](#htseq-count)
+    * [DESeq2](#deseq2)
+      * [DEXSeq](#dexseq)
+    * [Cufflinks](#cufflinks-1)
+  * [SNP calling](#snp-calling)
+  * [ASEReadCounter](#asereadcounter)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 
@@ -329,7 +337,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - There is also a SNP in the same file flagged as MismatchRefBase, but it's a mismatch in both the original VCF and the liftover. Looks like a case of a strand swap during imputation
             - It also flags 4000 duplicate sites, which are different alternate alleles at the same position
             - There are also complaints about Alternative alleles with freq > 50% and monomorphic sites, but I think I can safely ignore them
-
+            - Filtering on position appears to clean everything up:
+                - ```bcftools filter -e 'POS>=89346516' chr22.GRCh38.vcf.gz > chr22.GRCh38.filter.vcf.gz```
+                 
 ##Clip overlapping reads
 - the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
 - this clips the read with the lowest quality score, which isn't as good as comparing the bases of the overlapping reads, but is probably good enough
@@ -460,7 +470,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```bash ~/LabNotes/SubmissionScripts/SubmitGTcheck.sh```
 
 #[ASEReadCounter](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_ASEReadCounter.php)
-- This tool from GATK seems like it's probably the best bet to extract AS read counts (tho it looks like WASP has a tool now also?)
+- This tool
+ from GATK seems like it's probably the best bet to extract AS read counts (tho it looks like WASP has a tool now also?)
 - Unfortunately, GATK it awful picky about input BAM files. I need to run [ValidateSAM](https://broadinstitute.github.io/picard/command-line-overview.html#ValidateSamFile) from Picard and fix all the issues with them before proceeding
     - see info [here](https://software.broadinstitute.org/gatk/documentation/article?id=7571)
     - MISSING_READ_GROUP/RECORD_MISSING_READ_GROUP
@@ -485,6 +496,14 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
                 - coordinate sorting the unmapped file before adding read groups does work, but it doesn't make the warning (Exception merging bam alignment - attempting to sort aligned reads and try again: Underlying iterator is not queryname sorted) doesn't go away
             - [MergeBamAlignment](https://broadinstitute.github.io/picard/command-line-overview.html#MergeBamAlignment) STILL doesn't work. Now it's complaining about identical Program Record ID's in the headers from the mapped and unmapped files
             - This is because both have ID:Tophat in the @PG line of the header. I think I have managed to solve this by adding a line to [tophat-recondition](https://github.com/cbrueffer/tophat-recondition) to modify the PGID of the unmapped file to be "Tophat-unmapped". This is running right now, so we'll see how it goes
+            - I also had to modify [tophat-recondition](https://github.com/cbrueffer/tophat-recondition) to set the mate_reverse_strand flag
+            - ValidateSAM is still complaining about the PNEXT for unmapped reads being set to one, rather than the position of the mapped read and about RNEXT/PNEXT of the mapped read being set to */0, rather than the coordinates of the mapped read
+                - this is because tophat-recondition set the RNAME/POS of unmapped reads to RNAME/POS of the mapped mate, but does not change RNEXT/PNEXT of the mapped mate
+                - changeing PNEXT of the unmapped reads is an easy fix by tweaking tophat-recondition, but that script doesn't modify accepted_hits, so fixing the mapped mate is not trivial
+                - I'm trying MergeBAM from picard on the latest output of tophat-recondition to see if it can cope with this, but I'm not optomistic
+                - It's also possible that ASEReadCounter will ignore these problems that ValidateSAM is flagging
+                - My only other option is a fairly major rewrite of tophat-recondition or write my own script to modify accepted_hits.bam
+                    - It's an easy fix: if mapped.mate_unmapped == true, mapped.pnext = mapped.pos, mapped.rnext = mapped.tid
         - WASP somehow fixes this missing mate problem, but creates a new problem where reads with properly mapped mates have the mates removed
         - I suspect that this is due to poor mate read quality
     
