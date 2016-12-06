@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_14_18_noA_excl_19_cooks.75_FDR.1_interact"                         # name of the project
+projectName <- "MvsF_14_20_noA_lrt_interact"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -21,24 +21,24 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-varInt <- "Sex"                                    # factor of interest
+varInt <- "PCW"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
 batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
-interact <- c("PCW")
+interact <- c("Sex")
 RIN_cutoff <- 0
-PCW_cutoff <- c(14, 18)
+PCW_cutoff <- c(14, 20)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- .75                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
-alpha <- 0.1                                      # threshold of statistical significance
+alpha <- 0.05                                      # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
-testMethod <- 'Wald'
+testMethod <- 'LRT'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
 BrainBank <- 'HDBR'
-#exclude <- c('15641', '18432', '16491')
-exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
+exclude <- c('15641', '18432')#, '16491')
+#exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
 
@@ -166,6 +166,7 @@ GetGeneIDs <- function(Ids) {
   }
   geneIDs
 }
+DEgenes=NA
 if (testMethod == 'Wald') {
   MalevsFemale.up <- read.delim("tables/MalevsFemale.up.txt", check.names=FALSE)
   MalevsFemale.up <- select(MalevsFemale.up, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
@@ -179,11 +180,11 @@ if (testMethod == 'Wald') {
   DESeq.complete <- read.delim("tables/MalevsFemale.complete.txt")
 } else if (testMethod=='LRT' ) {
   lrt.up <- read.delim(paste0("tables/drop", varInt, ".up.txt"), check.names=FALSE)
-  lrt.up <- select(lrt.up, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+  lrt.up <- select(lrt.up, Id, baseMean, FoldChange, log2FoldChange, pvalue, padj)
   lrt.up <- bind_cols(GetGeneIDs(lrt.up$Id), lrt.up)
   write.table(lrt.up, file=paste0("tables/drop", varInt, ".up.gene_name.txt"), sep="\t", quote=FALSE, row.names=FALSE)
   lrt.down <- read.delim(paste0("tables/drop", varInt, ".down.txt"), check.names=FALSE)
-  lrt.down <- select(lrt.down, Id, Female, Male, FoldChange, log2FoldChange, pvalue, padj)
+  lrt.down <- select(lrt.down, Id, baseMean, FoldChange, log2FoldChange, pvalue, padj)
   lrt.down <- bind_cols(GetGeneIDs(lrt.down$Id), lrt.down)
   write.table(lrt.down, paste0("tables/drop", varInt, ".down.gene_name.txt"), sep="\t", quote=FALSE, row.names=FALSE)
   DEgenes <- nrow(lrt.up) + nrow(lrt.down)
@@ -219,7 +220,7 @@ summary <- data.frame(BrainBank=c(BrainBank),
                       n=c(ncol(counts)),
                       test=c(testMethod),
                       model=c(ifelse(length(interact)==0, '+', '*')), 
-                      CooksCutoff=c(cooksCutoff),
+                      CooksCutoff=c(ifelse(testMethod=='Wald', cooksCutoff, "None")),
                       DEgenes=c(DEgenes),
                       res=c(workDir)                     
                       )                                              
