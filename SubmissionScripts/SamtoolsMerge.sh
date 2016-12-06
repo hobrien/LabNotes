@@ -10,4 +10,5 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
-samtools merge ${1%.*}_merge.bam$1 $2
+samtools merge ${1%.*}_merge.bam $1 $2
+exit $?

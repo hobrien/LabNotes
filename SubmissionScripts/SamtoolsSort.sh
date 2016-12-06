@@ -11,3 +11,4 @@ folder_path=${@%/*}
 folder=${folder_path##*/}
 filename=${1%%.bam}
 ~/bin/samtools sort -o $filename_sort.bam $@
+exit $?
