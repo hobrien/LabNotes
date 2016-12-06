@@ -19,12 +19,13 @@ bash ~/LabNotes/SubmissionScripts/tophat-recondition.sh $folder
 echo "Merging mapped and unmapped BAM files for $sampleID"
 # Merge BAM file
 rm $folder/accepted_hits_fixup_merge.bam
-bash ~/LabNotes/SubmissionScripts/SamtoolsMerge $folder/accepted_hits_fixup.bam $folder/unmapped_fixup.bam 
-
-echo "Adding read group info to merged BAM for $sampleID"
-# Add Readgroup Info to bam file
-bash ~/LabNotes/SubmissionScripts/AddRG.sh $folder/accepted_hits_fixup_merge.bam $sampleID
+bash ~/LabNotes/SubmissionScripts/SamtoolsMerge.sh $folder/accepted_hits_fixup.bam $folder/unmapped_fixup.bam 
 
 echo "Sorting BAM for $sampleID"
 # Sort BAM files by query name
-bash ~/LabNotes/SubmissionScripts/SortSam.sh $folder/accepted_hits_fixup_merge_RG.bam coordinate
+bash ~/LabNotes/SubmissionScripts/Samtools.sh $folder/accepted_hits_fixup_merge.bam
+
+echo "Adding read group info to merged BAM for $sampleID"
+# Add Readgroup Info to bam file
+bash ~/LabNotes/SubmissionScripts/AddRG.sh $folder/accepted_hits_fixup_merge_sort.bam $sampleID
+
