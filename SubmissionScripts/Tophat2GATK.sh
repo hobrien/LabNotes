@@ -23,7 +23,7 @@ bash ~/LabNotes/SubmissionScripts/SamtoolsMerge.sh $folder/accepted_hits_fixup.b
 
 echo "Sorting BAM for $sampleID"
 # Sort BAM files by query name
-bash ~/LabNotes/SubmissionScripts/Samtools.sh $folder/accepted_hits_fixup_merge.bam
+bash ~/LabNotes/SubmissionScripts/SamtoolsSort.sh $folder/accepted_hits_fixup_merge.bam
 
 echo "Adding read group info to merged BAM for $sampleID"
 # Add Readgroup Info to bam file
