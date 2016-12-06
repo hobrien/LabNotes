@@ -501,9 +501,13 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
                 - this is because tophat-recondition set the RNAME/POS of unmapped reads to RNAME/POS of the mapped mate, but does not change RNEXT/PNEXT of the mapped mate
                 - changeing PNEXT of the unmapped reads is an easy fix by tweaking tophat-recondition, but that script doesn't modify accepted_hits, so fixing the mapped mate is not trivial
                 - I'm trying MergeBAM from picard on the latest output of tophat-recondition to see if it can cope with this, but I'm not optomistic
+                    - when reads are queryname sorted, MergeBAM gives an error: "picard.PicardException: Second read from pair not found in unmapped bam: HISEQ:258:C6UARANXX:4:1101:10000:28046, HISEQ:258:C6UARANXX:4:1101:10000:64326"
+                    - when reads are coordinate sorted, MergeBAM first does a queryname sort, then gives error
                 - It's also possible that ASEReadCounter will ignore these problems that ValidateSAM is flagging
-                - My only other option is a fairly major rewrite of tophat-recondition or write my own script to modify accepted_hits.bam
-                    - It's an easy fix: if mapped.mate_unmapped == true, mapped.pnext = mapped.pos, mapped.rnext = mapped.tid
+                - I've modified tophat-recondition.py to make the necessary changes to accepted_hits.bam
+                    - if mapped.mate_unmapped == true, mapped.pnext = mapped.pos, mapped.rnext = mapped.tid
+             - No error reported!
+             - I've incorporated all the steps to do this into a script called Tophat2GATK.sh       
         - WASP somehow fixes this missing mate problem, but creates a new problem where reads with properly mapped mates have the mates removed
         - I suspect that this is due to poor mate read quality
     
