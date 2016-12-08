@@ -4,13 +4,13 @@
 
 GSEA.program.location <- "/Users/heo3/BTSync/Code/GSEA-P-R/GSEA.1.0.R"   #  R source program (change pathname to the rigth location in local machine)
 source(GSEA.program.location, verbose=T, max.deparse.length=9999)
-doc_string = "MvsF_C5_mf"
+doc_string = "MvsF_C3_tft"
 output_directory <- paste0("/Users/heo3/BTSync/FetalRNAseq/GSEA/", doc_string, "/")
 dir.create(output_directory)
 GSEA(                                                                    # Input/Output Files :-------------------------------------------
  input.ds =  "/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MvsF.gct",           # Input gene expression Affy dataset file in RES or GCT format
  input.cls = "/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MvsF.cls",           # Input class vector (phenotype) file in CLS format
- gs.db =     "/Users/heo3/BTSync/FetalRNAseq/GSEA/MSigDB/c5.mf.v5.2.symbols.gmt",         # Gene set database in GMT format
+ gs.db =     "/Users/heo3/BTSync/FetalRNAseq/GSEA/MSigDB/c3.tft.v5.2.symbols.gmt",         # Gene set database in GMT format
  output.directory      = output_directory,        # Directory where to store output and results (default: "")
 #  Program parameters :-------------------------------------------------------------------------------------------------------------------------
  doc.string            = doc_string,   # Documentation string used as a prefix to name result files (default: "GSEA.analysis")

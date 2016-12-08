@@ -1,0 +1,143 @@
+---
+title: "Re: your RNAseq"
+author: "Heath O'Brien"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(cowplot)
+library(gridExtra)
+library(tufte)
+library(readr)
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+```
+## Cardiff Sequencing results
+
+Here is a histogram of the number of reads for each sample from the sequencing that we have done on the HiSeq 4000:
+\vspace{10 mm}
+
+```{r}
+
+lengths1 <- read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/seq_lengths.txt", 
+                       "\t", 
+                       escape_double=FALSE, 
+                       trim_ws=TRUE,
+                       col_names=c('filename', 'reads'),
+                       col_types=cols(filename='c', reads='i')
+                       )
+lengths1$Million_reads <- lengths1$reads/1000000
+LibraryInfo <- read_delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt",
+                          "\t", 
+                          escape_double=FALSE, 
+                          trim_ws=TRUE,
+                          col_types =cols_only(sample='c',
+                                               Centre='c'
+                                              )
+                     )
+SeqInfo <- read_delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/sequences.txt", 
+                      "\t",
+                      escape_double=FALSE, 
+                      col_names=c('filename', 'sample'),
+                      col_types=cols(filename='c', sample='c'),
+                      trim_ws=TRUE
+                     )
+lengths1 <- full_join(LibraryInfo, SeqInfo) %>%
+  right_join(lengths1)
+lengths1 <- filter(lengths1, !grepl("_R2_",filename)) %>% filter(!grepl("_2$",filename))
+lengths1$pool_size <- "6 samples / lane"
+
+lengths2 <- read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/Carolina/seq_lengths.txt",
+                       "\t", 
+                       escape_double=FALSE, 
+                       trim_ws=TRUE,
+                       col_names=c('filename', 'reads'),
+                       col_types=cols(filename='c', reads='i')
+                       )
+
+lengths2$Million_reads <- lengths2$reads/1000000
+lengths2 <- filter(lengths2, !grepl("_R2_",filename)) %>% filter(!grepl("_2$",filename))
+lengths2$pool_size <- "8 samples / lane"
+
+filter(lengths1, Centre == 'Cardiff') %>%
+  select(filename, Million_reads, pool_size) %>%
+  bind_rows(select(lengths2, filename, Million_reads, pool_size)) %>% 
+  ggplot(aes(x=Million_reads)) +
+    geom_histogram(bins=25, fill='dark blue') +
+  facet_grid(pool_size ~ .) + 
+    tufte_theme() +
+    scale_x_continuous(breaks=seq(0,150,25))
+
+```
+\pagebreak
+
+I'm not sure what summary statistics about quality would be most useful, but here's a summary of all the QC metrics from [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc) for each of our samples. I'm happy to pull out numbers for any stat in particular that you might be interested in:
+\vspace{10 mm}
+
+`r margin_note("- Green: PASS")`
+`r margin_note("- Yellow: WARN")`
+`r margin_note("- Red: FAIL")`
+
+```{r fig.width=18, fig.height=30}
+summary_all <- read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", 
+                          "\t", 
+                          col_names=c('status', 'stat', 'filename'),
+                          col_types=cols(status='c', stat='c', filename='c'),
+                          escape_double=FALSE,
+                          trim_ws=TRUE
+                          )
+
+summary_all <- separate(summary_all, filename, c('filename'), '\\.', extra='drop')
+p1 <- full_join(LibraryInfo, SeqInfo) %>% 
+  inner_join(summary_all) %>%
+  filter(Centre == 'Cardiff') %>%
+  select(stat, filename, status) %>%
+  bind_rows(read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/Carolina/Carolina_summary.txt",
+                       "\t", 
+                        col_names=c('status', 'stat', 'filename'),
+                        col_types=cols(status='c', stat='c', filename='c'),
+                        escape_double=FALSE,
+                        trim_ws=TRUE
+                        )
+            ) %>%
+  filter(!grepl("_R2_",filename)) %>% filter(!grepl("_2$",filename)) %>%
+  ggplot(aes(x=stat, y=filename, fill=status)) +
+    geom_tile() +
+    scale_fill_manual(values=c('red', 'green', 'yellow')) +
+    scale_x_discrete(position = "top") +
+    tufte_theme() +
+    theme(axis.text.x= element_text(angle=90, hjust = 0, size=20), 
+          axis.text.y= element_text(size=20), 
+          axis.title = element_blank(), legend.title=element_blank())
+
+layout(matrix(c(1,2), 2, byrow = TRUE))
+p2 <- full_join(LibraryInfo, SeqInfo) %>% 
+  inner_join(summary_all) %>%
+  filter(Centre == 'Cardiff') %>%
+  select(stat, filename, status) %>%
+  bind_rows(read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/Carolina/Carolina_summary.txt",
+                       "\t", 
+                        col_names=c('status', 'stat', 'filename'),
+                        col_types=cols(status='c', stat='c', filename='c'),
+                        escape_double=FALSE,
+                        trim_ws=TRUE
+                        )
+            ) %>%
+  filter(!grepl("_R1_",filename)) %>% filter(!grepl("_1$",filename)) %>%
+  ggplot(aes(x=stat, y=filename, fill=status)) +
+    geom_tile() +
+    scale_fill_manual(values=c('red', 'green', 'yellow')) +
+    scale_x_discrete(position = "top") +
+    tufte_theme() +
+    theme(axis.text.x= element_text(angle=90, hjust = 0, size=20), 
+          axis.text.y= element_text(size=20), 
+          axis.title = element_blank(), legend.title=element_blank())
+grid.arrange(p1, p2, ncol=2)
+```
+

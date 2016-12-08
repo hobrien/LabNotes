@@ -1,0 +1,178 @@
+
+---
+title: "Allele-specific Expression"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(tufte)
+library(GGally)
+rm(list=ls())
+source("~/BTSync/FetalRNAseq/LabNotes/R/ASexpressionFunctions.R")
+```
+
+
+
+```{r }
+#Expression data for all samples
+MvsF_complete <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_all2/tables/MalevsFemale.complete.txt",  "\t", escape_double = FALSE, trim_ws = TRUE)
+#reference file that has all 104 samples
+
+#Reference set used for Differential expression
+targetFile <- "~/BTSync/FetalRNAseq/LabNotes/MvsFmac.txt"
+target <- read.delim(targetFile)                        # path to the design/target file
+
+sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
+target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
+
+sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
+target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
+
+```
+# chr10:102901727
+
+```{r }
+snp_pos <- "chr10:102901727-102901727"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs11191419.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1046778.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+`r margin_note("- Samtools sort ran on deduplicated bam for 15533 (10401) and clipOverlap running (10501))`
+`r margin_note("- Samtools ran on deduplicated bam for 16491 (10430) and clipOverlap running (10502))`
+`r margin_note("- Samtools sort ran on deduplicated bam for 19031 (10431) and clipOverlap running (10503))`
+`r margin_note("- Samtools sort running on deduplicated bam for 18653 (10432))`
+`r margin_note("- Samtools sort running on deduplicated bam for 17372 (10433))`
+`r margin_note("- qsub ../LabNotes/SubmissionScripts/Samtools.sh /c8000xd3/rnaseq-heath/Mappings/17372/BAM/17372.chr.nonref.merged.sorted.dedup.bam)`
+
+`r margin_note("- WASP running on each chromosome for 16548 (10408-10429))`
+`r margin_note("- WASP running on each chromosome for 18983 (10120-10139))`
+`r margin_note("- bash ../LabNotes/SubmissionScripts/SubmitWASPnonRefchr.sh 16548)`
+
+```{r}
+full_join(target, Combined, by=c("label" = "sample")) %>% 
+  filter(is.na(ref.clip)) %>%
+  select(label, chr, pos, ref_base, ref.raw, ref.dedup, ref.clip)
+```
+#chr1:9804657
+```{r }
+snp_pos <- "chr1:98046571-98046571"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs1625579.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2660304.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+#chr2:192775750
+```{r }
+snp_pos <- "chr2:192775750-192775750"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs17662626.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs13419834.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+#chr6:30186422 (TRIM26)
+```{r }
+snp_pos <- "chr6:30186422-30186422"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2021722.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2074473.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+#chr8:2937908 (CSMD1)
+```{r }
+snp_pos <- "chr8:2937908-2937908"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs10503253.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2291319.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+#chr8:88039069 (MMP16)
+```{r }
+snp_pos <- "chr8:88039069-88039069"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7004633.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2664370.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+#chr10:103054405 (CNNM2)
+```{r }
+snp_pos <- "chr10:103054405-103054405"
+riskVar_file <- "~/BTSync/FetalRNAseq/Genotypes/rs7914558.txt"
+ExpressedSNP_file <- "~/BTSync/FetalRNAseq/Genotypes/rs2275271.txt"
+
+Combined <- GetAllCounts(snp_pos, riskVar_file, ExpressedSNP_file)
+PlotCounts(Combined)
+```
+
+
+# chr10:102864315
+```{r}
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:102864315-102864315.clip.counts.txt"
+read_tsv(count_file, 
+                   col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'),
+                   col_types = cols(chr="c", 
+                                    pos="i", 
+                                    ref_base="c", 
+                                    ref="i",
+                                    alt="i",
+                                    sample="c"
+                   )
+) %>% 
+  full_join(chr10_103054405, query, by=c("sample")) %>% View()
+  filter(is.na(ref.x))
+
+filter(MvsF_complete, grepl('ENSG00000166275', Id)) %>%
+  select(starts_with('A263'))
+
+```
+
+# chr10:103054405
+`r margin_note("- Gene (CNNM2-002) is expressde at a high level in all samples, but very few reads covering this SNP (none in the case of A263")`
+```{r}
+count_file <- "~/BTSync/FetalRNAseq/Counts/Clip/chr10:102864315-102864315.clip.counts.txt"
+read_tsv(count_file, 
+                   col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'),
+                   col_types = cols(chr="c", 
+                                    pos="i", 
+                                    ref_base="c", 
+                                    ref="i",
+                                    alt="i",
+                                    sample="c"
+                   )
+) %>% full_join(chr10_103054405, query, by=c("sample")) %>% filter(is.na(ref.x))
+
+filter(MvsF_complete, grepl('ENSG00000148842', Id)) %>% select(starts_with('A263'))
+count_file <- "~/BTSync/FetalRNAseq/Counts/Dedup/chr10:103054405-103054405.counts.txt"
+chr10_103054405 <- read_tsv(count_file, 
+                   col_names=c('chr', 'pos', 'ref_base', 'ref', 'alt', 'sample'),
+                   col_types = cols(chr="c", 
+                                    pos="i", 
+                                    ref_base="c", 
+                                    ref="i",
+                                    alt="i",
+                                    sample="c"
+                   )
+)
+full_join(chr10_102864315, chr10_103054405, by=c("sample")) %>% View()
+```

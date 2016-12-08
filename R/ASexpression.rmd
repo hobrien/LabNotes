@@ -226,6 +226,7 @@ hets <- filter(counts, ExpressedSNP == 'A|G' | ExpressedSNP == 'G|A') %>%
 
 PlotDistortion(hets)
 PlotRatio(hets)
+hets$riskVar <- relevel(factor(hets$riskVar), 'T|T')
 summary(glm(cbind(alt, ref) ~ riskVar, data=hets, family = binomial))
 ```
 

@@ -36,7 +36,7 @@ DESeq2results <- read_delim("~/BTSync/FetalRNAseq/Counts/Summary.txt",
                             escape_double = FALSE, 
                             trim_ws = TRUE
                             )
-kable(select(DESeq2results, -results) %>% filter(Excluded == "None" | AgeRange == "14-18" | AgeRange == "14-17.75" | AgeRange == "14-17.15" | AgeRange == "12-20"))
+kable(select(DESeq2results, -results))
 ```
 
 # Dealing with outliers
