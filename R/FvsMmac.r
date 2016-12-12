@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_14_20_noA_lrt_interact"                         # name of the project
+projectName <- "MvsF_14_18_noA_excl_19_cooks.75_noSexChr"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -21,10 +21,10 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-varInt <- "PCW"                                    # factor of interest
+varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
-batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
-interact <- c("Sex")
+batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+interact <- c()
 RIN_cutoff <- 0
 PCW_cutoff <- c(14, 20)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
@@ -32,16 +32,17 @@ cooksCutoff <- .75                             # TRUE/FALSE to perform the outli
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
 alpha <- 0.05                                      # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
-testMethod <- 'LRT'
+testMethod <- 'Wald'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
 BrainBank <- 'HDBR'
-exclude <- c('15641', '18432')#, '16491')
-#exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
+#exclude <- c('16491')
+#exclude <- c('15641', '18432')
+exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-
+excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -51,6 +52,7 @@ library(devtools)
 load_all(pkg = "~/BTSync/Code/R/SARTools")
 library(dplyr)
 library(tidyr)
+library(readr)
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 
 # checking parameters
@@ -90,7 +92,10 @@ if (BrainBank == 'HDBR') {
 # loading counts
 # this doesn't use the batch info
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
-
+if (! is.na(excludedFeaturesFile)) {
+  excludedFeatures <- read_csv(excludedFeaturesFile, col_names = FALSE)
+  counts <- counts[!rownames(counts) %in% excludedFeatures$X1, ]
+}
 # description plots
 # this doesn't use the batch info
 majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)
