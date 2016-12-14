@@ -326,11 +326,13 @@ print SH "$tempfile\n";
 my $newfile = $file_stem.'-updated';
 print SH "$plink --bfile $tempfile --reference-allele $forcefile --make-bed --out $newfile\n";
 
-#split into per chromosome files
-for (my $i = 1; $i <= 23; $i++)
+#split into per chromosome files, sort and compress in new folder
+print SH "mkdir Updated\n";
+for (my $i = 1; $i <= 22; $i++)
  {
  my $perchrfile = $newfile.'-chr'.$i;
- print SH "$plink --bfile $newfile --reference-allele $forcefile --make-bed --chr $i --out $perchrfile\n";
+ print SH "$plink --bfile $newfile --reference-allele $forcefile --recode vcf --chr $i --out $perchrfile\n";
+ print SH "vcf-sort $perchrfile.vcf | bgzip -c > Updated/$perchrfile.vcf.gz\n";
  }
 print SH "rm TEMP*\n";
 
