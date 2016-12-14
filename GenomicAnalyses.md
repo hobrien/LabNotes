@@ -48,10 +48,14 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - added sort and compression steps
     - final output written to subfolder, which makes upload to [Michigan imputation server](https://imputationserver.sph.umich.edu/start.html) easier
 - Analysis steps:
-    - ```cd ../Genome-wide\ genotyping/```
-    - ```perl ../LabNotes/Perl/HRC-1000G-check-bim.pl -b FB_Merged.bim -f plink.frq -r ../Ref/HRC.r1-1.GRCh37.wgs.mac5.sites.tab -h```
+    - ```cd BTSync/FetalRNAseq/Genome-wide\ genotyping/```
+    - ```plink --bfile FB_Merged --freq```
+    - ```mkdir Imputation3```
+    - ```cd Imputation3```
+    - ```perl ../LabNotes/Perl/HRC-1000G-check-bim.pl -b ../FB_Merged.bim -f ../plink.frq -r ../../Ref/HRC.r1-1.GRCh37.wgs.mac5.sites.tab -h```
     - ```bash Run-plink.sh```
 - Run imputation using HRC r1.1 2016 and Eagle v2.3 for phasing with Mixed population for QC (see ScreenShots/Imputation3.png)
+    - files are uploaded from BTSync/FetalRNAseq/Genome-wide\ genotyping/Imputation3
     - Imputed data are in BTSync/FetalRNAseq/ImputedGenotypes/Imputation3 
         
 ##Concatenate and filter imputed data
