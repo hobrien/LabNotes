@@ -20,10 +20,7 @@ For SNP calling output, I would like counts of the following genotypes for each 
 
 def main(argv):
     bcf_in = VariantFile(argv[0])  # auto-detect input format
-    for x in bcf_in.header.records:
-        print(x)
-    print("##contig=<ID=22>")
-    print("#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT", '\t'.join(list((bcf_in.header.samples))))
+    print(bcf_in.header, end='')
     for site in bcf_in.fetch():
         keep_site = 0 # default option is to remove SNP
         for sample, rec in site.samples.items():
