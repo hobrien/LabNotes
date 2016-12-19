@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import sys
-import fileinput
 import warnings
-from string import maketrans
+from pysam import VariantFile
 
 """
 For SNP calling output, I would like counts of the following genotypes for each SNP:
@@ -19,18 +19,19 @@ For SNP calling output, I would like counts of the following genotypes for each 
 """ 
 
 def main(argv):
-    for line in fileinput.input([]):
-       line = line.strip()
-       try:
-           if line[0] == '#': # skip header lines and column names
-               continue
-       except IndexError:
-            continue
-       fields = line.split('\t')
-       genotype_counts = count_genotypes(fields[9:])
-       if sum(genotype_counts[3:]) == 0:
-           print line
-        
+    bcf_in = VariantFile(argv[0])  # auto-detect input format
+    for x in bcf_in.header.records:
+        print(x)
+    print("##contig=<ID=22>")
+    print("#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT", '\t'.join(list((bcf_in.header.samples))))
+    for site in bcf_in.fetch():
+        keep_site = 0 # default option is to remove SNP
+        for sample, rec in site.samples.items():
+            if max(rec.get('GP')[1:]) > 0.9:
+                keep_site = 1 # do not remove SNP if either het or non-ref homo is greater than .9 for any sample
+        if keep_site:
+            print(site, end='')
+                      
 def count_genotypes(fields):
     genotype_counts = [0,0,0,0,0,0]
     for field in fields:
@@ -59,6 +60,6 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
            
 if __name__ == "__main__":
     global usage
-    usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
+    usage = "python FilterVCF.py VCF_file.vcf.gz | bcftools view -Ob -o VCF_file.filter.vcf.gz (must have corresponding VCF_file.vcf.gz/tbi file)"
     warnings.formatwarning = warning_on_one_line
     main(sys.argv[1:])
