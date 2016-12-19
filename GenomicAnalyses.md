@@ -47,7 +47,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - changed output from bed to VCF
     - added sort and compression steps
     - final output written to subfolder, which makes upload to [Michigan imputation server](https://imputationserver.sph.umich.edu/start.html) easier
-- Analysis steps:
+- Analysis steps (this has to be done on the iMac because it requires ca. 12 GB of RAM):
     - ```cd BTSync/FetalRNAseq/Genome-wide\ genotyping/```
     - ```plink --bfile FB_Merged --freq```
     - ```mkdir Imputation3```
@@ -56,10 +56,22 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```bash Run-plink.sh```
 - Run imputation using HRC r1.1 2016 and Eagle v2.3 for phasing with Mixed population for QC (see ScreenShots/Imputation3.png)
     - files are uploaded from BTSync/FetalRNAseq/Genome-wide\ genotyping/Imputation3
-    - Imputed data are in BTSync/FetalRNAseq/ImputedGenotypes/Imputation3 
+    - Imputed data are in /Volumes/FetalRNAseq/ImputedGenotypes/Imputation3 and in /c8000xd3/rnaseq-heath/Genotypes/Imputation3 on rocks
         
 ##Concatenate and filter imputed data
 ###bcftools
+- modify vcf headers to add info about all filter classes (PASS/Genotyped/ Genotyped_only) (see [this](https://github.com/samtools/bcftools/issues/470) post)
+    - ```head -13 ~/LabNotes/header.txt > header_temp.txt```
+    - ```echo "##contig=<ID=$chr>" >> header_temp.txt```
+    - ```tail -1 ~/LabNotes/header.txt >> header_temp.txt```
+    - ```bcftools reheader -h header_temp.txt -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.vcf.gz /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.vcf.gz```
+- Change the names of the samples in the VCF headers to match the samples (this step is unnecessary if I use the new names when I reheader in the step above)
+    - ```cut -f 1 ~/LabNotes/VCFindex.txt | cut -d'/' -f 1 | cut -d'-' -f 1 > ~/LabNotes/VCFindex2.txt```
+    - ```for chr in {1..22}; do bcftools reheader -s ~/LabNotes/VCFindex2.txt -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.vcf.gz /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.vcf.gz; done```
+- Filter out samples that we do not have sequence data for
+    - ```ls /c8000xd3/rnaseq-heath/Mappings > ~/LabNotes/mappings.txt```
+    - ```for chr in {1..22}; do bcftools view -s `cut -f1 ~/LabNotes/VCFindex.txt | cut -d/ -f 1 | cut -d- -f 1 | sort | join -t'|' - ~/LabNotes/mappings.txt | paste -s -d,` -o  /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.vcf.gz /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.vcf.gz; done```
+
 - I need to combine into a single file
     - ```find Raw_output -name chr\*.dose.vcf.gz | awk '{ print length, $0 }' |sort -n -s | cut -d" " -f2- > vcf_files.txt```
     
@@ -282,9 +294,6 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - ```conda install -c anaconda gmp=5.1.2```
             - ```conda update pysam```
         - Working on generating HDF5 from VCF, but I'm getting segfaults for a couple of the VCF files (/c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr14.GRCh38.sort.vcf.gz, /c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr19.GRCh38.sort.vcf.gz)
-            - I changed the names of the samples in the VCF headers to match the samples
-                - ```cut -f 1 ~/LabNotes/VCFindex.txt | cut -d'/' -f 1 | cut -d'-' -f 1 > ~/LabNotes/VCFindex2.txt```
-                - ```for chr in {1..22}; do bcftools reheader -s ~/LabNotes/VCFindex2.txt -o /c8000xd3/rnaseq-heath/Genotypes/Imputation2/Sorted/chr$chr.GRCh38.sort.vcf.gz /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr$chr.GRCh38.sort.vcf.gz; done```
             - There is also a problem with chr22 that gives an error saying "SNP position (89346516) is outside of chromomosome  range:1-72058697861300481"
             - I have no idea why it gives the range as 1-72058697861300481, which is 25 million x the total size of the genome, but 89346516 is outside the range of chr22 (50818468)
             - The VCF for chr22 actually goes up to position 154768956, which is more than the length of all be ut the first 7 chromosomes
