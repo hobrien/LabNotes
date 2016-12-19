@@ -1,4 +1,12 @@
 plate position	BrainBankID	Sex	PCW	spec	260/280	260/230	RIN	Adapter Index	Date Completed	Repeated Sample	 conc 	 molarity	Sequenced	Average Size
+	11875	Male	19				5.7
+	12107	Male	19				8.2
+	12545	Female	19				7.7
+	12546	Male	19				6.1
+	12994	Female	15				8.3
+	13142	Male	19				7.8
+	12993	Male	19				8.5
+	13008	Female	17				8.0
 A1	15240	Female	13	191.7	2.09	1.78	5.5	19	06/02/15	Y	9,952.18	43,992.00	y	385
 	15296	Female	12.4	O 2921.7	1.95	1.86	7.2	13	30/03/15	N	11,374.13	48,214.00		426
 	15329	Male	12.1	O 403.8	1.9	0.69	7.6	14	30/03/15	N	14,488.37	59,128.90		442
