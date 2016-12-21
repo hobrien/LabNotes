@@ -13,10 +13,9 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 
 sampleID=$1
-sampleIndex=$2
 
 # Hard code this for now
-chr=chr22
+chr=chr$2
 
 # This should already be done.
 #bash ~/LabNotes/SubmissionScripts/ExtractSNPs.sh $1 $2
@@ -25,10 +24,9 @@ echo "Starting WASP non-ref Remapping on $sampleID for chromosome $chr"
 
 mkdir -p /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$chr/RemapNonRef
 
-# Can't for the life of me imagine why I would have wanted to copy the input file
-#cp /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.bam /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/RemapNonRef/$sampleID.chr.bam
+cp /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.bam /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$chr/RemapNonRef/$sampleID.$chr.bam
 
-python ~/src/WASP/mapping/find_intersecting_snps.py -p /c8000xd3/rnaseq-heath/Mappings/$sampleID/Chromosomes/$chr/BAM/RemapNonRef/$sampleID.$chr.bam /c8000xd3/rnaseq-heath/Genotypes/Imputation2/$sampleID/
+python ~/src/WASP/mapping/find_intersecting_snps.py -p /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$chr/RemapNonRef/$sampleID.$chr.bam /c8000xd3/rnaseq-heath/Genotypes/Imputation2/$sampleID/
 
 tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  --mate-std-dev 50 --num-threads 8 \
   --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
@@ -59,3 +57,8 @@ echo "Finished WASP Non-ref Remapping on $sampleID for chromosome $chr"
 python ~/src/WASP/mapping/rmdup_pe.py /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.nonref.merged.sorted.bam \
   /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.nonref.merged.dedup.bam
 
+samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.nonref.merged.dedup.bam \
+  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.nonref.merged.dedup.sort
+  
+bash ~/LabNotes/SubmissionScripts/clipOverlap.sh /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.nonref.merged.dedup.sort.bam
+samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Chromosomes/$sampleID.$chr.nonref.merged.dedup.sort.clip.bam
