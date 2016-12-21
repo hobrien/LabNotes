@@ -20,9 +20,9 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-varInt <- "treatment"                                    # factor of interest
-condRef <- "F"                                      # reference biological condition
-batch <- c("centre", "PCW", "RIN")                  # blocking factor: NULL (default) or "batch" for example
+varInt <- "Sex"                                    # factor of interest
+condRef <- "Female"                                 # reference biological condition
+batch <- c("Centre", "PCW", "RIN")                  # blocking factor: NULL (default) or "batch" for example
 RIN_cutoff <- 0
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 cooksCutoff <- TRUE                                  # TRUE/FALSE to perform the outliers detection (default is TRUE)
@@ -58,8 +58,8 @@ library(dplyr)
 # once this is loaded, I can filter it to remove samples with RIN < 5
 #target <- loadTargetFile(targetFile=targetFile, varInt=varInt, condRef=condRef, batch=batch)
 
-target <- read.delim("~/LabNotes/MvsF.txt")                        # path to the design/target file
-#target <- read.delim("~/BTSync/FetalRNAseq/LabNotes/MvsF.txt")                        # path to the design/target file
+targetFile <- "~/LabNotes/MvsF.txt"                        # path to the design/target file
+target <- read.delim(targetFile)                        # path to the design/target file
 
 sample_info <- read.delim("~/LabNotes/sample_info.txt")
 #sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
@@ -67,7 +67,7 @@ target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by 
 
 sample_progress <- read.delim("~/LabNotes/SampleProgress.txt")
 #sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
-target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample")) %>% View()
+target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
 
 if (!is.null(RIN_cutoff)) {
   target <- filter(target, RIN >= RIN_cutoff)
