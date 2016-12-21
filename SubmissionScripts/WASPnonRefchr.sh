@@ -14,7 +14,6 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 sampleID=$1
 
-# Hard code this for now
 chr=chr$2
 
 # This should already be done.
