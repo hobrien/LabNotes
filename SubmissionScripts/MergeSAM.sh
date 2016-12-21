@@ -7,7 +7,9 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
-java -jar picard.jar MergeSamFiles \
+java -jar ~/src/picard-tools-1.139/picard.jar MergeSamFiles \
       I=$1 \
       I=$2 \
-      O=${1%.*}_merge.bam \
+      O=${1%.*}_merge.bam 
+exit $?
+
