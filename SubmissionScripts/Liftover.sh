@@ -12,7 +12,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 #sampleID=${path##*/}
 chr=$1
 bcftools view /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz \
-  |perl -pe 's/^(\d+)/chr$chr/' \
+  |perl -pe 's/^(\d+)/chr$1/' \
   | bgzip \
   > /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.vcf.gz
 CrossMap.py vcf /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/hg19ToHg38.over.chain \
