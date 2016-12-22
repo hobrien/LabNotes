@@ -1,0 +1,109 @@
+---
+title: "Imputation Info"
+output: html_notebook
+---
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+
+
+The michigan imputation server used Minimac3, which produces a vcf file with hard genotype calls, alt allele dosages and genotype probabilities. Confusingly, the genotype calls are based on the per haplotype dosages, but the dosages and probabilites are based on combined dosages. This means that dosages can be close to one and the heterozygote can have the highest probability, but the genotype calls are homozygous. This happens a lot in cases where the R-square is very close to zero, meaning there's basically no info and the dosage is close to .5 for each haplotype, so you get imputation calls like 0|0:0.972:0.264,0.5,0.236 vs. 1|1:1.014:0.243,0.5,0.257.
+
+R-squares are highely bi-modal with 47% being less than 0.1 (and 29% being less than 0.01), but 23% being greater than 0.9. Clearly some filtering is going to be necessary here because a lot of the non-ref calls are essentially noise 
+
+
+```{r}
+chr22_info <- read_delim("~/BTSync/FetalRNAseq/ImputedGenotypes/Imputation2/chr_22/chr22.info.gz",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+chr22_info$Rsq_bin <- cut(chr22_info$Rsq, breaks=seq(0,1.1, 0.1), include.lowest = TRUE) 
+chr22_lowR2 <- filter(chr22_info, Rsq < 0.1) %>%
+  mutate(Rsq_bin=cut(Rsq, breaks=seq(0,0.1, 0.01), include.lowest=TRUE))
+nrow(chr22_info)
+nrow(chr22_lowR2)/nrow(chr22_info)
+nrow(filter(chr22_lowR2, Rsq < 0.01))/nrow(chr22_info)
+nrow(filter(chr22_info, Rsq>0.9))/nrow(chr22_info)
+```
+
+```{r}
+ggplot(chr22_info, aes(x=Rsq_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.1,1.1,0.1)) +
+  xlab("Rsq")
+
+ggplot(chr22_lowR2, aes(x=Rsq_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.01,0.1,0.01)) +
+  xlab("Rsq")
+```
+
+Lets look at Alt allele frequency
+
+87% of SNPs have ALT freq less than 0.1 (and 71 % have ALT freq < 0.01). The frequency spectrum looks about how I would expect, except that there are a bunch of SNPs with freq greater than 0 but less than 0.001, which is pretty confusing since there are only 192 samples, meaning that if a single individual is a het, the freq should be 0.0026. I suppose they must be calculating it based on the dosage, not the hard genotype calls.
+
+```{r}
+chr22_info$ALT_bin <- cut(chr22_info$ALT_Frq, breaks=seq(0,1.1, 0.1), include.lowest = TRUE) 
+ggplot(chr22_info, aes(x=ALT_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.1,1.1,0.1)) +
+  xlab("Alt allele freq")
+
+ggplot(filter(chr22_info, ALT_Frq > 0.1), aes(x=ALT_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.2,1.1,0.1)) +
+  xlab("Alt allele freq")
+
+chr22_lowAlt <- filter(chr22_info, ALT_Frq < 0.1) %>%
+  mutate(ALT_bin=cut(ALT_Frq, breaks=seq(0,0.1, 0.01), include.lowest=TRUE))
+ggplot(chr22_lowAlt, aes(x=ALT_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.01,0.1,0.01)) +
+  xlab("Alt allele freq")
+
+nrow(chr22_info)
+nrow(chr22_lowAlt)/nrow(chr22_info)
+nrow(filter(chr22_lowAlt, ALT_Frq < 0.01))/nrow(chr22_info)
+nrow(filter(chr22_info, ALT_Frq>0.9))/nrow(chr22_info)
+nrow(filter(chr22_info, ALT_Frq==0))
+nrow(filter(chr22_info, ALT_Frq==1))
+```
+
+What does it look like for the high-conf SNPs?
+
+Getting rid of the low conf SNPs reduces the frequency of rare SNPs (24% vs. 71% for <0.01). I think this makes sense because it's presumably harder to impute rare SNPs that only on a small number of haplotypes in the reference set.
+
+This also gets rid of all samples with ALT freq of 0. This was a bit of a head scratcher, but I'm going to assume that the R-square must be zero if there is no variability in the data. Encouragingly, the lowest freq is 0.00234, which is exactly what it should be if there is a single het in the population.
+
+Indeed, there are 7 SNPs with freq=1 and 7000 with freq=0. All have R-square < 0.002. For our purposes, it doesn't much matter about the ones with freq=0, but it would be nice to include the ones with freq=1 in the remapping
+
+
+
+```{r}
+chr22_info_hiConf <- filter(chr22_info, Rsq > 0.9)
+ggplot(chr22_info_hiConf, aes(x=ALT_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.1,1.1,0.1)) +
+  xlab("Alt allele freq")
+
+ggplot(filter(chr22_info_hiConf, ALT_Frq > 0.1), aes(x=ALT_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.2,1.1,0.1)) +
+  xlab("Alt allele freq")
+
+chr22_lowAlt_hiConf <- filter(chr22_info_hiConf, ALT_Frq < 0.1) %>%
+  mutate(ALT_bin=cut(ALT_Frq, breaks=seq(0,0.1, 0.01), include.lowest=TRUE))
+ggplot(chr22_lowAlt_hiConf, aes(x=ALT_bin, fill=Genotyped)) +
+  geom_bar() +
+  scale_x_discrete(labels=seq(0.01,0.1,0.01)) +
+  xlab("Alt allele freq")
+
+nrow(chr22_info_hiConf)
+nrow(chr22_lowAlt_hiConf)/nrow(chr22_info_hiConf)
+nrow(filter(chr22_lowAlt_hiConf, ALT_Frq < 0.01))/nrow(chr22_info_hiConf)
+nrow(filter(chr22_info_hiConf, ALT_Frq>0.9))/nrow(chr22_info_hiConf)
+nrow(filter(chr22_info_hiConf, ALT_Frq==0))
+nrow(filter(chr22_info_hiConf, ALT_Frq==1))
+```
