@@ -1,4 +1,3 @@
-library(knitr)
 library(WGCNA)
 allowWGCNAThreads()
 options(stringsAsFactors = FALSE)
@@ -197,6 +196,7 @@ bwnet = blockwiseModules(datExpr, maxBlockSize = 2000,
                          saveTOMFileBase = "femaleMouseTOM-blockwise",
                          verbose = 3)
 
+load(file = "FemaleLiver-02-networkConstruction-auto.RData")
 # Relabel blockwise modules
 bwLabels = matchLabels(bwnet$colors, moduleLabels);
 # Convert labels to colors for plotting
@@ -231,6 +231,7 @@ single2blockwise = match(names(singleBlockMEs), names(blockwiseMEs))
 signif(diag(cor(blockwiseMEs[, single2blockwise], singleBlockMEs)), 3)
 
 #Relating modules to external information
+# see https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-03-relateModsToExt.pdf
 load(file = "FemaleLiver-01-dataInput.RData")
 load(file = "FemaleLiver-02-networkConstruction-auto.RData")
 # Define numbers of genes and samples
@@ -266,11 +267,14 @@ weight = as.data.frame(datTraits$weight_g);
 names(weight) = "weight"
 # names (colors) of the modules
 modNames = substring(names(MEs), 3)
+
+# module membership MM = the correlation of the module eigengene and the gene expression profle
 geneModuleMembership = as.data.frame(cor(datExpr, MEs, use = "p"));
 MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples));
 names(geneModuleMembership) = paste("MM", modNames, sep="")
 names(MMPvalue) = paste("p.MM", modNames, sep="")
 
+# Gene Signifcance GS = (the absolute value of) the correlation between a gene and a trait of interest
 geneTraitSignificance = as.data.frame(cor(datExpr, weight, use = "p"))
 GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples))
 names(geneTraitSignificance) = paste("GS.", names(weight), sep="")
@@ -319,3 +323,40 @@ for (mod in 1:ncol(geneModuleMembership))
 # Order the genes in the geneInfo variable first by module color, then by geneTraitSignificance
 geneOrder = order(geneInfo0$moduleColor, -abs(geneInfo0$GS.weight));
 geneInfo = geneInfo0[geneOrder, ]
+View(geneInfo)
+
+# Interfacing network analysis with functional annotation and gene ontology
+# https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-04-Interfacing.pdf
+
+allLLIDs = annot$LocusLinkID[probes2annot]
+GOenr = GOenrichmentAnalysis(moduleColors, allLLIDs, organism = "mouse", nBestP = 10)
+tab = GOenr$bestPTerms[[4]]$enrichment
+names(tab)
+keepCols = c(1, 2, 5, 6, 7, 12, 13);
+screenTab = tab[, keepCols];
+# Round the numeric columns to 2 decimal places:
+numCols = c(3, 4);
+screenTab[, numCols] = signif(apply(screenTab[, numCols], 2, as.numeric), 2)
+# Truncate the the term name to at most 40 characters
+screenTab[, 7] = substring(screenTab[, 7], 1, 40)
+# Shorten the column names:
+colnames(screenTab) = c("module", "size", "p-val", "Bonf", "nInTerm", "ont", "term name");
+rownames(screenTab) = NULL;
+# Set the width of R's output. The reader should play with this number to obtain satisfactory output.
+options(width=95)
+# Finally, display the enrichment table:
+screenTab
+
+# Network visualization using WGCNA functions
+# https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-05-Visualization.pdf
+# heatmap of correlations
+# Calculate topological overlap anew: this could be done more efficiently by saving the TOM
+# calculated during module detection, but let us do it again here.
+dissTOM = 1-TOMsimilarityFromExpr(datExpr, power = 6);
+# Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
+plotTOM = dissTOM^7;
+# Set diagonal to NA for a nicer plot
+diag(plotTOM) = NA;
+# Call the plot function
+sizeGrWindow(9,9)
+TOMplot(plotTOM, geneTree, moduleColors, main = "Network heatmap plot, all genes")
