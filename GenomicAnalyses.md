@@ -308,7 +308,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - It also flags 4000 duplicate sites, which are different alternate alleles at the same position
             - There are also complaints about Alternative alleles with freq > 50% and monomorphic sites, but I think I can safely ignore them
             - Filtering on position appears to clean everything up:
-                - ```bcftools filter -e 'POS>=89346516' chr22.GRCh38.vcf.gz > chr22.GRCh38.filter.vcf.gz```
+                - ```bcftools filter -Oz -e 'POS>=89346516' chr22.GRCh38.vcf.gz > chr22.GRCh38.filter.vcf.gz```
                  
 ##Clip overlapping reads
 - the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
