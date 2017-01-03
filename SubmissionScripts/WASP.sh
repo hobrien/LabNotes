@@ -7,6 +7,7 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
+
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 path=${1%/*}
 path=${path%/*}
@@ -14,29 +15,13 @@ sampleID=${path##*/}
 
 echo "Starting WASP Remapping on $sampleID"
 
-python ~/src/WASP/mapping/find_intersecting_snps.py -p $1 /c8000xd3/rnaseq-heath/Genotypes/Imputation2/SNPs/
 
-mkdir /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Remap
-tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500  --mate-std-dev 50 --num-threads 8 \
-  --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
-  --output-dir /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Remap \
-  /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.fq1.gz \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.fq2.gz
-
-python ~/src/WASP/mapping/filter_remapped_reads.py -p \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/Remap/accepted_hits.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.keep.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.to.remap.num.gz
-
-samtools merge /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.remap.keep.bam
-  
-samtools sort /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.bam \
-  /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.sorted
-  
-samtools index /c8000xd3/rnaseq-heath/Mappings/$sampleID/BAM/$sampleID.chr.keep.merged.sorted.bam
-
-echo "Finished WASP Remapping on $sampleID"
+python ~/src/WASP/mapping/find_intersecting_snps.py \
+          --is_paired_end \
+          --is_sorted \
+          --output_dir find_intersecting_snps \
+          --snp_tab /c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5/snp_tab.h5 \
+          --snp_index /c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5/snp_index.h5 \
+          --haplotype /c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5/haplotype.h5 \
+          --samples my_samples.txt \
+          $1
