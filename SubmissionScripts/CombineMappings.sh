@@ -13,4 +13,6 @@ SampleID=$1
 #mkdir -p $BASEDIR/$SampleID/BAM
 #Rscript ~/LabNotes/R/CombineCounts.R $SampleID
 
-bash ~/LabNotes/SubmissionScripts/SamtoolsMerge.sh `ls $BASEDIR | grep $SampleID-`
+bash ~/LabNotes/SubmissionScripts/SamtoolsMerge.sh `find $BASEDIR -name accepted_hits_fixup_merge_sort.bam | grep $SampleID- | sort`
+mv $BASEDIR/$SampleID-1/BAM/accepted_hits_fixup_merge_sort_merge.bam $BASEDIR/$SampleID/BAM/
+	
