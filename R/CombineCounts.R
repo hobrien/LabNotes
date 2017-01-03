@@ -1,5 +1,6 @@
 library(readr)
 library(dplyr)
+args = commandArgs(trailingOnly=TRUE)
 nameStem <- args[1]
 folder <- '/c8000xd3/rnaseq-heath/Mappings/'
 AllFiles <- list.files(folder)
@@ -11,7 +12,7 @@ for (fileName in AllFiles[grepl(paste0(nameStem, '-'), AllFiles)]) {
   if (length(Counts) == 0) {
     Counts <- rbind(Counts, input)
   } else {
-    Counts <- join(Counts, input, by= 'X1')
+    Counts <- full_join(Counts, input, by= 'X1')
   }    
 }
 Counts$Sum <- rowSums(Counts[,-1])
