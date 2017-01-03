@@ -9,8 +9,9 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 nameStem=$1
-#mv $nameStem $nameStem-1
-for filename in `find $nameStem-1 -name $nameStem.*`
+mv /c8000xd3/rnaseq-heath/Mappings/$nameStem /c8000xd3/rnaseq-heath/Mappings/$nameStem-1
+for filename in `find /c8000xd3/rnaseq-heath/Mappings/$nameStem-1 -name $nameStem.*`
 do 
-    echo ${filename#$nameStem}
+    pathname=${filename%/*}
+    mv $filename $pathname/$nameStem-1.${filename#*.}
 done
