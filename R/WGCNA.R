@@ -151,8 +151,19 @@ collectGarbage()
 
 batch <- datTraits$Centre
 modcombat = model.matrix(~1, data=datTraits)
+<<<<<<< Updated upstream
 MalevsFemale_combat = ComBat(dat=MalevsFemale, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=TRUE)
 
+=======
+MalevsFemale_combat = ComBat(dat=MalevsFemale, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=FALSE)
+combat_fit = lm.fit(mod2,t(MalevsFemale_combat))
+hist(combat_fit$coefficients[2,],col=2,breaks=100)
+plot(fit2$coefficients[2,],combat_fit$coefficients[2,],col=2,
+     xlab="Linear Model",ylab="Combat",xlim=c(-5,5),ylim=c(-5,5))
+abline(c(0,1),col=1,lwd=3)
+#this doesn't work
+qqplot(fit2$coefficients)
+>>>>>>> Stashed changes
 MalevsFemale_norm <- normalize.quantiles(as.matrix(MalevsFemale_combat),copy=TRUE)
 
 #transpose, remove metadata about genes

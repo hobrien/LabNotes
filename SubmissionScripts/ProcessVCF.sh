@@ -70,4 +70,6 @@ do
         echo "Could not do liftover for chromosome $chr"
         exit 1
     fi
+    python ~/LabNotes/Python/FilterVCF.py /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.vcf.gz | bcftools view -Ob -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
+    rm header_temp.txt
 done
