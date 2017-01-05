@@ -6,6 +6,7 @@ output:
   #tufte::tufte_handout: default
 ---
 <!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+<!-- type Rscript -e "library(rmarkdown); render('BamQC.rmd')" to knit to html on the server -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyr)
@@ -132,6 +133,13 @@ folders <- c("/c8000xd3/rnaseq-heath/Mappings/15533/15533",
              "/c8000xd3/rnaseq-heath/Mappings/17046/17046",
              "/c8000xd3/rnaseq-heath/Mappings/17193/17193",
              "/c8000xd3/rnaseq-heath/Mappings/18540/18540",
+             "/c8000xd3/rnaseq-heath/Mappings/13008/13008",
+             "/c8000xd3/rnaseq-heath/Mappings/12994/12994",
+             "/c8000xd3/rnaseq-heath/Mappings/11875/11875",
+             "/c8000xd3/rnaseq-heath/Mappings/12107/12107",
+             "/c8000xd3/rnaseq-heath/Mappings/12546/12546",
+             "/c8000xd3/rnaseq-heath/Mappings/12993/12993",
+             "/c8000xd3/rnaseq-heath/Mappings/12545/12545",
              "/c8000xd3/rnaseq-heath/Mappings/15296/15296"             )
 LibraryInfo <- read.delim("~/LabNotes/SampleProgress.txt", 
                      header=TRUE, stringsAsFactors=TRUE, sep='\t'
