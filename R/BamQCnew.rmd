@@ -1,0 +1,285 @@
+---
+title: "Data QC"
+author: "Heath O'Brien"
+output:
+  tufte::tufte_html: default
+  #tufte::tufte_handout: default
+---
+<!-- see http://rstudio.github.io/tufte/ for info about tufte -->
+<!-- type Rscript -e "library(rmarkdown); render('BamQC.rmd')" to knit to html on the server -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(RColorBrewer)
+library(tufte)
+rm(list=ls())
+source("~/LabNotes/R/FormatGGplot.R")
+folders <- c(
+             "/c8000xd3/rnaseq-heath/Mappings/13008/13008",
+             "/c8000xd3/rnaseq-heath/Mappings/12994/12994",
+             "/c8000xd3/rnaseq-heath/Mappings/11875/11875",
+             "/c8000xd3/rnaseq-heath/Mappings/12107/12107",
+             "/c8000xd3/rnaseq-heath/Mappings/12546/12546",
+             "/c8000xd3/rnaseq-heath/Mappings/12993/12993",
+             "/c8000xd3/rnaseq-heath/Mappings/12545/12545"
+             )
+LibraryInfo <- read.delim("~/LabNotes/SampleProgress.txt", 
+                     header=TRUE, stringsAsFactors=TRUE, sep='\t'
+                     )
+```
+
+# RSeQC
+## Mapping Stats
+`r margin_note("- rDNA reads not included in first three stats")`
+`r margin_note("- # uniquely mapped reads ranges from 57 million to 446 million, with 3 samples (17054, 17160, 15483) having < 100 million")`
+`r margin_note("- % rRNA ranges from 0.1% to 56%, with 4 samples (17054, 17160, 18655, 16428) having > 40%")`
+
+``` {r }
+#bam_stat.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  #print(folder)
+  if(file.exists(paste(folder, ".ex.stats.txt", sep=""))){
+    temp <- read.delim(paste(folder, ".ex.stats.txt", sep=""), 
+                header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
+                )
+    } else {
+    temp <- read.delim(paste(folder, ".chr.stats.txt", sep=""), 
+                         header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
+                         )
+    }
+  temp[4,2] <-strsplit(temp[4,1], ' +')[[1]][4]
+  temp[4,1] <- 'Non primary hits'
+  temp <- temp[c(6,7,14),]
+  temp2 <- read.delim(paste(folder, ".in.stats.txt", sep=""), 
+                     header=FALSE, stringsAsFactors=FALSE, skip=5, sep=':'
+                     )
+  temp2[4,2] <-strsplit(temp[4,1], ' +')[[1]][4]
+  temp2[4,1] <- 'Non primary hits'
+  temp <-rbind(temp, c("rDNA",sum(as.numeric(temp2[c(6,7),2]))))
+  temp[,1] <- c("Multimapped", "Unique", "Paired", "rDNA")
+  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+RSeQCstats <- spread(RSeQCstats, V1, V2)
+#mutate(RSeQCstats, Perc_rDNA = as.numeric(rDNA)/(as.numeric(Unique)+as.numeric(Multimapped)+as.numeric(rDNA))) %>% arrange(Perc_rDNA)
+ReadNumbers <- RSeQCstats[,c(1,5)]
+RSeQCstats <- RSeQCstats[c(1,5,3,2,4)]
+RSeQCstats[,2:5] <- sapply(RSeQCstats[,2:5], function(x) formatC(as.numeric(x), format='d', big.mark=','))
+knitr::kable(
+  RSeQCstats
+)
+```
+
+
+## Distribution of Reads Among Features (proportion of tags mapping to different feature classes)
+`r margin_note("- Intergenic only considers sequence within 10 kb upstream of TSS and downstream of TES")`
+`r margin_note("- Exons enriched >10 fold relative to introns")`
+`r margin_note("- Introns enriched >10 fold relative to Intergenic")`
+`r margin_note("- 1/3rd to 2/3rd of tags map to introns. 2-4% map to intergenic (except for 17198 which is 13% intergenic)")`
+`r margin_note("- Number of tags per read ranges from 1.1 to 1.8, except for 17198, which has 0.8")`
+`r margin_note("- 17198, also has the highest proportion of intronic and intergenic sequence and the lowest proportion of CDS and second lowest of UTR")`
+`r margin_note("- I wonder if this might be an indeciation of DNA contamination?")`
+
+
+``` {r }
+#read_distribution.py
+RSeQCdistribution <- data.frame()
+ReadNumbers$ExpressedTags = NA
+for (folder in folders) {
+  sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp <- read.delim(paste(folder, ".dist.txt", sep=""), 
+                           header=TRUE, stringsAsFactors=FALSE, skip=4, sep=''
+                     )
+  temp <- temp[-11,]
+  tag_total <- sum(temp[c(1,2,3,4,7,10),3])
+  ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags <- sum(temp[c(1,2,3),3])
+  temp <- data.frame(V1 = c("Tags_per_read", "CDS", "UTR", "Intron", "Intergenic"), 
+                     V2=c(
+                  tag_total/as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique),
+                  temp[1,3]/tag_total, 
+                  sum(as.numeric(temp[c(2,3),3]))/tag_total,
+                  temp[4,3]/tag_total,
+                  sum(as.numeric(temp[c(7,10),3]))/tag_total
+                  )
+             )
+  temp$sample <- sample
+  #temp$centre <- LibraryInfo[LibraryInfo$sample == sample,2]
+  RSeQCdistribution <- rbind(RSeQCdistribution, temp)
+}
+RSeQCdistribution <- spread(RSeQCdistribution, V1, V2)
+RSeQCdistribution <- RSeQCdistribution[c(1,5,2,6,4,3)]
+
+knitr::kable(
+  RSeQCdistribution
+)
+```
+
+## Strand
+
+`r margin_note("- Data consistent with second-strand experiment")`
+
+```{r }
+#infer_experiment.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  temp <- read.delim(paste(folder, ".expt.txt", sep=""), 
+                     skip=3, header=FALSE, sep=':'
+                     )
+  temp$sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$V1 <- c("Ambiguous", "First Strand", "Second Strand")
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+RSeQCstats <- spread(RSeQCstats, V1, V2)
+
+knitr::kable(
+  RSeQCstats
+)
+```
+
+## Insert Size Distribution
+
+`r margin_note("- Sharp peaks indicate that most fragments are shorter than the read length")`
+`r margin_note("- Inner distance pretty consistenly at - 125 for Edinbrugh data, but centered at about -50 for Exeter data")`
+`r margin_note("- This indicates that fragment size tends to be around 125-150 bp")`
+
+
+```{r include=FALSE}
+#inner_distance.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  #print(folder)
+  temp <- read.delim(paste(folder, ".inner_distance_freq.txt", sep=""),
+                     header=FALSE
+                     )
+  sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$sample <- sample
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+```
+
+```{r dev.args = list(bg = 'transparent')}
+ggplot(RSeQCstats, aes(x=(V1+V2)/2, y=V3, colour=centre, group=sample)) +
+  geom_line() +
+  ylab('reads') +
+  xlab('inner distance') +
+  scale_colour_brewer(type = "qual", palette = 6) +
+  tufte_theme() +
+  theme(legend.position=c(.8,.8))
+
+```
+
+## Transcript Read Coverage
+
+`r margin_note("- Looks good. Steep drop-offs at the ends, especially 5'")`
+`r margin_note("- I'm still a bit surprised about the spread in these values because I've normalised by the number of tags that map to CDS or UTR features. I guess there can be some variation in the size of the tags, but this still seems like a lot")`
+
+```{r dev.args = list(bg = 'transparent')}
+#geneBody_coverage.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  #print(folder)
+  temp <- read.delim(paste(folder, ".geneBodyCoverage.txt", sep=""),
+                     header=FALSE
+                     )
+  temp <-  as.data.frame(t(temp[,-1]))
+  sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$sample <- sample
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
+  temp$V2 <- temp$V2
+  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$ExpressedTags)
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+
+#ggplot(subset(RSeQCstats, sample != 17175), aes(x=V1, y=V2/ReadNumbers, colour=centre, group=sample)) +
+ggplot(RSeQCstats, aes(x=V1, y=V2/ReadNumbers, colour=centre, group=sample)) +
+  geom_line() +
+  ylab('reads') +
+  tufte_theme() +
+  theme(legend.position=c(0.1,.9)) +
+  scale_colour_brewer(type = "qual", palette = 6) +
+  xlab('transcript percentile') +
+  ylab("proportion of expressed tags")
+  
+```
+
+## Sequence Duplication
+
+`r margin_note("- Plenty of duplication")`
+`r margin_note("- Probably not unexpected in this case")`
+`r margin_note("- Duplication higher for Exeter samples")`
+
+```{r include=FALSE}
+#read_duplication.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  eval(parse(file = paste(folder, ".DupRate_plot.r", sep=""))[2:6])
+  temp <- rbind(data.frame(Reads=pos_uniqRead, 
+                            Duplication_level=pos_occ, 
+                            Method='Position-based'
+                            ),
+                 data.frame(Reads=seq_uniqRead, 
+                            Duplication_level=seq_occ, 
+                            Method='Sequence-based'
+                            )
+                )
+  sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$sample <- sample
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
+  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,]$Unique)
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+
+```
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(RSeQCstats, aes(x=Duplication_level, y=Reads/ReadNumbers, colour=centre, group=sample)) +
+  geom_point() +
+  xlim(c(0,500)) +
+  scale_y_log10() +
+  tufte_theme() +
+  theme(legend.position=c(.8,.8)) +
+  scale_colour_brewer(type = "qual", palette = 6) +
+  facet_wrap(~ Method) +
+  ylab("Proportion of Reads")
+
+
+```
+
+## Splice Junction Saturation
+
+`r margin_note("- It looks like both known and novel splice sites continue to be found")`
+
+```{r include=FALSE}
+#junction_saturation.py
+RSeQCstats <- data.frame()
+for (folder in folders) {
+  eval(parse(file = paste(folder, ".junctionSaturation_plot.r", sep=""))[2:5])
+  temp<-rbind(
+              data.frame(percent_reads=x, junctions=z, Category='All'),
+              data.frame(percent_reads=x, junctions=y, Category='Known'),
+              data.frame(percent_reads=x, junctions=w, Category='Novel')
+              )
+  sample <- tail(strsplit(folder, '/')[[1]], 1)
+  temp$sample <- sample
+  temp$ReadNumbers <- as.numeric(ReadNumbers[ReadNumbers$sample == sample,2])
+  temp$centre <- LibraryInfo[LibraryInfo$sample == sample,3]
+  RSeQCstats <- rbind(RSeQCstats, temp)
+}
+```
+
+```{r dev.args = list(bg = 'transparent'), warning=FALSE}
+ggplot(RSeQCstats, aes(y=junctions, x=ReadNumbers*percent_reads/100, group=sample, colour=centre)) +
+  geom_point() +
+  #xlim(c(0,500)) +
+  #scale_y_log10() +
+  scale_colour_brewer(type = "qual", palette = 6) +
+  tufte_theme() +
+  theme(legend.position=c(.8,.9)) +
+  facet_wrap(~ Category, scales='free') +
+  xlab("Number of Reads")
+  ```
