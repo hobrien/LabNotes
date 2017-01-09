@@ -107,3 +107,11 @@ A263	A263.chr.counts.txt
 18856	18856.chr.counts.txt
 A139	A139.chr.counts.txt
 A145	A145.chr.counts.txt
+12546	12546.chr.counts.txt
+12994	12994.chr.counts.txt
+12107	12107.chr.counts.txt
+11875	11875.chr.counts.txt
+12545	12545.chr.counts.txt
+13142	13142.chr.counts.txt
+12993	12993.chr.counts.txt
+13008	13008.chr.counts.txt

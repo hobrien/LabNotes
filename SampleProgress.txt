@@ -84,6 +84,7 @@ sample	problems	Centre	BAMsize	Tophat	RSeQC	Filter	ValidateSAM	Clip	Index
 19052		Edinburgh		3579	3602		11216		
 15533-2		Exeter		3751	3858		11311		
 A138		Edinburgh		3585	3651		11318		
+17921	=17921-l1	Exeter		3349	3541/3889		11218		
 17921-l1	=17921-l1	Exeter		3349	3541/3889		11218		
 17921-1	=17921-l1	Exeter		3349	3541/3889		11218		
 A138-2	duplicate	Cardiff		7485	7504		see A138		

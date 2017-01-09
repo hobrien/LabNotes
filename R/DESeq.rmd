@@ -8,7 +8,6 @@ output:
 <!-- see http://rstudio.github.io/tufte/ for info about tufte -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warnings=FALSE, message = FALSE, dev.args = list(bg = 'transparent'))
-rm(list=ls())
 
 library(readr)
 library(dplyr)
@@ -36,7 +35,7 @@ DESeq2results <- read_delim("~/BTSync/FetalRNAseq/Counts/Summary.txt",
                             escape_double = FALSE, 
                             trim_ws = TRUE
                             )
-kable(select(DESeq2results, -results))
+filter(DESeq2results, grepl('new', results)) %>% select( -results, -test, -RIN, -model) %>% arrange(BrainBank, AgeRange, desc(Excluded)) %>% kable()
 ```
 
 # Dealing with outliers
@@ -44,7 +43,7 @@ kable(select(DESeq2results, -results))
 `r margin_note("- Cooks = 100 should read 100+ and Count = 10.0 should read 10+")`
 `r margin_note("- Cooks Distance is << 1 for the vast majority of datapoints, but 15641, 18432 and possibly 16428 stand out as having many high values")`
 
-![Distribution of Cooks Distances by Sample](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA/figures/CooksHist.png)
+![Distribution of Cooks Distances by Sample](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_new/figures/CooksHist.png)
  
  
 `r margin_note("- removing 15641 reduces the number of DE genes by 14% while removing 15641 and 18432 actually increases the number of DE genes by 11%")`
@@ -54,7 +53,7 @@ kable(select(DESeq2results, -results))
  
 ```{r}
 kable(select(DESeq2results, -results) %>% 
-        filter(BrainBank ==  "HDBR only" & AgeRange == "14-20" & test == 'Wald' & CooksCutoff == "None")
+        filter(BrainBank ==  "HDBR" & AgeRange == "14-20" & test == 'Wald' & CooksCutoff == "FALSE")
       )
 ```
 
@@ -81,7 +80,7 @@ PlotExpression<-function(geneID, file=All_Samples, geneName='', id="A value that
     separate(key, into=c('norm', 'label'), sep='[.]') %>%
     select(label, value) %>%
     left_join(target, by='label')
-  plot<-  ggplot(data, aes(x=PCW, y=value, colour=Sex)) + 
+  plot<-  ggplot(data, aes(x=as.numeric(as.character(PCW)), y=value, colour=Sex)) + 
       geom_point() + 
       geom_point(data=subset(data, label==id), colour='orange') +
       geom_smooth() +
@@ -112,14 +111,14 @@ target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by 
 sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt", stringsAsFactors = FALSE)
 target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
 target <- arrange(target, Sex)
-
+target <- mutate(target, PCW = factor(floor(PCW)))
 #All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 
-All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_lrt_age/tables/dropPCW.complete.txt", stringsAsFactors = FALSE)
+All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_new/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 
-LateSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
+LateSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 
-EarlySamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_excl_16491_Cooks.75/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
+EarlySamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_Cooks.75_excl_16491_new/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
 ```
 
 #Plot counts for gene with the highest Cooks Distances when cutoff is 2
@@ -167,7 +166,7 @@ PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
 
 ```{r}
 kable(select(DESeq2results, -results) %>% 
-        filter(BrainBank ==  "HDBR only" & AgeRange == "12-14" & test == 'Wald')
+        filter(BrainBank ==  "HDBR" & AgeRange == "12-14" & test == 'Wald')
       )
 ```
 
