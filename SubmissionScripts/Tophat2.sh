@@ -95,7 +95,21 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_fixup.bam ] || [ ! -f $BASEDIR/$SampleID/BAM/unmapped_fixup.bam ]
+if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam ]
+then
+    echo "Running WASP remapping on $SampleID"
+    bash ~/LabNotes/WASP.sh $BASEDIR/$SampleID/BAM/accepted_hits.bam
+    if [ $? -eq 0 ]
+    then
+        echo "Finished running WASP remapping for $SampleID"
+    else
+        echo "Could not run WASP remapping for $SampleID"
+        exit 1
+    fi
+fi   
+
+
+if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam ] || [ ! -f $BASEDIR/$SampleID/BAM/unmapped_fixup.bam ]
 then
     echo "Fixing BAM formatting for $SampleID"
     bash ~/LabNotes/SubmissionScripts/tophat-recondition.sh $BASEDIR/$SampleID/BAM/
