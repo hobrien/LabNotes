@@ -59,6 +59,7 @@ sample	problems	Centre	BAMsize	Tophat	RSeQC	Filter	ValidateSAM	Clip	Index
 17923		Edinburgh		3606	3672		11142		
 18055		Edinburgh		3607	3677		11197		
 18208	labeled 18121 (but male!)	Edinburgh		3608	3673		11198		
+18121	labeled 18121 (but male!)	Edinburgh		3608	3673		11198		
 18134		Edinburgh		3610	3674		11199		
 18153	2 libraries	Edinburgh		3658	3706		see 18153-2		
 18241		Edinburgh		3659	3684		11200		
@@ -83,6 +84,7 @@ sample	problems	Centre	BAMsize	Tophat	RSeQC	Filter	ValidateSAM	Clip	Index
 19052		Edinburgh		3579	3602		11216		
 15533-2		Exeter		3751	3858		11311		
 17921	=17921-l1	Exeter		3349	3541/3889		11218		
+17921-l1	=17921-l1	Exeter		3349	3541/3889		11218		
 A138		Edinburgh		3585	3651		11318		
 A138-2	duplicate	Cardiff		7485	7504		see A138		
 A151		Cardiff		7486	7516		11352		
