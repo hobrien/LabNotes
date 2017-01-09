@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_14_18_noA_excl_19_cooks.75_noSexChr"                         # name of the project
+projectName <- "MvsF_12_14_Cooks.75_excl_16491_FDR.1_new"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -26,23 +26,26 @@ condRef <- "Female"                                      # reference biological 
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 interact <- c()
 RIN_cutoff <- 0
-PCW_cutoff <- c(14, 20)
+PCW_cutoff <- c(12, 14)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
-cooksCutoff <- .75                             # TRUE/FALSE to perform the outliers detection (default is TRUE)
+#if numeric, features with maxCooks values above this number are removed 
+cooksCutoff <-  FALSE                          # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
-alpha <- 0.05                                      # threshold of statistical significance
+alpha <- 0.1                                    # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
 testMethod <- 'Wald'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
-BrainBank <- 'HDBR'
-#exclude <- c('16491')
-#exclude <- c('15641', '18432')
-exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
+BrainBank <- 'HDBR' # 'All' #
+exclude <- c()
+exclude <- c('16491')
+#exclude <- c('15641', '18432')#, '16491')
+#exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
+excludedFeaturesFile = NA
+#excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -88,7 +91,7 @@ if (length(exclude) > 0) {
 if (BrainBank == 'HDBR') {
     target <- filter(target, ! grepl('A', label))
 }
-#target <- mutate(target, PCW = factor(floor(PCW)))
+target <- mutate(target, PCW = floor(PCW))
 # loading counts
 # this doesn't use the batch info
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
@@ -106,14 +109,16 @@ if (testMethod=='Wald' ) {
                          locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
                          cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
   mcols(out.DESeq2$dds)$maxCooks <- apply(assays(out.DESeq2$dds)[["cooks"]], 1, max)
-  out.DESeq2$results$Male_vs_Female$pvalue[mcols(out.DESeq2$dds)$maxCooks > cooksCutoff] <- NA
-  out.DESeq2$results$Male_vs_Female$padj <- p.adjust(out.DESeq2$results$Male_vs_Female$pvalue, method="BH")
-  } else if (testMethod=='LRT' ) {
+  if (is.numeric(cooksCutoff)) {
+    out.DESeq2$results$Male_vs_Female$pvalue[mcols(out.DESeq2$dds)$maxCooks > cooksCutoff] <- NA
+    out.DESeq2$results$Male_vs_Female$padj <- p.adjust(out.DESeq2$results$Male_vs_Female$pvalue, method="BH")
+  }  
+} else if (testMethod=='LRT' ) {
   out.DESeq2 <- run.DESeq2.LRT(counts=counts, target=target, varInt=varInt, batch=batch, interact=interact,
                            locfunc=locfunc, fitType=fitType, pAdjustMethod=pAdjustMethod,
                            cooksCutoff=cooksCutoff, independentFiltering=independentFiltering, alpha=alpha)
-  } else {
-  stop("testMethod not recognised")
+} else {
+stop("testMethod not recognised")
 }
 
 # PCA + clustering
@@ -241,7 +246,7 @@ write.table(summary,
 
 # Include histograms of PCW and RIN
 ggplot(target, aes(x=PCW)) +
-  geom_histogram(binwidth=1/7) +
+  geom_bar() +
   facet_grid(Sex ~ .) +
   tufte_theme() +
   scale_y_continuous(breaks=seq(0,100, 2))
@@ -258,9 +263,18 @@ ggsave("figures/RIN_hist.png")
 # Plot histogram of Cooks distances for DE genes
 # last bin should be read as '100+')
 # counts of 10 should be read as '10+'
-if (testMethod == 'Wald') {
+#this only runs when cooksCutoff is set to NA becasue it doesn't make sense when high maxCooks features are excluded
+if (testMethod == 'Wald' & ! is.numeric(cooksCutoff)) {
   DE.cooks <- as.data.frame(assays(out.DESeq2$dds)[["cooks"]][as.character(rbind(MalevsFemale.up, MalevsFemale.down)$Id),])
   gather(DE.cooks, 'Sample', 'Cooks')  %>% mutate(Cooks = ifelse(Cooks > 100, 100, Cooks)) %>%
-    ggplot(aes(x=Cooks))+geom_histogram(bins=100)+ facet_wrap(~Sample) + coord_cartesian(ylim=c(0, 10))
+    ggplot(aes(x=Cooks)) +
+      geom_histogram(bins=100) + 
+      facet_wrap(~Sample) + 
+      coord_cartesian(ylim=c(0, 10)) +
+      tufte_theme() +
+      theme(axis.text.x=element_text(size=6)) +
+      theme(axis.text.y=element_text(size=6)) +
+      theme(strip.text=element_text(size=4))
+  
   ggsave("figures/CooksHist.png")
 }
