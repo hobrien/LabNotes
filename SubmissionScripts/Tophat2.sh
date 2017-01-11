@@ -16,6 +16,7 @@ SampleID=${filename%%_*} #This will remove the library ID, lane number and read 
 # this will keep incrementing the SampleID until a unique one is found
 replicate=1
 baseID=$SampleID
+SampleID=$baseID-$replicate
 while [[ -d $BASEDIR/$SampleID ]]
 do
   replicate=$((replicate+1))
@@ -98,7 +99,7 @@ fi
 if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam ]
 then
     echo "Running WASP remapping on $SampleID"
-    bash ~/LabNotes/WASP.sh $BASEDIR/$SampleID/BAM/accepted_hits.bam
+    bash ~/LabNotes/SubmissionScripts/WASP.sh $BASEDIR/$SampleID/BAM/accepted_hits.bam
     if [ $? -eq 0 ]
     then
         echo "Finished running WASP remapping for $SampleID"
@@ -122,24 +123,12 @@ then
     fi    
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_fixup_merge.bam ]
-then
-    echo "Merging mapped and unmapped BAM files for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/SamtoolsMerge.sh $BASEDIR/$SampleID/BAM/accepted_hits_fixup.bam $BASEDIR/$SampleID/BAM/unmapped_fixup.bam 
-    if [ $? -eq 0 ]
-    then
-        echo "Finished BAM merging on $SampleID"
-    else
-        echo "Samtools merge failed on $SampleID"
-        exit 1
-    fi    
-fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_fixup_merge_sort.bam ]
+if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup_sort.bam ]
 then
     echo "Sorting BAM for $SampleID"
     # Sort BAM files by query name
-    bash ~/LabNotes/SubmissionScripts/SamtoolsSort.sh $BASEDIR/$SampleID/BAM/accepted_hits_fixup_merge.bam
+    bash ~/LabNotes/SubmissionScripts/SamtoolsSort.sh $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam
     if [ $? -eq 0 ]
     then
         echo "Finished BAM sorting on $SampleID"
@@ -149,10 +138,10 @@ then
     fi    
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_fixup_merge_sort_RG.bam ]
+if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup_sort_RG.bam ]
 then
     echo "Adding read groups for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/AddRG.sh $BASEDIR/$SampleID/BAM/accepted_hits_fixup_merge_sort.bam $SampleID
+    bash ~/LabNotes/SubmissionScripts/AddRG.sh $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup_sort.bam $SampleID
     if [ $? -eq 0 ]
     then
         echo "Finished adding read groups for $SampleID"
