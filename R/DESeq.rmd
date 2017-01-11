@@ -15,6 +15,7 @@ library(tidyr)
 library(knitr)
 library(ggplot2)
 library(tufte)
+library(gplots)
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
 ```
 
@@ -46,15 +47,57 @@ filter(DESeq2results, grepl('new', results)) %>% select( -results, -test, -RIN, 
 ![Distribution of Cooks Distances by Sample](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_new/figures/CooksHist.png)
  
  
-`r margin_note("- removing 15641 reduces the number of DE genes by 14% while removing 15641 and 18432 actually increases the number of DE genes by 11%")`
-`r margin_note("- also removing 16428 reduces the number of DE 60%")`
-`r margin_note("- This is presumably due to a reduction in variance when the outliers are removed")`
- 
- 
+# Compare DESeq with EdgeR
+`r margin_note("- Differences between 12-14/12-20 and 14-20 are more dramatic with edgeR")`
+## 12-20
 ```{r}
-kable(select(DESeq2results, -results) %>% 
-        filter(BrainBank ==  "HDBR" & AgeRange == "14-20" & test == 'Wald' & CooksCutoff == "FALSE")
-      )
+MalevsFemale_up_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_FDR.1_edgeR/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_up_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_FDR.1_new/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_FDR.1_edgeR/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_FDR.1_new/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+par(mfrow=c(1,2))
+venn(list(DESeq=MalevsFemale_down_12_20_Deseq$Id, edgeR=MalevsFemale_down_12_20_EdgeR$Id))
+title(main="MalevsFemale_down")
+venn(list(DESeq=MalevsFemale_up_12_20_Deseq$Id, edgeR=MalevsFemale_up_12_20_EdgeR$Id))
+title(main="MalevsFemale_up")
+```
+
+## 12-14
+```{r}
+MalevsFemale_up_12_14_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_excl_16491_FDR.1_edgeR/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_up_12_14_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_Cooks.75_excl_16491_FDR.1_new/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_14_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_excl_16491_FDR.1_edgeR/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_14_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_Cooks.75_excl_16491_FDR.1_new/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+par(mfrow=c(1,2))
+venn(list(DESeq=MalevsFemale_down_12_14_Deseq$Id, edgeR=MalevsFemale_down_12_14_EdgeR$Id))
+title(main="MalevsFemale_down")
+venn(list(DESeq=MalevsFemale_up_12_14_Deseq$Id, edgeR=MalevsFemale_up_12_14_EdgeR$Id))
+title(main="MalevsFemale_up")
+```
+
+## 14-20
+```{r}
+MalevsFemale_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+par(mfrow=c(1,2))
+venn(list(DESeq=MalevsFemale_down_14_20_Deseq$Id, edgeR=MalevsFemale_down_14_20_EdgeR$Id))
+title(main="MalevsFemale_down")
+venn(list(DESeq=MalevsFemale_up_14_20_Deseq$Id, edgeR=MalevsFemale_up_14_20_EdgeR$Id))
+title(main="MalevsFemale_up")
 ```
 
 
