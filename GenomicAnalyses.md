@@ -494,3 +494,6 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - SAMException: Value was put into PairInfoMap more than once
         - somewhat ironically, the WASP deduplication script duplicated the entry for one of the reads
         - hopefully this is fixed with the new version of WASP
+    - I'm debating the proper order of doing things here. I managed to get the output from Tophat to pass VerifyBAM, but that was without WASP remapping. I can run WASP on this GATK compatible file, but it requires tophat so I think I'm just going to reintroduce all the same problems. Probably the thing to do is run WASP as the first step after tophat, but what about the remove duplicates step?
+        - Sorting and adding read groups appears to be enough to get the mapping to pass ValidateSAM
+        - I've written an R script to combine the counts from individual mappings. This doesn't give exactly the same counts as passing multiple fastq files to Tophat, but it's close (a total of 159 features with discrepant counts, with a total of 206 differences). I think I'm not going to worry about it.
