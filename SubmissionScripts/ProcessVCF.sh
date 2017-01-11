@@ -4,6 +4,8 @@
 #$ -j y
 #$ -S /bin/bash
 #
+
+BASEDIR=/c8000xd3/rnaseq-heath/Genotypes/Imputation3
 ls /c8000xd3/rnaseq-heath/Mappings | cut -d- -f 1 | sort | uniq > ~/LabNotes/mappings.txt
 for chr in {1..22}
 do 
@@ -12,8 +14,8 @@ do
     echo "##contig=<ID=$chr>" >> header_temp.txt 
     tail -1 ~/LabNotes/header.txt >> header_temp.txt
     bcftools reheader -h header_temp.txt \
-        -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.vcf.gz \
-        /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.vcf.gz
+        -o $BASEDIR/hg19/chr$chr.dose.rename.vcf.gz \
+        $BASEDIR/hg19/chr$chr.dose.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished modifying header of chromosome $chr"
@@ -27,8 +29,8 @@ do
     # they can also be indexed with tabix, tho I'm using bcftools for this
     bcftools view -Ob \
         -s `cut -f1 ~/LabNotes/VCFindex.txt | cut -d/ -f 1 | cut -d- -f 1 | sort | uniq | join -t'|' - ~/LabNotes/mappings.txt | paste -s -d,` \
-        -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.vcf.gz \
-        /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.vcf.gz
+        -o $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz \
+        $BASEDIR/hg19/chr$chr.dose.rename.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished removing unsequenced samples from chromosome $chr"
@@ -39,7 +41,8 @@ do
         exit 1
     fi
     echo "Filtering SNPs with alt allele probabilities < 0.9 for $chr"
-    python ~/LabNotes/Python/FilterVCF.py /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.vcf.gz | bcftools view -Oz -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
+    python ~/LabNotes/Python/FilterVCF.py $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz \
+      | bcftools view -Oz -o $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished filtering SNPs for chromosome $chr"
@@ -51,9 +54,9 @@ do
     bcftools index /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
     bcftools annotate -c ID -Oz \
         -a /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/hg19/All_20161121.vcf.gz \
-        -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz \
-        /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
-    bcftools index /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz
+        -o $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz \
+        $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
+    bcftools index $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished adding rsIDs to chromosome $chr"
@@ -70,6 +73,7 @@ do
         echo "Could not do liftover for chromosome $chr"
         exit 1
     fi
-    python ~/LabNotes/Python/FilterVCF.py /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.vcf.gz | bcftools view -Ob -o /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
+    python ~/LabNotes/Python/FilterVCF.py $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz \
+      | bcftools view -Ob -o $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
     rm header_temp.txt
 done
