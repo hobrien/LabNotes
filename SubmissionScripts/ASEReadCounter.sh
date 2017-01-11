@@ -14,9 +14,9 @@ outfilename=/c8000xd3/rnaseq-heath/Counts/$sampleID.ase.rtable
 
 java -jar /share/apps/GenomeAnalysisTK.jar -T ASEReadCounter \
    -R /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
-   -o $outfilename \
+   -o ${1%.*}.22.ase.rtable \
    -I $1 \
-   -sites /c8000xd3/rnaseq-heath/Genotypes/Imputation2/chr22.GRCh38.vcf.gz \
+   -sites /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr22.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz \
    -U ALLOW_N_CIGAR_READS \
    -minDepth 10 \
    --minMappingQuality 10 \
