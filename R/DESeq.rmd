@@ -114,33 +114,41 @@ title(main="MalevsFemale_up FDR<0.05")
 
 ## 14-20
 ```{r}
-MalevsFemale_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/MalevsFemale.up.txt", 
+Male_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
-MalevsFemale_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/MalevsFemale.up.txt", 
+Male_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
-MalevsFemale_down_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/MalevsFemale.down.txt", 
+Female_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
-MalevsFemale_down_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/MalevsFemale.down.txt", 
+Female_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
 par(mfrow=c(1,2))
-venn(list(DESeq=MalevsFemale_down_14_20_Deseq$Id, edgeR=MalevsFemale_down_14_20_EdgeR$Id))
-title(main="MalevsFemale_down FDR<0.1")
-venn(list(DESeq=MalevsFemale_up_14_20_Deseq$Id, edgeR=MalevsFemale_up_14_20_EdgeR$Id))
-title(main="MalevsFemale_up FDR<0.1")
+venn(list(DESeq=Male_up_14_20_Deseq$Id, edgeR=Male_up_14_20_EdgeR$Id))
+title(main="Male Up FDR<0.1")
+venn(list(DESeq=Female_up_14_20_Deseq$Id, edgeR=Female_up_14_20_EdgeR$Id))
+title(main="Female Up FDR<0.1")
 
- MalevsFemale_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_edgeR/tables/MalevsFemale.up.txt", 
+Female_up_intersection <- inner_join(select(Female_up_14_20_EdgeR, Chr, GeneID, Id, padj), select(Female_up_14_20_Deseq, Id, padj), by='Id')
+colnames(Female_up_intersection) <- c("Chr", "GeneID", "Id", "padj_EdgeR", "padj_DEseq")
+write_delim(Female_up_intersection, "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_female_up_intersection.txt")
+
+Male_up_intersection <- inner_join(select(Male_up_14_20_EdgeR, Chr, GeneID, Id, padj), select(Male_up_14_20_Deseq, Id, padj), by='Id')
+colnames(Male_up_intersection) <- c("Chr", "GeneID", "Id", "padj_EdgeR", "padj_DEseq")
+write_delim(Male_up_intersection, "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_male_up_intersection.txt")
+
+Male_up_14_20_FDR.05_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_edgeR/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
-MalevsFemale_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/MalevsFemale.up.txt", 
+Male_up_14_20_FDR.05_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
-MalevsFemale_down_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_edgeR/tables/MalevsFemale.down.txt", 
+Female_up_14_20_FDR.05_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_edgeR/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
-MalevsFemale_down_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/MalevsFemale.down.txt", 
+Female_up_14_20_FDR.05_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
 par(mfrow=c(1,2))
-venn(list(DESeq=MalevsFemale_down_14_20_Deseq$Id, edgeR=MalevsFemale_down_14_20_EdgeR$Id))
-title(main="MalevsFemale_down FDR<0.05")
-venn(list(DESeq=MalevsFemale_up_14_20_Deseq$Id, edgeR=MalevsFemale_up_14_20_EdgeR$Id))
-title(main="MalevsFemale_up FDR<0.05")
+venn(list(DESeq=Male_up_14_20_FDR.05_Deseq$Id, edgeR=Male_up_14_20_FDR.05_EdgeR$Id))
+title(main="Male Up FDR<0.05")
+venn(list(DESeq=Female_up_14_20_FDR.05_Deseq$Id, edgeR=Female_up_14_20_FDR.05_EdgeR$Id))
+title(main="Female Up FDR<0.05")
 ```
 
 
