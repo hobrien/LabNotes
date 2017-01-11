@@ -125,7 +125,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref ] | [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp ]
+if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref ] | [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp ] | [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup ]
 then
     echo "Running checkVCF on GRCh38 VCF for $chr"
     bash ~/LabNotes/SubmissionScripts/checkVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz
@@ -143,6 +143,7 @@ then
     echo "Removing non-reference bases from GRCh38 VCF for $chr"
     cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp > $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
     cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref | cut -f 2 -d: >> $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
+    cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup | cut -f 2 -d: >> $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
     exset=`sort $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt |uniq | perl -pe 's/^/POS=/' | paste -s -d'|'`
     if [[ ${#exset} > 0 ]]
     then
