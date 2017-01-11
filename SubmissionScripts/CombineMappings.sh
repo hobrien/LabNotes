@@ -15,3 +15,4 @@ Rscript ~/LabNotes/R/CombineCounts.R $SampleID
 
 bash ~/LabNotes/SubmissionScripts/MergeSAM.sh `find $BASEDIR -name accepted_hits_filtered_sort_dedup_sort_RG.bam | grep $SampleID- | sort`
 mv $BASEDIR/$SampleID-1/BAM/accepted_hits_filtered_sort_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/BAM/$SampleID.bam
+bash ~/LabNotes/SubmissionScripts/SamtoolsIndex.sh $BASEDIR/$SampleID/BAM/$SampleID.bam
