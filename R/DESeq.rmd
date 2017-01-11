@@ -61,9 +61,24 @@ MalevsFemale_down_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12
      "\t", escape_double = FALSE, trim_ws = TRUE)
 par(mfrow=c(1,2))
 venn(list(DESeq=MalevsFemale_down_12_20_Deseq$Id, edgeR=MalevsFemale_down_12_20_EdgeR$Id))
-title(main="MalevsFemale_down")
+title(main="MalevsFemale_down FDR<0.1")
 venn(list(DESeq=MalevsFemale_up_12_20_Deseq$Id, edgeR=MalevsFemale_up_12_20_EdgeR$Id))
-title(main="MalevsFemale_up")
+title(main="MalevsFemale_up FDR<0.1")
+
+MalevsFemale_up_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_edgeR/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_up_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_new/tables/MalevsFemale.up.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_edgeR/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_new/tables/MalevsFemale.down.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+par(mfrow=c(1,2))
+venn(list(DESeq=MalevsFemale_down_12_20_Deseq$Id, edgeR=MalevsFemale_down_12_20_EdgeR$Id))
+title(main="MalevsFemale_down FDR<0.05")
+venn(list(DESeq=MalevsFemale_up_12_20_Deseq$Id, edgeR=MalevsFemale_up_12_20_EdgeR$Id))
+title(main="MalevsFemale_up FDR<0.05")
+
 ```
 
 ## 12-14
