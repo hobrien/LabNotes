@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_12_14_Cooks.75_excl_16491_FDR.1_new"                         # name of the project
+projectName <- "MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_new"                         # name of the project
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
@@ -26,12 +26,12 @@ condRef <- "Female"                                      # reference biological 
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 interact <- c()
 RIN_cutoff <- 0
-PCW_cutoff <- c(12, 14)
+PCW_cutoff <- c(12, 20)
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 #if numeric, features with maxCooks values above this number are removed 
-cooksCutoff <-  FALSE                          # TRUE/FALSE to perform the outliers detection (default is TRUE)
+cooksCutoff <-  0.75 #FALSE                          # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
-alpha <- 0.1                                    # threshold of statistical significance
+alpha <- 0.05                                    # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
 testMethod <- 'Wald'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
@@ -40,7 +40,7 @@ locfunc <- "median"                                  # "median" (default) or "sh
 BrainBank <- 'HDBR' # 'All' #
 exclude <- c()
 exclude <- c('16491')
-#exclude <- c('15641', '18432')#, '16491')
+exclude <- c('15641', '18432', '16491')
 #exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
@@ -139,6 +139,7 @@ write.table(vst, file="tables/VST.txt", sep="\t", quote=FALSE, row.names = FALSE
 filterSet <- rowSums(ifelse(counts(out.DESeq2$dds) > 9, 1, 0)) > (ncol(vst)-1)*.9
 write.table(vst[filterSet, ], file="tables/VST_filtered.txt", sep="\t", quote=FALSE, row.names = FALSE)
 
+#filter out genes with counts < 10 in more than 50% of samples
 filterSet <- rowSums(ifelse(counts(out.DESeq2$dds) > 9, 1, 0)) > (ncol(vst)-1)*.5
 write.table(vst[filterSet, ], file="tables/VST_filtered2.txt", sep="\t", quote=FALSE, row.names = FALSE)
 
