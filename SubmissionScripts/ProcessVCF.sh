@@ -7,7 +7,7 @@
 
 BASEDIR=/c8000xd3/rnaseq-heath/Genotypes/Imputation3
 ls /c8000xd3/rnaseq-heath/Mappings | cut -d- -f 1 | sort | uniq > ~/LabNotes/mappings.txt
-chr = $1
+chr=$1
 if [ ! $BASEDIR/hg19/chr$chr.dose.rename.vcf.gz ]
 then 
     echo "Modifying header of chromosome $chr"
@@ -27,6 +27,7 @@ then
     rm header_temp.txt
 fi
 if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz ]
+then
     echo "Removing unsequenced samples from chromosome $chr"
     # the pysam script that I'm using appears to require a bcf file
     # all subsequent files will be gzipped vcf files, because they take up about half of the space
@@ -46,6 +47,7 @@ if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz ]
     fi
 fi
 if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz ]
+then
     echo "Filtering SNPs with alt allele probabilities < 0.9 for $chr"
     python ~/LabNotes/Python/FilterVCF.py $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz \
       | bcftools view -Oz -o $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
@@ -58,6 +60,7 @@ if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz ]
     fi
 fi
 if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz ]
+then
     echo "Adding rsIDs to $chr"
     bcftools index /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
     bcftools annotate -c ID -Oz \
@@ -74,6 +77,7 @@ if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz
     fi
 fi
 if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz ]
+then
     echo "Liftover of chromosome $chr from hg19 to GRCh38"
     bash ~/LabNotes/SubmissionScripts/Liftover.sh $chr
     if [ $? -eq 0 ]
