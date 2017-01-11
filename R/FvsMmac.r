@@ -129,6 +129,10 @@ summaryResults <- summarizeResults.DESeq2(out.DESeq2, group=target[,varInt], col
                                           independentFiltering=independentFiltering,
                                           cooksCutoff=cooksCutoff, alpha=alpha)
 
+################################################################################
+###                          additional steps                                ###
+################################################################################
+
 #Save VST counts
 vst <- as.data.frame(assay(varianceStabilizingTransformation(out.DESeq2$dds)))
 vst$Id <- row.names(vst)
@@ -216,7 +220,8 @@ select(DESeq.complete, Id, Female,	Male,	FoldChange,	log2FoldChange,	pvalue,	pad
   write.table(file="tables/Background.txt", sep="\t", quote=FALSE, row.names=FALSE)
 
 #write summary of analysis to file
-summary <- data.frame(BrainBank=c(BrainBank), 
+summary <- data.frame(Method=c('DESeq'),
+                      BrainBank=c(BrainBank), 
                       AgeRange=c(paste(PCW_cutoff, collapse='-')), 
                       RIN=c(ifelse(RIN_cutoff==0, "All", RIN_cutoff)),
                       FDR=c(alpha), 
