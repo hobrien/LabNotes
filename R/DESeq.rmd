@@ -118,23 +118,28 @@ Male_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_ex
      "\t", escape_double = FALSE, trim_ws = TRUE)
 Male_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
+Male_up_14_20_Voom <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_voom/tables/MaleUp.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+
 Female_up_14_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.1_edgeR/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
 Female_up_14_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_FDR.1_new/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
+Female_up_14_20_Voom <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_voom/tables/FemaleUp.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
 par(mfrow=c(1,2))
-venn(list(DESeq=Male_up_14_20_Deseq$Id, edgeR=Male_up_14_20_EdgeR$Id))
+venn(list(DESeq=Male_up_14_20_Deseq$Id, edgeR=Male_up_14_20_EdgeR$Id, Voom=Male_up_14_20_Voom$Id))
 title(main="Male Up FDR<0.1")
-venn(list(DESeq=Female_up_14_20_Deseq$Id, edgeR=Female_up_14_20_EdgeR$Id))
+venn(list(DESeq=Female_up_14_20_Deseq$Id, edgeR=Female_up_14_20_EdgeR$Id, Voom=Female_up_14_20_Voom$Id))
 title(main="Female Up FDR<0.1")
 
 Female_up_intersection <- inner_join(select(Female_up_14_20_EdgeR, Chr, GeneID, Id, padj), select(Female_up_14_20_Deseq, Id, padj), by='Id')
 colnames(Female_up_intersection) <- c("Chr", "GeneID", "Id", "padj_EdgeR", "padj_DEseq")
-write_delim(Female_up_intersection, "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_female_up_intersection.txt")
+write_delim(Female_up_intersection, "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_female_up_intersection.txt", delim='\t')
 
 Male_up_intersection <- inner_join(select(Male_up_14_20_EdgeR, Chr, GeneID, Id, padj), select(Male_up_14_20_Deseq, Id, padj), by='Id')
 colnames(Male_up_intersection) <- c("Chr", "GeneID", "Id", "padj_EdgeR", "padj_DEseq")
-write_delim(Male_up_intersection, "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_male_up_intersection.txt")
+write_delim(Male_up_intersection, "~/BTSync/FetalRNAseq/Counts/MvsF_14_20_male_up_intersection.txt", delim='\t')
 
 Male_up_14_20_FDR.05_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_edgeR/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
