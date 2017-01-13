@@ -8,10 +8,11 @@
 BASEDIR=/c8000xd3/rnaseq-heath/Genotypes/Imputation3
 cd $BASEDIR/HDF5
 
+echo "Running VCF2HDF5"
 for chr in {1..22}
-then
-    if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz` ]
-    do
+do
+    if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz ]
+    then
         echo "Running ProcessVCF on $chr"
         bash ~/LabNotes/SubmissionScripts/ProcessVCF.sh $chr
         if [ $? -eq 0 ]
@@ -21,13 +22,13 @@ then
             echo "Could not run ProcessVCF on $chr"
             exit 1
         fi
-    done
-fi
+    fi
+done
 
 
-if [ ! -f $BASEDIR/GRCh38/HDF5/haplotypes.h5 ] | \
-   [ ! -f $BASEDIR/GRCh38/HDF5/snp_index.h5 ] | \
-   [ ! -f $BASEDIR/GRCh38/HDF5/snp_tab.h5 ]
+if [ ! -f $BASEDIR/HDF5/haplotypes.h5 ] | \
+   [ ! -f $BASEDIR/HDF5/snp_index.h5 ] | \
+   [ ! -f $BASEDIR/HDF5/snp_tab.h5 ]
 then
     echo "Converting VCF files with duplicated sites to HDF5"
     ~/src/WASP-0.2.1/snp2h5/snp2h5 \
@@ -45,5 +46,5 @@ then
         exit 1
     fi
 fi
-
+echo "Finished running VCF2HDF5"
         
