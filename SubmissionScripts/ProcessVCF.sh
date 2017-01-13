@@ -124,7 +124,9 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref ] | \
+   [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp ] | \
+   [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup ]
 then
     echo "Running checkVCF on GRCh38 VCF for $chr"
     bash ~/LabNotes/SubmissionScripts/checkVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz
@@ -136,20 +138,20 @@ then
         exit 1
     fi
 fi
-if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz ]
+ 
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz ]
 then
     echo "Removing non-reference bases from GRCh38 VCF for $chr"
     cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp > $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
     cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref | cut -f 2 -d: >> $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
-    cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup | cut -f 2 -d: >> $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
     exset=`sort $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt |uniq | perl -pe 's/^/POS=/' | paste -s -d'|'`
     if [[ ${#exset} > 0 ]]
     then
         bcftools filter -Oz -e $exset $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz \
-          > $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
+          > $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz
     else
         cp $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz \
-           $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
+           $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz
     fi
     if [ $? -eq 0 ]
     then
@@ -160,10 +162,35 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.ref ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.nonSnp ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.dup ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz ]
+then
+    echo "Removing duplicated positions from GRCh38 VCF for $chr"
+    cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup | cut -f 2 -d: >> $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
+    exset=`sort $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt |uniq | perl -pe 's/^/POS=/' | paste -s -d'|'`
+    if [[ ${#exset} > 0 ]]
+    then
+        bcftools filter -Oz -e $exset $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz \
+          > $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz
+    else
+        cp $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz \
+           $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz
+    fi
+    if [ $? -eq 0 ]
+    then
+        echo "Finished removing duplicated positions from GRCh38 VCF for $chr"
+    else
+        echo "Could not remove duplicated from GRCh38 VCF for $chr"
+        exit 1
+    fi
+fi
+
+
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.check.ref ] | \
+   [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.check.nonSnp ] | \
+   [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.check.dup ]
 then
     echo "Rerunning checkVCF on filtered GRCh38 VCF for $chr"
-    bash ~/LabNotes/SubmissionScripts/checkVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
+    bash ~/LabNotes/SubmissionScripts/checkVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished rerunning checkVCF on filtered GRCh38 VCF for $chr"
@@ -173,10 +200,10 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz.csi ] 
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz.csi ] 
 then
     echo "Indexing (csi) filtered GRCh38 VCF for $chr"
-    bcftools index $BASEDIR//GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
+    bcftools index $BASEDIR//GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished indexing (csi) filtered GRCh38 VCF for $chr"
@@ -186,10 +213,10 @@ then
     fi
 fi
 
-if  [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz.tbi ]
+if  [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz.tbi ]
 then
     echo "Indexing (tbi) filtered GRCh38 VCF for $chr"
-    tabix $BASEDIR//GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
+    tabix $BASEDIR//GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz
     if [ $? -eq 0 ]
     then
         echo "Finished indexing (tbi) filtered GRCh38 VCF for $chr"

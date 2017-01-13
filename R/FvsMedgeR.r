@@ -27,6 +27,9 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
 RIN_cutoff <- 0
 PCW_cutoff <- c(14, 20)
 batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+testMethod <- 'NA'
+interact <- 0
+cooksCutoff <- FALSE
 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
@@ -116,3 +119,89 @@ writeReport.edgeR(target=target, counts=counts, out.edgeR=out.edgeR, summaryResu
                   targetFile=targetFile, rawDir=rawDir, featuresToRemove=featuresToRemove, varInt=varInt,
                   condRef=condRef, batch=batch, alpha=alpha, pAdjustMethod=pAdjustMethod, colors=colors,
                   gene.selection=gene.selection, normalizationMethod=normalizationMethod)
+
+
+################################################################################
+###                          additional steps                                ###
+################################################################################
+
+my_db <- src_mysql("FetalRNAseq", host="localhost", user="root")
+GetGeneIDs <- function(Ids) {
+  geneIDs <- tibble(Chr=character(), GeneID=character())
+  for (Id in Ids) {
+    geneIDs <- collect(tbl(my_db, sql(paste0("SELECT DISTINCT GencodeGTF.seqid AS 'Chr', 
+                                             GencodeFeatures.value AS 'GeneID' FROM 
+                                             GencodeFeatures, GencodeGTF WHERE 
+                                             GencodeGTF.id = GencodeFeatures.id AND 
+                                             GencodeFeatures.feature = 'gene_name' AND 
+                                             GencodeFeatures.id IN (
+                                             SELECT GencodeGTF.id FROM GencodeGTF, GencodeFeatures WHERE 
+                                             GencodeGTF.id = GencodeFeatures.id AND GencodeFeatures.Value =",
+                                             paste0("'", Id, "'"),
+                                             ")"
+                                             )))) %>%
+      bind_rows(geneIDs, .)
+  }
+  geneIDs
+}
+DEgenes=NA
+MalevsFemale.up <- read.delim("tables/MalevsFemale.up.txt", check.names=FALSE)
+MalevsFemale.up <- select(MalevsFemale.up, Id, Female, Male, FC, log2FoldChange, pvalue, padj)
+MalevsFemale.up <- bind_cols(GetGeneIDs(MalevsFemale.up$Id), MalevsFemale.up)
+write.table(MalevsFemale.up, file="tables/MaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
+MalevsFemale.down <- read.delim("tables/MalevsFemale.down.txt", check.names=FALSE)
+MalevsFemale.down <- select(MalevsFemale.down, Id, Female, Male, FC, log2FoldChange, pvalue, padj)
+MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
+write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
+DEgenes <- nrow(MalevsFemale.down) + nrow(MalevsFemale.up)
+
+
+#write summary of analysis to file
+summary <- data.frame(Method=c('EdgeR'),
+                      BrainBank=c(BrainBank), 
+                      AgeRange=c(paste(PCW_cutoff, collapse='-')), 
+                      RIN=c(ifelse(RIN_cutoff==0, "All", RIN_cutoff)),
+                      FDR=c(alpha), 
+                      Excluded=c(ifelse(length(exclude)==0,
+                                        "None",
+                                        ifelse(length(exclude)>3,
+                                               length(exclude),
+                                               paste(exclude, collapse="/")
+                                        )
+                      )
+                      ),
+                      n=c(ncol(counts)),
+                      test=c(testMethod),
+                      model=c(ifelse(length(interact)==0, '+', '*')), 
+                      CooksCutoff=c(ifelse(testMethod=='Wald', cooksCutoff, "None")),
+                      DEgenes=c(DEgenes),
+                      res=c(workDir)                     
+)                                              
+write.table(summary, 
+            file="~/BTSync/FetalRNAseq/Counts/Summary.txt", 
+            sep="\t", 
+            quote=FALSE, 
+            row.names=FALSE, 
+            col.names=FALSE,
+            append=TRUE
+)
+
+
+# Include histograms of PCW and RIN
+ggplot(target, aes(x=PCW)) +
+  geom_bar() +
+  facet_grid(Sex ~ .) +
+  tufte_theme() +
+  scale_y_continuous(breaks=seq(0,100, 2))
+ggsave("figures/PCW_hist.png")
+
+ggplot(target, aes(x=RIN)) +
+  geom_histogram(binwidth=1) +
+  facet_grid(Sex ~ .) +
+  scale_y_continuous(breaks=seq(0,100,2)) +
+  scale_x_continuous(breaks=seq(0,12,1)) +
+  tufte_theme()
+ggsave("figures/RIN_hist.png")
+
+
+

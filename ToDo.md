@@ -3,20 +3,22 @@
         - sum square of diff between M and F for each gene, then take square root
         - 
 - WGCNA 
+- week by week analyses
 
+- Reread {Pollen:2014ej}, {Darmanis:2015hf}, {Werling:2016jn}, {Wu:2016kh}
 
 - Quantify Intronic reads
 - Paired analysis
 
 - ASEReadCounter
 - rerun what I've done with non-overlapping reads
-- 
+- FET on DE genes vs. 
 
 - how many transcripts can we identify
 
-Send Nick
-- 12-14, FDR.05 and .1
-- 12-20, FDR.05 and .1
+- compare to older gene lists
+- compare our list to ones from the literature
+- compare sDMPs to our gene sets
 
 Prepare talk!
 - early developmental origin (esp. autism scz)
