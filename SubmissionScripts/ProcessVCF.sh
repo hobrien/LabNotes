@@ -7,11 +7,10 @@
 
 chr=$1
 BASEDIR=/c8000xd3/rnaseq-heath/Genotypes/Imputation3
-
 echo "Starting to process VCF for chr$chr"
 ls /c8000xd3/rnaseq-heath/Mappings | cut -d- -f 1 | sort | uniq > ~/LabNotes/mappings.txt
 
-if [ ! $BASEDIR/hg19/chr$chr.dose.rename.vcf.gz ]
+if [ ! -f $BASEDIR/hg19/chr$chr.dose.rename.vcf.gz ]
 then 
     echo "Modifying header of chromosome $chr"
     head -13 ~/LabNotes/header.txt > header_temp.txt
@@ -30,7 +29,7 @@ then
     rm header_temp.txt
 fi
 
-if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz ]
+if [ ! -f $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz ]
 then
     echo "Removing unsequenced samples from chromosome $chr"
     # the pysam script that I'm using appears to require a bcf file
@@ -51,7 +50,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz ]
+if [ ! -f $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz ]
 then
     echo "Filtering SNPs with alt allele probabilities < 0.9 for $chr"
     python ~/LabNotes/Python/FilterVCF.py $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.vcf.gz \
@@ -65,7 +64,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz ]
+if [ ! -f $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz ]
 then
     echo "Adding rsIDs to $chr"
     bcftools index /c8000xd3/rnaseq-heath/Genotypes/Imputation3/hg19/chr$chr.dose.rename.filter_samples.filter_sites.vcf.gz
@@ -83,7 +82,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.vcf.gz ]
+if [ ! -f $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.vcf.gz ]
 then
     echo "Adding the stupid 'chr' to chromosome numbers for $chr"
     bcftools view $BASEDIR/hg19/chr$chr.dose.rename.filter_samples.filter_sites.rsID.vcf.gz \
@@ -99,7 +98,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.vcf.gz ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.vcf.gz ]
 then
     echo "Liftover of chromosome $chr from hg19 to GRCh38"
     bash ~/LabNotes/SubmissionScripts/Liftover.sh $chr
@@ -112,7 +111,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz ]
 then
     echo "Sorting GRCh38 VCF for $chr"
     bash ~/LabNotes/SubmissionScripts/SortVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.vcf.gz
@@ -125,7 +124,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref ] | [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp ] | [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.ref ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.dup ]
 then
     echo "Running checkVCF on GRCh38 VCF for $chr"
     bash ~/LabNotes/SubmissionScripts/checkVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz
@@ -137,8 +136,7 @@ then
         exit 1
     fi
 fi
- 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz ]
 then
     echo "Removing non-reference bases from GRCh38 VCF for $chr"
     cut -f 2 $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.check.nonSnp > $BASEDIR/GRCh38/chr$chr.excludedSNPs.txt
@@ -162,7 +160,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.ref ] | [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.nonSnp ]
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.ref ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.nonSnp ] | [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.check.dup ]
 then
     echo "Rerunning checkVCF on filtered GRCh38 VCF for $chr"
     bash ~/LabNotes/SubmissionScripts/checkVCF.sh /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
@@ -175,7 +173,7 @@ then
     fi
 fi
 
-if [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz.csi ] 
+if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz.csi ] 
 then
     echo "Indexing (csi) filtered GRCh38 VCF for $chr"
     bcftools index $BASEDIR//GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
@@ -188,7 +186,7 @@ then
     fi
 fi
 
-if  [ ! $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz.tbi ]
+if  [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz.tbi ]
 then
     echo "Indexing (tbi) filtered GRCh38 VCF for $chr"
     tabix $BASEDIR//GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz
