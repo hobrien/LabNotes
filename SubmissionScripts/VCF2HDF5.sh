@@ -5,12 +5,12 @@
 #$ -S /bin/bash
 #
 
-BASEDIR=/c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5
+BASEDIR=/c8000xd3/rnaseq-heath/Genotypes/Imputation3
 cd $BASEDIR/HDF5
 
-if [ ls -lrth $BASEDIR/GRCh38/ | grep chr*dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz != 22 ]
+for chr in {1..22}
 then
-    for chr in {1..22}
+    if [ ! -f $BASEDIR/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz` ]
     do
         echo "Running ProcessVCF on $chr"
         bash ~/LabNotes/SubmissionScripts/ProcessVCF.sh $chr
