@@ -5,14 +5,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(tidyr)
+library(tidyverse)
 library(ggplot2)
-library(dplyr)
 library(gridExtra)
-library(readr)
 
-
-rm(list=ls())
+#rm(list=ls())
 ```
 ## Read numbers
 - One sample (17025 = 150610_D00125_0239_BC718AANXX_3_IL-TP-013_1/2) has almost no reads.
@@ -30,14 +27,12 @@ lengths <- read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/seq_lengths.txt",
 lengths$Million_reads <- lengths$num_reads/1000000
 SeqInfo <- read_delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/sequences.txt", 
                      delim='\t',
-                     col_names=c('file', 'read_group', 'centre'),
-                     col_types=cols(file='c', read_group='c', centre='c')
+                     col_names=c('file', 'read_group', 'centre', 'folder'),
+                     col_types=cols(file='c', read_group='c', centre='c', folder='c')
                      )
 
-# If I do a full_join here, there are some issues of missing data. I cannot rerun FastQC ATM becuase the data aren't mounted on the compute nodes. I will have to revisit once this is fixed
-#full_join(SeqInfo, lengths, by='file') %>% View()
 
-lengths <- inner_join(SeqInfo, lengths, by='file') 
+lengths <- full_join(SeqInfo, lengths, by='file') 
 lengths<-mutate(lengths, Billion_bp = ifelse(centre == 'Exeter', 
                                     Million_reads * 100 / 1000, 
                                     ifelse(centre == 'Edinburgh', 
@@ -47,10 +42,22 @@ lengths<-mutate(lengths, Billion_bp = ifelse(centre == 'Exeter',
                                     )
        )
 lengths <- separate(lengths, read_group, c('sample', 'run'), fill='right', remove=FALSE) 
-lengths <- group_by(lengths, centre, sample) %>% summarise(Million_reads = sum(Million_reads), Billion_bp = sum(Billion_bp))
+```
+
+```{r}
+length_summary <- lengths %>% group_by(centre, sample) %>% summarise(Million_reads = sum(Million_reads), Billion_bp = sum(Billion_bp))
 layout(matrix(c(1,2), 2, byrow = TRUE))
-p1<-ggplot(lengths, aes(x=Million_reads, fill=centre))+geom_histogram(bins=25)+facet_grid(centre ~ .) + theme(legend.position="none")
-p2<-ggplot(lengths, aes(x=Billion_bp, fill=centre))+geom_histogram(bins=30)+facet_grid(centre ~ .) + theme(legend.position="none")
+p1<-ggplot(length_summary, aes(x=Million_reads, fill=centre))+geom_histogram(bins=25)+facet_grid(centre ~ .) + theme(legend.position="none")
+p2<-ggplot(length_summary, aes(x=Billion_bp, fill=centre))+geom_histogram(bins=30)+facet_grid(centre ~ .) + theme(legend.position="none")
+grid.arrange(p1, p2, ncol=2)
+```
+
+```{r}
+#Add grouping by run to see results for each lane
+length_summary <- lengths %>% filter(grepl('170111_K00267_0051_BHG5LNBBXX', folder)) %>% group_by(centre, sample) %>% summarise(Million_reads = sum(Million_reads), Billion_bp = sum(Billion_bp))
+layout(matrix(c(1,2), 2, byrow = TRUE))
+p1<-ggplot(length_summary, aes(x=Million_reads))+geom_histogram(bins=25) + theme(legend.position="none")
+p2<-ggplot(length_summary, aes(x=Billion_bp))+geom_histogram(bins=30) + theme(legend.position="none")
 grid.arrange(p1, p2, ncol=2)
 ```
 
@@ -67,13 +74,25 @@ grid.arrange(p1, p2, ncol=2)
 - 150610_D00125_0239_BC718AANXX_3_IL-TP-013_2.sanfastq looks horible. 150610_D00125_0239_BC718AANXX_3_IL-TP-013_1.sanfastq has fine quality, but A is really over-represented
 - Edinburgh sequences have a lot of adaptor sequence
 
-```{r fig.width=8, fig.height=32}
+```{r} 
 
-summary_all <- read.delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", header=FALSE, stringsAsFactors=FALSE)
-fastQC_summary <- spread(summary_all, V2, V1)
-colnames(fastQC_summary) <- c("Sample", "Adapter", "Basic_stats", "Kmers", "Overrepresented", "N_content", "Per_base_content", "Per_base_Q", "Per_seq_GC", "Per_seq_Q", "Per_tile_Q", "Duplication", "Length_dist")
+summary_all <- read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/summary.txt", 
+                      delim='\t', 
+                      col_names=c('status', 'category', 'file'), 
+                      col_types=cols(status='c', category='c', file='c')
+                      )
+summary_all <- separate(summary_all, file, c('file'), sep='\\.', remove=TRUE, extra='drop')
+summary_all <- full_join(summary_all, SeqInfo, by='file')
+fastQC_summary <- spread(summary_all, category, status)
 #summary(fastQC_summary[-1]) #this no longer works since I set stringsAsFactors to FALSE
-ggplot(summary_all, aes(x=V2, y=V3, fill=V1)) +
+colnames(fastQC_summary)[-c(1,2,3,4)] <- c("Adapter", "Basic_stats", "Kmers", "Overrepresented", "N_content", "Per_base_content", "Per_base_Q", "Per_seq_GC", "Per_seq_Q", "Per_tile_Q", "Duplication", "Length_dist")
+
+
+```
+
+use fig.width=8, fig.height=32 when not filtering list
+```{r}
+ggplot(filter(summary_all, grepl('170111_K00267_0051_BHG5LNBBXX', folder)), aes(x=category, y=file, fill=status)) +
   geom_tile() +
   scale_fill_manual(values=c('red', 'green', 'yellow')) +
   theme(axis.text.x= element_text(angle=90, hjust = 1), axis.text.y= element_text(size=8), axis.title = element_blank(), legend.title=element_blank())
