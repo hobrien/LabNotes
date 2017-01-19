@@ -55,14 +55,20 @@ MalevsFemale_up_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_2
      "\t", escape_double = FALSE, trim_ws = TRUE)
 MalevsFemale_up_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_FDR.1_new/tables/MalevsFemale.up.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_up_12_20_Voom <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_FDR.1_voom/tables/MaleUp.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+
 MalevsFemale_down_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_FDR.1_edgeR/tables/MalevsFemale.down.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
 MalevsFemale_down_12_20_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_FDR.1_new/tables/MalevsFemale.down.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
+MalevsFemale_down_12_20_Voom <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_FDR.1_voom/tables/FemaleUp.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+
 par(mfrow=c(1,2))
-venn(list(DESeq=MalevsFemale_down_12_20_Deseq$Id, edgeR=MalevsFemale_down_12_20_EdgeR$Id))
+venn(list(DESeq=MalevsFemale_down_12_20_Deseq$Id, edgeR=MalevsFemale_down_12_20_EdgeR$Id, Voom=MalevsFemale_down_12_20_Voom$Id))
 title(main="MalevsFemale_down FDR<0.1")
-venn(list(DESeq=MalevsFemale_up_12_20_Deseq$Id, edgeR=MalevsFemale_up_12_20_EdgeR$Id))
+venn(list(DESeq=MalevsFemale_up_12_20_Deseq$Id, edgeR=MalevsFemale_up_12_20_EdgeR$Id,  Voom=MalevsFemale_up_12_20_Voom$Id))
 title(main="MalevsFemale_up FDR<0.1")
 
 MalevsFemale_up_12_20_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_excl_15641_18432_16491_edgeR/tables/MalevsFemale.up.txt", 
@@ -145,14 +151,20 @@ Male_up_14_20_FDR.05_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20
      "\t", escape_double = FALSE, trim_ws = TRUE)
 Male_up_14_20_FDR.05_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/MaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
+Male_up_14_20_FDR.05_Voom <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.05_voom/tables/MaleUp.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+
 Female_up_14_20_FDR.05_EdgeR <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_edgeR/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
 Female_up_14_20_FDR.05_Deseq <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/FemaleUp.txt", 
      "\t", escape_double = FALSE, trim_ws = TRUE)
+Female_up_14_20_FDR.05_Voom <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_FDR.05_voom/tables/FemaleUp.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+
 par(mfrow=c(1,2))
-venn(list(DESeq=Male_up_14_20_FDR.05_Deseq$Id, edgeR=Male_up_14_20_FDR.05_EdgeR$Id))
+venn(list(DESeq=Male_up_14_20_FDR.05_Deseq$Id, edgeR=Male_up_14_20_FDR.05_EdgeR$Id, Voom=Male_up_14_20_FDR.05_Voom$Id))
 title(main="Male Up FDR<0.05")
-venn(list(DESeq=Female_up_14_20_FDR.05_Deseq$Id, edgeR=Female_up_14_20_FDR.05_EdgeR$Id))
+venn(list(DESeq=Female_up_14_20_FDR.05_Deseq$Id, edgeR=Female_up_14_20_FDR.05_EdgeR$Id, Voom=Female_up_14_20_FDR.05_Voom$Id))
 title(main="Female Up FDR<0.05")
 ```
 
@@ -180,7 +192,7 @@ PlotExpression<-function(geneID, file=All_Samples, geneName='', id="A value that
     select(label, value) %>%
     left_join(target, by='label')
   plot<-  ggplot(data, aes(x=as.numeric(as.character(PCW)), y=value, colour=Sex)) + 
-      geom_point() + 
+      geom_jitter(height=0, width=.1) + 
       geom_point(data=subset(data, label==id), colour='orange') +
       geom_smooth() +
       ylab("normalised counts") +
@@ -327,7 +339,7 @@ In males, there is significantly (P < 0.05, uncorrected) higher expression (rela
 
 ```{r}
 pvalues <- InitializePvalues()
-for (gene_name in c('PAX6', 'SOX2', 'EOMES')) {
+for (gene_name in c('PAX6', 'SOX2', 'EOMES', 'CHRM2')) {
   gene_id <- GetGeneID(gene_name)
 
   print(PlotExpression(gene_id, All_Samples, gene_name))
@@ -378,7 +390,7 @@ kable(pvalues)
 pvalues <- InitializePvalues()
 for (gene_name in c('NES', 'DCX', 'GFAP', 'MAP2', 'TUBB3', 'TH', 'FOXG1', 'TBR1', 'EMX1', 'ACTB')) {
   gene_id <- GetGeneID(gene_name)
-  print(PlotExpression(gene_id, EarlySamples, gene_name))
+  print(PlotExpression(gene_id, All_Samples, gene_name))
   pvalues <- bind_rows(pvalues, NoteSig(gene_id, gene_name, EarlySamples, LateSamples, All_Samples))
 }
 kable(pvalues)
