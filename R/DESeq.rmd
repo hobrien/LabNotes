@@ -405,3 +405,96 @@ for (gene_name in c('MYOT', 'IGLV4-69', 'NR2F6', 'TOPORS')) {
 }
 kable(pvalues)
 ```
+
+```{r}
+
+
+
+
+```
+```{r}
+Week12 <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_13_noA_FDR.1_edgeR/tables/MalevsFemale.complete.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+Week13 <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_13_14_noA_FDR.1_edgeR/tables/MalevsFemale.complete.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+Week14 <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_15_noA_FDR.1_edgeR/tables/MalevsFemale.complete.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+Week15_16 <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_15_17_noA__excl_15641_Cooks.75_FDR.1_edgeR/tables/MalevsFemale.complete.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+Week17_19 <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_17_20_noA__excl_18432_Cooks.75_FDR.1_edgeR/tables/MalevsFemale.complete.txt", 
+     "\t", escape_double = FALSE, trim_ws = TRUE)
+
+data <- full_join(mutate(Week12, Male_12=Male, Female_12=Female) %>%
+                    select(starts_with('norm'), Id, Male_12, Female_12),
+                   mutate(Week13, Male_13=Male, Female_13=Female) %>%
+                    select(starts_with('norm'), Id, Male_13, Female_13)
+                  ) %>%
+        full_join(mutate(Week14, Male_14=Male, Female_14=Female) %>%
+                    select(starts_with('norm'), Id, Male_14, Female_14) 
+                  ) %>%
+        full_join(mutate(Week15_16, Male_15.5=Male, Female_15.5=Female) %>%
+                    select(starts_with('norm'), Id, Male_15.5, Female_15.5)
+                  ) %>%
+        full_join(mutate(Week17_19, Male_18=Male, Female_18=Female) %>%
+                    select(starts_with('norm'), Id, Male_18, Female_18)
+                 )
+
+PlotCounts <- function(data, gene_name) {
+  gene_id <- GetGeneID(gene_name)
+  counts <- filter(data, Id == gene_id) %>% 
+    select(starts_with('norm')) %>%
+    gather() %>%
+    separate(key, into=c('norm', 'label'), sep='[.]') %>%
+    select(label, value) %>%
+    left_join(target, by='label') %>%
+    mutate(PCW=as.numeric(as.character(PCW)))
+  counts$PCWpool <- ifelse(counts$PCW >= 15 & counts$PCW < 17, 15.5,   ifelse(counts$PCW >= 17 & counts$PCW < 20, 18, counts$PCW))
+
+  fit <- filter(data, Id ==gene_id) %>%
+         select(-starts_with('norm')) %>%
+         gather(SexPCW, Fit, -Id) %>%
+         separate(SexPCW, c('Sex', 'PCW'), sep='_') %>%
+         mutate(PCW = as.numeric(as.character(PCW)))
+
+
+  #plot <- ggplot(counts, aes(x=PCWpool, y=log2(value), colour=Sex)) + 
+  plot <- ggplot(counts, aes(x=PCWpool, y=value, colour=Sex)) + 
+            geom_jitter(height=0, width=.1) +
+            #geom_line(aes(x=PCW, y=log2(Fit), colour=Sex), data=fit) +
+            geom_line(aes(x=PCW, y=Fit, colour=Sex), data=fit) +
+            scale_x_continuous(breaks=c(12,13,14,15.5,18), 
+                               labels=c('12', '13', '14', '15-16', '17-19')) +
+            #scale_y_continuous(breaks=c(2,4,6,8,10,12,14,16,18,20), 
+                               #labels=c(2^2, 2^4,2^6,2^8,2^10,2^12,2^14,2^16,2^18,2^20)) +
+            ylab("normalised counts") +
+            xlab("Weeks Post Conception") +
+            tufte_theme() +
+            scale_colour_brewer(type = "qual", palette = 6) +
+            theme(legend.position=c(0.75,.9)) +
+            theme(plot.background=element_blank()) +
+            ggtitle(gene_name)
+  plot
+}
+```
+
+```{r}
+PlotCounts(data, 'XIST') #X
+PlotCounts(data, 'BNC2')
+PlotCounts(data, 'SHOX') #X
+PlotCounts(data, 'NLGN4X') #X
+PlotCounts(data, 'DTHD1')
+PlotCounts(data, 'RP11-707M1.1')
+PlotCounts(data, 'WDR63')
+PlotCounts(data, 'ONECUT3')
+```
+
+```{r}
+PlotCounts(data, 'USP9Y') #Y
+PlotCounts(data, 'NFATC4')
+PlotCounts(data, 'CHRDL1') #X
+PlotCounts(data, 'NEUROD4')
+PlotCounts(data, 'LRP4')
+PlotCounts(data, 'NPR3')
+PlotCounts(data, 'ESPL1')
+PlotCounts(data, 'MCM2')
+```
