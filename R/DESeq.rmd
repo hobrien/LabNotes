@@ -17,6 +17,7 @@ library(ggplot2)
 library(tufte)
 library(gplots)
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+#rm(list=ls()) 
 ```
 
 # Running DEseq2 via SARTools (at FDR < 0.05)
@@ -169,48 +170,6 @@ title(main="Female Up FDR<0.05")
 ```
 
 
-# Filtering out genes that include samples with high Cooks Distance
-`r margin_note("- removing samples with Cooks values > 2 reduces the number of DE genes by 40%")`
-`r margin_note("- Most of these are likely to be spurious results")`
-`r margin_note("- More stringent filtering actually increases the number of DE genes slightly, presumably because it is applied before FD correction")`
-
-```{r}
-kable(select(DESeq2results, -results) %>% 
-        filter(n == 51)
-      )
-```
-
-```{r}
-PlotExpression<-function(geneID, file=All_Samples, geneName='', id="A value that hopefully isn't in the dataset", maxCooks=NULL) {
-  if ( is.null(maxCooks) ) {
-    maxCooks <-filter(file, Id==geneID)$maxCooks
-  }    
-  data <- filter(file, Id == geneID) %>%  
-    select(starts_with('norm')) %>%
-    gather() %>%
-    separate(key, into=c('norm', 'label'), sep='[.]') %>%
-    select(label, value) %>%
-    left_join(target, by='label')
-  plot<-  ggplot(data, aes(x=as.numeric(as.character(PCW)), y=value, colour=Sex)) + 
-      geom_jitter(height=0, width=.1) + 
-      geom_point(data=subset(data, label==id), colour='orange') +
-      geom_smooth() +
-      ylab("normalised counts") +
-      tufte_theme() +
-      scale_colour_brewer(type = "qual", palette = 6) +
-      ggtitle(paste(geneName, "maxCooks = ", maxCooks)) +
-      theme(legend.position=c(0.1,.9)) +
-      theme(plot.background=element_blank())
-    plot
-}
-
-GetID <- function(file, row_num) {
-  read.delim(file, stringsAsFactors = FALSE) %>% 
-    arrange(desc(maxCooks)) %>%
-    select(Id, maxCooks) %>% 
-    .[row_num,]
-}
-```
 
 ```{r }
 targetFile <- "~/BTSync/FetalRNAseq/LabNotes/MvsFmac.txt"
@@ -224,61 +183,6 @@ target <- left_join(target, select(sample_progress, sample, Centre), by = c("lab
 target <- arrange(target, Sex)
 target <- mutate(target, PCW = factor(floor(PCW)))
 #All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
-
-All_Samples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_noA_new/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
-
-LateSamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_Cooks.75_excl_15641_18432_new/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
-
-EarlySamples <- read.delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA_Cooks.75_excl_16491_new/tables/MalevsFemale.complete.txt", stringsAsFactors = FALSE)
-```
-
-#Plot counts for gene with the highest Cooks Distances when cutoff is 2
-`r margin_note("- Samples with Cooks Distance between 1 and 2 have an obvious impact on the model fit")`
-
-```{r}
-topCooksMale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks2/tables/MalevsFemale.up.txt", 1)
-PlotExpression(topCooksMale[,1], All_Samples, '', maxCooks=topCooksMale[,2])
-
-topCooksFemale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks2/tables/MalevsFemale.down.txt", 1)
-PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
-```
-
-#Plot counts for gene with the highest Cooks Distances when cutoff is 1
-`r margin_note("- Samples with Cooks Distance under 1 still have noticible impact on the model fit")`
-
-```{r}
-topCooksMale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks1/tables/MalevsFemale.up.txt", 1)
-PlotExpression(topCooksMale[,1], All_Samples, '', maxCooks=topCooksMale[,2])
-
-topCooksFemale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks1/tables/MalevsFemale.complete.txt", 1)
-PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
-```
-#Plot counts for gene with the highest Cooks Distances when cutoff is 0.75
-`r margin_note("- Samples with Cooks Distance under 0.75 still stand out as outliers, but no longer appear to be driving the DE")`
-
-```{r}
-topCooksMale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MalevsFemale.up.txt", 1)
-PlotExpression(topCooksMale[,1], All_Samples, '', maxCooks=topCooksMale[,2])
-
-topCooksFemale <- GetID("~/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA_excl_15641_18432_Cooks.75/tables/MalevsFemale.down.txt", 1)
-PlotExpression(topCooksFemale[,1], All_Samples, '', maxCooks=topCooksFemale[,2])
-```
-
-![Distribution of Cooks Distances by Sample (14-20 PCW)](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_14_20_noA/figures/CooksHist.png)
-
-`r margin_note("- removing 15641 reduces the number of DE genes by 14% while removing 15641 and 18432 actually increases the number of DE genes by 11%")`
-`r margin_note("- also removing 16428 reduces the number of DE 60%")`
-`r margin_note("- This is presumably due to a reduction in variance when the outliers are removed")`
-
-# Outliers in 12-14 PCW samples
-
-![Distribution of Cooks Distances by Sample (12-14 PCW)](/Users/heo3/BTSync/FetalRNAseq/Counts/MvsF_12_14_noA/figures/CooksHist.png)
-`r margin_note("- DE analysis is robust to the removal of 16491 (46 DE genes vs 46 or 47 with, depending on run) and maxCooks filtering (48genes)")`
-
-```{r}
-kable(select(DESeq2results, -results) %>% 
-        filter(BrainBank ==  "HDBR" & AgeRange == "12-14" & test == 'Wald')
-      )
 ```
 
 # Genes of interest
@@ -457,15 +361,15 @@ PlotCounts <- function(data, gene_name) {
          mutate(PCW = as.numeric(as.character(PCW)))
 
 
-  #plot <- ggplot(counts, aes(x=PCWpool, y=log2(value), colour=Sex)) + 
-  plot <- ggplot(counts, aes(x=PCWpool, y=value, colour=Sex)) + 
+  plot <- ggplot(counts, aes(x=PCWpool, y=log2(value), colour=Sex)) + 
+  #plot <- ggplot(counts, aes(x=PCWpool, y=value, colour=Sex)) + 
             geom_jitter(height=0, width=.1) +
-            #geom_line(aes(x=PCW, y=log2(Fit), colour=Sex), data=fit) +
-            geom_line(aes(x=PCW, y=Fit, colour=Sex), data=fit) +
+            geom_line(aes(x=PCW, y=log2(Fit), colour=Sex), data=fit) +
+            #geom_line(aes(x=PCW, y=Fit, colour=Sex), data=fit) +
             scale_x_continuous(breaks=c(12,13,14,15.5,18), 
                                labels=c('12', '13', '14', '15-16', '17-19')) +
-            #scale_y_continuous(breaks=c(2,4,6,8,10,12,14,16,18,20), 
-                               #labels=c(2^2, 2^4,2^6,2^8,2^10,2^12,2^14,2^16,2^18,2^20)) +
+            scale_y_continuous(breaks=c(2,4,6,8,10,12,14,16,18,20), 
+                               labels=c(2^2, 2^4,2^6,2^8,2^10,2^12,2^14,2^16,2^18,2^20)) +
             ylab("normalised counts") +
             xlab("Weeks Post Conception") +
             tufte_theme() +
