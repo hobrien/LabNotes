@@ -11,7 +11,7 @@
 rm(list=ls())                                        # remove all the objects from the R session
 
 
-projectName <- "MvsF_14_20_noA_excl_15641_18432_edgeR"                         # name of the project
+projectName <- "MvsF_14_noA_noSexChr_FDR.1_edgeR"                         # name of the project
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
@@ -25,22 +25,21 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
 RIN_cutoff <- 0
-PCW_cutoff <- c(14, 20)
-batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+PCW_cutoff <- c(14, 15)
+batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 testMethod <- 'NA'
 interact <- 0
 cooksCutoff <- FALSE
 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
-batch <- "Centre"               # blocking factor: NULL (default) or "batch" for example
 BrainBank <- 'HDBR' # 'All' #
-exclude <- c()
+exclude <- c('15641')
 #exclude <- c('16491')
 #exclude <- c('15641', '18432')
 exclude <- c('15641', '18432', '16491')
 
-alpha <- 0.05                                        # threshold of statistical significance
+alpha <- 0.1                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
 
 cpmCutoff <- 1                                       # counts-per-million cut-off to filter low counts
@@ -49,6 +48,7 @@ normalizationMethod <- "TMM"                         # normalization method: "TM
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
+excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
 
 ################################################################################
 ###                             running script                               ###
@@ -91,10 +91,14 @@ if (BrainBank == 'HDBR') {
   target <- filter(target, ! grepl('A', label))
 }
 target <- mutate(target, PCW = floor(PCW))
-
+target <- droplevels(target)
 
 # loading counts
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
+if (! is.na(excludedFeaturesFile)) {
+  excludedFeatures <- read_csv(excludedFeaturesFile, col_names = FALSE)
+  counts <- counts[!rownames(counts) %in% excludedFeatures$X1, ]
+}
 
 # description plots
 majSequences <- descriptionPlots(counts=counts, group=target[,varInt], col=colors)
