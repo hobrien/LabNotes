@@ -189,7 +189,7 @@ save.image(file=paste0(projectName, ".RData"))
 
 # generating HTML report
 writeReport.edgeR(target=target, counts=counts, out.edgeR=out.edgeR, summaryResults=summaryResults,
-                  majSequences=majSequences, workDir=workDir, projectName=projectName, author=author,
+                  majSequences=majSequences, workDir=workDir, projectName=paste0("MvsF_", PCW_cutoff, collapse='_'), author=author,
                   targetFile=targetFile, rawDir=rawDir, featuresToRemove=featuresToRemove, varInt=varInt,
                   condRef=condRef, batch=batch, alpha=alpha, pAdjustMethod=pAdjustMethod, colors=colors,
                   gene.selection=gene.selection, normalizationMethod=normalizationMethod)
@@ -245,9 +245,9 @@ summary <- data.frame(Method=c('EdgeR'),
                       )
                       ),
                       n=c(ncol(counts)),
-                      test=c(testMethod),
+                      test=c("None"),
                       model=c(ifelse(length(interact)==0, '+', '*')), 
-                      CooksCutoff=c(ifelse(testMethod=='Wald', cooksCutoff, "None")),
+                      CooksCutoff=c("None"),
                       DEgenes=c(DEgenes),
                       res=c(workDir)                     
 )                                              
