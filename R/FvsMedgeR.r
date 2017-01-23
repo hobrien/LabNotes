@@ -9,9 +9,88 @@
 ###                parameters: to be modified by the user                    ###
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
+library("optparse")
 
+option_list <- list(
+  make_option(c("-m", "--min"), type="integer", default=NULL, 
+              help="minimum age (PCW)", metavar="minimum age"),
+  make_option(c("-x", "--max"), type="integer", default=NULL, 
+              help="maximum age (PCW)", metavar="maximum age"),
+  make_option(c("-r", "--rin"), type="numeric", default=0, 
+              help="minimum RIN", metavar="minimum RIN"),
+  make_option(c("-a", "--alpha"), type="numeric", default=0.1, 
+              help="corrected pvalue cutoff", metavar="alpha"),
+  make_option(c("-b", "--brainbank"), type="character", default='HDBR', 
+              help="Which brainbank to include ('HDBR', 'All')", metavar="brainbank"),
+  make_option(c("-e", "--exclude"), type="character", default='15641,18432,16491', 
+              help="Samples to exclude (comma separated list, no spaces)", metavar="excluded"),
+  make_option(c("-s", "--sex_chromosomes"), action='store_true', type="logical", default=FALSE, 
+              help="Exclude sex chromosomes", metavar="sex_chromosomes")
+)
 
-projectName <- "MvsF_14_noA_noSexChr_FDR.1_edgeR"                         # name of the project
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+if (is.null(opt$min) | is.null(opt$max)){
+  print_help(opt_parser)
+  stop("Min and Max ages must be specified", call.=FALSE)
+}
+if (opt$brainbank != 'HDBR' & opt$brainbank != 'All'){
+  print_help(opt_parser)
+  stop("BrainBank options are 'HDBR' and 'All'", call.=FALSE)
+}
+if ( opt$max-opt$min < 1 ) {
+  print_help(opt_parser)
+  stop("Min age must be less than max", call.=FALSE)
+}
+
+PCW_cutoff <- c(opt$min, opt$max)
+RIN_cutoff <- opt$rin
+alpha <- opt$alpha                                      # threshold of statistical significance
+BrainBank <- opt$brainbank
+exclude <- strsplit(opt$exclude, ',')[[1]] 
+if (! findInterval(16, PCW_cutoff) == 1) {
+  exclude <- exclude[exclude != "15641"]
+}
+if (! findInterval(17, PCW_cutoff) == 1) {
+  exclude <- exclude[exclude != "18432"]
+}
+if (! findInterval(13, PCW_cutoff) == 1) {
+  exclude <- exclude[exclude != "16491"]
+}
+
+print(paste0(PCW_cutoff, collapse='-'))
+print(RIN_cutoff)
+print(alpha)
+print(BrainBank)
+print(exclude)
+
+projectName <- paste("MvsF", 
+                     ifelse(opt$max-opt$min > 1, 
+                            paste(opt$min, 
+                                  opt$max, 
+                                  sep='_'
+                            ),
+                            opt$min
+                     ),
+                     ifelse(length(exclude > 0),
+                            paste(c(BrainBank, 'excl', exclude), collapse='_', sep='_'),
+                            BrainBank
+                     ),
+                     "FDR", 
+                     alpha, 
+                     "edgeR", 
+                     sep='_'
+)                         # name of the project
+
+print(projectName)
+
+if (opt$sex_chromosomes) {
+  excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
+} else {
+  excludedFeaturesFile = NA
+}
+print(excludedFeaturesFile)
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
@@ -24,22 +103,13 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-RIN_cutoff <- 0
-PCW_cutoff <- c(14, 15)
+
 batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
-testMethod <- 'NA'
 interact <- 0
-cooksCutoff <- FALSE
 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
-BrainBank <- 'HDBR' # 'All' #
-exclude <- c('15641')
-#exclude <- c('16491')
-#exclude <- c('15641', '18432')
-exclude <- c('15641', '18432', '16491')
 
-alpha <- 0.1                                        # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
 
 cpmCutoff <- 1                                       # counts-per-million cut-off to filter low counts
@@ -48,7 +118,7 @@ normalizationMethod <- "TMM"                         # normalization method: "TM
 
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
+
 
 ################################################################################
 ###                             running script                               ###
