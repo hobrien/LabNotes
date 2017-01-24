@@ -17,6 +17,9 @@ do
     elif [[ $file == *"gz" ]]
     then
         gunzip $file
+    elif [[ $file == *"zip" ]]
+    then
+        unzip $file
     else
         echo "extension not recognised"
     fi   
