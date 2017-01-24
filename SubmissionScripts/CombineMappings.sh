@@ -3,6 +3,7 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
+#$ -l h_vmem=20G
 #
 
 BASEDIR=/c8000xd3/rnaseq-heath/Mappings/
@@ -40,7 +41,6 @@ if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.bam ]
 then
     echo "Merging mappings for $SampleID"
     bash ~/LabNotes/SubmissionScripts/MergeSAM.sh `find $BASEDIR -name accepted_hits_filtered_sort_dedup_sort_RG.bam | grep $SampleID- | sort`
-    mv $BASEDIR/$SampleID-1/BAM/accepted_hits_filtered_sort_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/BAM/$SampleID.bam
 
     if [ $? -eq 0 ]
     then
@@ -49,6 +49,7 @@ then
         echo "Could merge mappings for $SampleID"
         exit 1
     fi
+    mv $BASEDIR/$SampleID-1/BAM/accepted_hits_filtered_sort_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/BAM/$SampleID.bam
 fi
 
 if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.bam.bai ]
@@ -67,7 +68,7 @@ fi
 
 for chr in {1..22}
 do
-    if [ ! -f /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.vcf.gz ]
+    if [ ! -f /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz ]
     then
         echo "Running ProcessVCF on $chr"
         bash ~/LabNotes/SubmissionScripts/ProcessVCF.sh $chr
@@ -79,7 +80,7 @@ do
             exit 1
         fi
     fi
-    if [ ! -f if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.$chr.ase.rtable ]
+    if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.$chr.ase.rtable ]
     then
         echo "Running ASEReadCounter on $chr for $SampleID"
         bash ~/LabNotes/SubmissionScripts/ASEReadCounter.sh $BASEDIR/$SampleID/BAM/$SampleID.bam $chr
