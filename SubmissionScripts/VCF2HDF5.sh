@@ -47,4 +47,5 @@ then
     fi
 fi
 echo "Finished running VCF2HDF5"
-        
+exit $?
+    
