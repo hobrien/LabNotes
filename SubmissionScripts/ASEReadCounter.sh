@@ -14,7 +14,7 @@ java -jar /share/apps/GenomeAnalysisTK.jar -T ASEReadCounter \
    -R /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta/genome.fa \
    -o ${1%.*}.$chr.ase.rtable \
    -I $1 \
-   -sites /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter.vcf.gz \
+   -sites /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz \
    -U ALLOW_N_CIGAR_READS \
    -minDepth 10 \
    --minMappingQuality 10 \
