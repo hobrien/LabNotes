@@ -3,35 +3,38 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
+#$ -pe smp 8
 #
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 BASEDIR=/c8000xd3/rnaseq-heath/Mappings/
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
-filename=${1##*/}
-SampleID=${filename%%_*} #This will remove the library ID, lane number and read number
+SampleID=$1 
 
-# deal with duplicated samples
-# this will keep incrementing the SampleID until a unique one is found
-replicate=1
-baseID=$SampleID
-SampleID=$baseID-$replicate
-while [[ -d $BASEDIR/$SampleID ]]
-do
-  replicate=$((replicate+1))
-  SampleID=$baseID-$replicate
-done
   
 echo "Starting mapping for $SampleID"
-mkdir /c8000xd3/rnaseq-heath/Mappings/$SampleID
+if [ ! -d /c8000xd3/rnaseq-heath/Mappings/$SampleID ]
+then
+    echo "Creating directory $SampleID"
+    mkdir /c8000xd3/rnaseq-heath/Mappings/$SampleID
+    if [ $? -eq 0 ]
+    then
+        echo "Finished creating directory for $SampleID"
+    else
+        echo "Could not create directory for $SampleID"
+        exit 1
+    fi    
+fi
+
 if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits.bam ] || [ ! -f $BASEDIR/$SampleID/BAM/unmapped.bam ]
 then
+    sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*fastq*; done)
     echo "Tophat mapping for $SampleID"
     tophat --keep-fasta-order --library-type fr-secondstrand --mate-inner-dist 500 --mate-std-dev 50 --num-threads 8 \
       --transcriptome-index /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx \
       --output-dir $BASEDIR/$SampleID \
-      /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome $@
+      /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome $sequences
     if [ $? -eq 0 ]
     then
         echo "Finished Tophat mapping for $SampleID"
@@ -150,7 +153,8 @@ then
         exit 1
     fi
 fi
-
+echo "Finished mapping for $SampleID"
+exit $?
 
 #bash ~/LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.bam
 #bash ~/LabNotes/SubmissionScripts/DivideBAM.sh $SampleID
