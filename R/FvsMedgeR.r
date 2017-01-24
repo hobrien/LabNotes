@@ -59,19 +59,13 @@ if (! findInterval(13, PCW_cutoff) == 1) {
   exclude <- exclude[exclude != "16491"]
 }
 
-print(paste0(PCW_cutoff, collapse='-'))
-print(RIN_cutoff)
-print(alpha)
-print(BrainBank)
-print(exclude)
 
 projectName <- paste("MvsF", 
-                     ifelse(opt$max-opt$min > 1, 
-                            paste(opt$min, 
-                                  opt$max, 
-                                  sep='_'
+                     ifelse(PCW_cutoff[2]-PCW_cutoff[1] > 1, 
+                            paste(PCW_cutoff, 
+                                  collapse ='_'
                             ),
-                            opt$min
+                            PCW_cutoff[1]
                      ),
                      ifelse(length(exclude > 0),
                             paste(c(BrainBank, 'excl', exclude), collapse='_', sep='_'),
@@ -83,14 +77,12 @@ projectName <- paste("MvsF",
                      sep='_'
 )                         # name of the project
 
-print(projectName)
 
 if (opt$sex_chromosomes) {
   excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
 } else {
   excludedFeaturesFile = NA
 }
-print(excludedFeaturesFile)
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
 workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
@@ -162,6 +154,7 @@ if (BrainBank == 'HDBR') {
 }
 target <- mutate(target, PCW = floor(PCW))
 target <- droplevels(target)
+target[,varInt] <- as.factor(target[,varInt])
 
 # loading counts
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
@@ -228,7 +221,9 @@ MalevsFemale.down <- select(MalevsFemale.down, Id, Female, Male, FC, log2FoldCha
 MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
 write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
 DEgenes <- nrow(MalevsFemale.down) + nrow(MalevsFemale.up)
-
+MalevsFemale.complete <- read.delim("tables/MalevsFemale.complete.txt", check.names=FALSE)
+filter(MalevsFemale.complete, ! is.na(padj)) %>%
+  write_tsv("tables/MalevsFemale.background.txt")
 
 #write summary of analysis to file
 summary <- data.frame(Method=c('EdgeR'),
