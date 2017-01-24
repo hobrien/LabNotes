@@ -227,4 +227,5 @@ then
 fi
 
 echo "Finished to processing VCF for chr$chr"
+exit $?
 
