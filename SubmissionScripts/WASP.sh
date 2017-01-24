@@ -10,6 +10,9 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 BASEDIR=/c8000xd3/rnaseq-heath/Mappings
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
+# Note, HDF5 files include duplicate postions (positions in .vcf.check.dup files)
+# These were filtered out from vcf files before running ASEReadCounter
+
 path=${1%/*}
 path=${path%/*}
 SampleID=${path##*/}
