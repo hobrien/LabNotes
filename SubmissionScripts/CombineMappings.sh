@@ -66,6 +66,20 @@ then
     fi
 fi
 
+if [ ! -f $BASEDIR/$SampleID/$SampleID.in.stats.txt ]
+then
+    echo "Indexing merged mappings for $SampleID"
+    bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh $BASEDIR/$SampleID/BAM/$SampleID.bam
+
+    if [ $? -eq 0 ]
+    then
+        echo "Finished indexing merged mappings for $SampleID"
+    else
+        echo "Could index merged mappings for $SampleID"
+        exit 1
+    fi
+fi
+
 for chr in {1..22}
 do
     if [ ! -f /c8000xd3/rnaseq-heath/Genotypes/Imputation3/GRCh38/chr$chr.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.filter_nonSNP.filter_dup.vcf.gz ]
