@@ -73,7 +73,7 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID.in.stats.txt ]
+if [ ! -f $BASEDIR/$SampleID/$SampleID.ex.stats.txt ] | [ ! -f $BASEDIR/$SampleID/$SampleID.in.stats.txt ]
 then
     echo "Running RNAseqQC $SampleID"
     bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh $BASEDIR/$SampleID/BAM/$SampleID.sort.bam   
