@@ -73,7 +73,7 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.chr.bam ]
+if [ ! -f $BASEDIR/$SampleID/$SampleID.in.stats.txt ]
 then
     echo "Running RNAseqQC $SampleID"
     bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh $BASEDIR/$SampleID/BAM/$SampleID.sort.bam   
@@ -99,71 +99,3 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam ]
-then
-    echo "Running WASP remapping on $SampleID"
-    bash ~/LabNotes/SubmissionScripts/WASP.sh $BASEDIR/$SampleID/BAM/accepted_hits.bam
-    if [ $? -eq 0 ]
-    then
-        echo "Finished running WASP remapping for $SampleID"
-    else
-        echo "Could not run WASP remapping for $SampleID"
-        exit 1
-    fi
-fi   
-
-
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam ] || [ ! -f $BASEDIR/$SampleID/BAM/unmapped_fixup.bam ]
-then
-    echo "Fixing BAM formatting for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/tophat-recondition.sh $BASEDIR/$SampleID/BAM/
-    if [ $? -eq 0 ]
-    then
-        echo "Finished BAM reformatting on $SampleID"
-    else
-        echo "tophat-recondition failed on $SampleID"
-        exit 1
-    fi    
-fi
-
-
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup_sort.bam ]
-then
-    echo "Sorting BAM for $SampleID"
-    # Sort BAM files by query name
-    bash ~/LabNotes/SubmissionScripts/SamtoolsSort.sh $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup.bam
-    if [ $? -eq 0 ]
-    then
-        echo "Finished BAM sorting on $SampleID"
-    else
-        echo "Samtools sort failed on $SampleID"
-        exit 1
-    fi    
-fi
-
-if [ ! -f $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup_sort_RG.bam ]
-then
-    echo "Adding read groups for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/AddRG.sh $BASEDIR/$SampleID/BAM/accepted_hits_filtered_sort_dedup_sort.bam $SampleID
-    if [ $? -eq 0 ]
-    then
-        echo "Finished adding read groups for $SampleID"
-    else
-        echo "could not add read groups for $SampleID"
-        exit 1
-    fi
-fi
-echo "Finished mapping for $SampleID"
-exit $?
-
-#bash ~/LabNotes/SubmissionScripts/dexseq-count.sh /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.bam
-#bash ~/LabNotes/SubmissionScripts/DivideBAM.sh $SampleID
-#bash ~/LabNotes/SubmissionScripts/CallSNPs.sh /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/Chromosomes/$SampleID.chr22.bam
-#bash ~/LabNotes/SubmissionScripts/GTcheck.sh $SampleID
-#index=`grep $SampleID ~/LabNotes/VCFindex.txt | cut -f 2`
-#bash ~/LabNotes/SubmissionScripts/WASPnonRef.sh $SampleID $index
-#bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.nonref.merged.sorted.bam
-#samtools sort /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.nonref.merged.dedup.bam /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.nonref.merged.dedup.sort
-#bash ~/LabNotes/SubmissionScripts/RNAseqQCwasp.sh /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.nonref.merged.dedup.sort.bam
-#bash ~/LabNotes/SubmissionScripts/clipOverlap.sh /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.nonref.merged.dedup.sort.bam
-#samtools index /c8000xd3/rnaseq-heath/Mappings/$SampleID/BAM/$SampleID.chr.nonref.merged.dedup.sort.clip.bam

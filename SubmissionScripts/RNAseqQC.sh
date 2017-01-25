@@ -22,34 +22,79 @@ do
 #/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CollectRnaSeqMetrics REF_FLAT=/home/heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/refFlat.txt.gz STRAND_SPECIFICITY=SECOND_READ_TRANSCRIPTION_STRAND INPUT=/home/heath/Mappings/15533_300_secondstrand/accepted_hits.bam OUTPUT=/home/heath/Mappings/15533_300_secondstrand/RnaSeqMetrics.txt ASSUME_SORTED=false
 
 #http://rseqc.sourceforge.net/
-    split_bam.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed -i $dataset -o $folder_path/BAM/$folder
-    bam_stat.py -i $folder_path/BAM/$folder.in.bam > $folder_path/$folder.in.stats.txt
-    #bam_stat.py -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
-    
-    samtools index $folder_path/BAM/$folder.ex.bam
-    samtools view -bh $folder_path/BAM/$folder.ex.bam \
-    chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY \
-    > $folder_path/BAM/$folder.chr.bam
-    samtools index $folder_path/BAM/$folder.chr.bam
+    if [ ! -f $folder_path/BAM/$folder.in.bam ] | [ ! -f $folder_path/BAM/$folder.ex.bam ]
+    then
+        echo "Splitting BAM for $SampleID"
+        split_bam.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed -i $dataset -o $folder_path/BAM/$folder   
+        if [ $? -eq 0 ]
+        then
+            echo "Finished splitting BAM for $SampleID"
+        else
+            echo "Could not split BAM for $SampleID"
+            exit 1
+        fi 
+    fi
+    if [ ! -f $folder_path/$folder.in.stats.txt ]
+    then
+        echo "Running bam_stat on ribosomal reads for $SampleID"
+        bam_stat.py -i $folder_path/BAM/$folder.in.bam > $folder_path/$folder.in.stats.txt
+        if [ $? -eq 0 ]
+        then
+            echo "Finished running bam_stat on ribosomal reads for $SampleID"
+        else
+            echo "Could not run bam_stat on ribosomal reads for $SampleID"
+            exit 1
+        fi 
+    fi
+    if [ ! -f $folder_path/$folder.ex.stats.txt ]
+    then
+        echo "Running bam_stat on non-ribosomal reads for $SampleID"
+        bam_stat.py -i $folder_path/BAM/$folder.ex.bam > $folder_path/$folder.ex.stats.txt
+        if [ $? -eq 0 ]
+        then
+            echo "Finished running bam_stat on non-ribosomal reads for $SampleID"
+        else
+            echo "Could not run bam_stat on non-ribosomal reads for $SampleID"
+            exit 1
+        fi 
+    fi
+    if [ ! -f $folder_path/BAM/$folder.chr.bam ]
+    then
+        echo "Extracting chromosome reads for $SampleID"
+        samtools index $folder_path/BAM/$folder.ex.bam
+        samtools view -bh $folder_path/BAM/$folder.ex.bam \
+          chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY \
+          > $folder_path/BAM/$folder.chr.bam
+        samtools index $folder_path/BAM/$folder.chr.bam
 
-    bam_stat.py -i $folder_path/BAM/$folder.chr.bam > $folder_path/$folder.chr.stats.txt
+        if [ $? -eq 0 ]
+        then
+            echo "Finished extracting chromosome reads for $SampleID"
+        else
+            echo "Could not extract chromosome reads for $SampleID"
+            exit 1
+        fi 
+    fi
+        
+
+    #bam_stat.py -i $folder_path/BAM/$folder.chr.bam > $folder_path/$folder.chr.stats.txt
 
     # determine the strand of experiment ("1++,1--,2+-,2-+" = first strand, "1+-,1-+,2++,2--" = second strand)
-    infer_experiment.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam > $folder_path/$folder.expt.txt
+    #infer_experiment.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam > $folder_path/$folder.expt.txt
 
     # plot distribution of insert sizes (size - total read length)
-    inner_distance.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder -u 1000 -s 10 >/dev/null
+    #inner_distance.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder -u 1000 -s 10 >/dev/null
 
     # the necessary output from this is going to the log file, not to $folder.junction.txt
-    junction_annotation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder  >  $folder_path/$folder.junction.txt
+    #junction_annotation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder  >  $folder_path/$folder.junction.txt
 
-    junction_saturation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
+    #junction_saturation.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
 
-    read_distribution.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam > $folder_path/$folder.dist.txt
+    #read_distribution.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam > $folder_path/$folder.dist.txt
 
-    read_duplication.py -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
+    #read_duplication.py -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
 
-    geneBody_coverage.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
+   #geneBody_coverage.py -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.bed -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
 
 
     #deletion_profile.py -l 120 -i $folder_path/BAM/$folder.chr.bam -o $folder_path/$folder
@@ -58,3 +103,4 @@ do
 
     echo "finished QC for $dataset"
 done
+exit $?
