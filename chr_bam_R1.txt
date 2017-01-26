@@ -177,3 +177,5 @@
 /c8000xd3/rnaseq-heath/Mappings/18655-2_bk/	18655-2.chr.bam	/c8000xd2/HiSeq4000-shared/heath/160824_K00267_0021_AHCYY3BBXX/Nick_Bray/	18655_2_S24_L007_R1_001
 /c8000xd3/rnaseq-heath/Mappings/18655-2_bk/	18655-2.chr.bam	/c8000xd2/HiSeq4000-shared/heath/160824_K00267_0021_AHCYY3BBXX/Nick_Bray/	18655_2_S24_L008_R1_001
 /c8000xd3/rnaseq-heath/Mappings/16483-3/	16483.chr.bam	/c8000xd3/rnaseq-heath/Trimmed/	150609_D00200_0263_BC7187ANXX_7_IL-TP-016_1
+/c8000xd3/rnaseq-heath/Mappings/17054-2/	17054-2.chr.bam	/c8000xd3/rnaseq-heath/Trimmed/	150521_D00200_0260_AC6V40ANXX_6_IL-TP-016_1
+/c8000xd3/rnaseq-heath/Mappings/18153-2/	18153-2.chr.bam	/c8000xd3/rnaseq-heath/Trimmed/	150521_D00200_0260_AC6V40ANXX_6_IL-TP-019_1
