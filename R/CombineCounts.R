@@ -3,7 +3,7 @@ library(dplyr)
 args = commandArgs(trailingOnly=TRUE)
 Counts <- data.frame('Feature'=c(), 'Count'=c())
 for (fileName in args) {
-  input <- read_delim(paste0(folder, fileName, '/BAM/', fileName, '.chr.counts.txt'), 
+  input <- read_delim(fileName, 
              "\t", escape_double = FALSE, col_names = FALSE, 
              trim_ws = TRUE)
   if (length(Counts) == 0) {
