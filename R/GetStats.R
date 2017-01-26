@@ -1,5 +1,6 @@
 library(tidyverse)
-LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
+#LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
+LabNotes="~/LabNotes/"
 SeqInfo <- read_delim(paste0(LabNotes, "sequences.txt"), 
                      delim='\t',
                      col_names=c('read_file', 'read_group', 'centre', 'folder'),
@@ -42,4 +43,5 @@ GetStats <- function(path, in_stats, ex_stats) {
 
 Stats <- SeqInfo %>%
   group_by(read_group) %>%
-  do(GetStats(path, in_stats, ex_stats))
+  do(GetStats(file_path, in_stats, ex_stats))
+write_delim(Stats, "~/Results/Mapping_stats.txt")
