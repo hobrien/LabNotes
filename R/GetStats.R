@@ -1,4 +1,7 @@
-library(tidyverse)
+#library(tidyverse)
+library(dplyr)
+library(readr)
+library(tidyr)
 #LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
 LabNotes="~/LabNotes/"
 SeqInfo <- read_delim(paste0(LabNotes, "sequences.txt"), 
@@ -19,9 +22,9 @@ ex_stats<- read_delim(paste0(LabNotes, "stats_files.txt"), "\t", escape_double =
 trim_ws = TRUE)
 
 SeqInfo <- filter(SeqInfo, grepl('_1$', read_file) | grepl('_R1_', read_file)) %>%
-  full_join(counts_files) %>% 
-  full_join(in_stats) %>%
-  full_join(ex_stats)
+  inner_join(counts_files) %>% 
+  inner_join(in_stats) %>%
+  inner_join(ex_stats) 
 
 GetStats <- function(path, in_stats, ex_stats) {
   temp <- read.delim(paste0(path, ex_stats), 
@@ -37,11 +40,14 @@ GetStats <- function(path, in_stats, ex_stats) {
   temp2[4,1] <- 'Non primary hits'
   temp <-rbind(temp, c("rDNA",sum(as.numeric(temp2[c(6,7),2]))))
   temp[,1] <- c("Multimapped", "Unique", "Paired", "rDNA")
-  temp$V2 <- as.numeric(as.character(temp$V2))
+  temp$V2 <- as.integer(as.character(temp$V2))
   spread(temp, V1, V2)
 }
-
+SeqInfo %>%
+  write_delim("~/Results/SeqInfo.txt")
 Stats <- SeqInfo %>%
-  group_by(read_group) %>%
-  do(GetStats(file_path, in_stats, ex_stats))
+  filter(! is.na(file_path)) %>%
+  group_by(file_path) %>%
+  slice(1L) %>% ungroup() %>% group_by(file_path, in_stats, ex_stats) %>%
+  do(GetStats(.$file_path, .$in_stats, .$ex_stats))
 write_delim(Stats, "~/Results/Mapping_stats.txt")
