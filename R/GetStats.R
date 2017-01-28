@@ -3,7 +3,7 @@ library(dplyr)
 library(readr)
 library(tidyr)
 #LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
-LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
+LabNotes="~/LabNotes/"
 SeqInfo <- read_delim(paste0(LabNotes, "sequences.txt"), 
                      delim='\t',
                      col_names=c('read_file', 'read_group', 'centre', 'folder'),
@@ -22,9 +22,9 @@ ex_stats<- read_delim(paste0(LabNotes, "stats_files.txt"), "\t", escape_double =
 trim_ws = TRUE)
 
 SeqInfo <- filter(SeqInfo, grepl('_1$', read_file) | grepl('_R1_', read_file)) %>%
-  inner_join(counts_files) %>% 
-  inner_join(in_stats) %>%
-  inner_join(ex_stats) 
+  full_join(counts_files) %>% 
+  full_join(in_stats) %>%
+  full_join(ex_stats) 
 
 GetStats <- function(path, in_stats, ex_stats) {
   temp <- read.delim(paste0(path, ex_stats), 
