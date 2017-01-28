@@ -3,7 +3,7 @@ library(dplyr)
 library(readr)
 library(tidyr)
 #LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
-LabNotes="~/LabNotes/"
+LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
 SeqInfo <- read_delim(paste0(LabNotes, "sequences.txt"), 
                      delim='\t',
                      col_names=c('read_file', 'read_group', 'centre', 'folder'),
