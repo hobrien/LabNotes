@@ -1,4 +1,5 @@
-/c8000xd3/rnaseq-heath/Mappings/17054-2	17054-2.in.stats.txt
+/c8000xd3/rnaseq-heath/Mappings/18153-2/	18153-2.in.stats.txt
+/c8000xd3/rnaseq-heath/Mappings/17054-2/	17054-2.in.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/17162/	17162.in.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/17081/	17081.in.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/15768/	15768.in.stats.txt

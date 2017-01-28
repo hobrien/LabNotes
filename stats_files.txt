@@ -84,7 +84,7 @@
 /c8000xd3/rnaseq-heath/Mappings/A263/	A263.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/17754/	17754.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/18611/	18611.ex.stats.txt
-/c8000xd3/rnaseq-heath/Mappings/17054-2	17054-2.ex.stats.txt
+/c8000xd3/rnaseq-heath/Mappings/17054-2/	17054-2.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/18856/	18856.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/18529/	18529.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/17753/	17753.ex.stats.txt
@@ -142,3 +142,4 @@
 /c8000xd3/rnaseq-heath/Mappings/18655-2_bk/	18655-2_bk.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/18139_bk/	18139_bk.ex.stats.txt
 /c8000xd3/rnaseq-heath/Mappings/16483-3/	16483.ex.stats.txt
+/c8000xd3/rnaseq-heath/Mappings/18153-2/	18153-2.ex.stats.txt
