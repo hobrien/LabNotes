@@ -1,0 +1,184 @@
+---
+title: "Female vs Male"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(clusterProfiler)
+LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
+source(paste0(LabNotes, 'R/AnalyseDE.R'))
+```
+
+## R Markdown
+
+- 51 million - 353 million read pairs (14 billion total)
+- 28 million - 252 million properly mapped pairs (10.7 billion total)
+- 5.3 million - 114 million read pairs included in counts matrix (3.5 billion total)
+
+- only sample with < 10 million read pairs in count matrix has 78% of reads mapping to rDNA
+- two additional samples with <10% of read pairs in count matrix have ~50 or reads mapping to rDNA
+
+
+```{r }
+MalevsFemale_complete <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+Counts <- MalevsFemale_complete %>%
+  dplyr::select(-starts_with('norm'), -baseMean, -Female, -Male, -FC, -log2FoldChange, -pvalue, -padj, -tagwise.dispersion, -trended.dispersion) %>%
+  gather(Sample, Count, -Id) %>%
+  mutate(Sample = as.character(Sample)) %>%
+  group_by(Sample) %>%
+  dplyr::summarise(TotalCount=sum(Count))
+
+lengths <- read_delim("/Users/heo3/BTSync/FetalRNAseq/FastQC/seq_lengths.txt", 
+                      delim='\t', 
+                      col_names=c('read_file', 'num_reads'), 
+                      col_types=cols(read_file='c', num_reads='i')
+                      )
+SeqInfo <- read_delim(paste0(LabNotes, "sequences.txt"), 
+                     delim='\t',
+                     col_names=c('read_file', 'read_group', 'centre', 'folder'),
+                     col_types=cols(read_file='c', read_group='c', centre='c', folder='c')
+                     )
+
+
+lengths <- full_join(SeqInfo, lengths, by='read_file') %>%
+  separate(read_group, c('Sample', 'run'), fill='right', remove=FALSE) 
+
+#Sample 18208 was orinigally labelled 18121
+lengths[lengths[, 'Sample'] =='18121',]$Sample <- '18208'
+
+counts_files <- read_delim(paste0(LabNotes, "chr_bam_R1.txt"),
+"\t", escape_double = FALSE, col_names = c('file_path', 'counts_file', 'read_path', 'read_file'),
+trim_ws = TRUE)
+
+mapping_stats <- read_delim(paste0(LabNotes, "Results/Mapping_stats.txt"),
+" ", escape_double = FALSE, col_names = TRUE,
+trim_ws = TRUE)
+
+combined <- lengths %>% 
+  filter(grepl('_1$', read_file) | grepl('_R1_', read_file)) %>%
+  full_join(counts_files)
+
+stats <- combined %>% dplyr::select(Sample, file_path) %>%
+  right_join(mapping_stats) %>% 
+  distinct() %>%
+  dplyr::select(-in_stats, -ex_stats, -file_path) %>%
+  group_by(Sample) %>%
+  summarise_each(funs(sum))
+
+total_reads <- combined %>%
+  group_by(Sample) %>%
+  dplyr::summarise(TotalFragments=sum(as.numeric(num_reads)))
+
+final_stats <- total_reads %>%
+  full_join(stats) %>%
+  right_join(Counts) %>% 
+  mutate(MappedFragments = Paired/2, rDNA_Fragments= floor(rDNA/2)) %>%
+  dplyr::select(Sample, TotalFragments, rDNA_Fragments, MappedFragments, TotalCount) %>%
+  mutate(perc_rDNA = rDNA_Fragments/TotalFragments*100,
+         perc_mapped = MappedFragments/TotalFragments*100,
+         perc_counted = TotalCount/TotalFragments*100)
+
+final_stats %>% arrange(TotalCount)
+final_stats %>%
+  dplyr::select(TotalFragments, MappedFragments, TotalCount) %>%
+  summarise(TotalFragments=sum(as.numeric(TotalFragments))/1000000000,
+            MappedFragments=sum(as.numeric(MappedFragments)/1000000000),
+            TotalCount=sum(as.numeric(TotalCount)/1000000000)
+  )
+
+```
+
+- In full 105 sample dataset, 47531 of 66023 ENSEMBL features have at least one read mapping
+- 17070 features with >=1 Counts Per Million in at least as many samples as the min of male/famale were included in the differential expression analysis
+
+```{r}
+count_matrix <- MalevsFemale_complete %>%
+  dplyr::select(-Id, -starts_with('norm'), -baseMean, -Female, -Male, -FC, -log2FoldChange, -pvalue, -padj, -tagwise.dispersion, -trended.dispersion)
+feature_stats <- data.frame(Samples=c(ncol(count_matrix)), TotalFeatures=c(nrow(count_matrix)))
+feature_stats <- count_matrix %>%
+  mutate(sum=rowSums(.)) %>%
+  filter(sum > 0) %>%
+  summarise(NonZeroFeatures=n()) %>%
+  bind_cols(feature_stats)
+feature_stats <- MalevsFemale_complete %>%
+  filter(! is.na(FC)) %>%
+  summarise(IncludedFeatures=n()) %>%
+  bind_cols(feature_stats)
+  
+dplyr::select(feature_stats, Samples, TotalFeatures, NonZeroFeatures, IncludedFeatures)
+
+```
+
+- Total of 452 DE (FDR<0.1) genes when all 105 samples analysed together
+- 261 are higher in males and 191 are higher in Females
+- Of these, 92 are also DE in at least one of the samples subsetted by age
+- 41 are on chrX and 20 are on chrY
+
+
+```{r}
+all_DE <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_FDR_0.1_edgeR/tables/FemaleUp.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_FDR_0.1_edgeR/tables/MaleUp.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)) %>%
+  mutate(Id = gsub('\\..*', '', Id))
+all_DE_by_week <- all_DE %>% 
+  dplyr::select(-Male, -Female, -FC, -log2FoldChange) %>%
+  left_join(Fold_changes, by='Id') %>%
+  mutate(gene_name = GeneID, ChrType=ifelse(Chr=='chrX', 'chrX', ifelse(Chr=='chrY', 'chrY', 'autosome')))
+
+all_nonSex <- MalevsFemale_complete %>% 
+  dplyr::select(-Male, -Female, -FC, -log2FoldChange) %>%
+  left_join(Fold_changes, by='Id') %>%
+  mutate(gene_name = GeneID, ChrType=ifelse(Chr=='chrX', 'chrX', ifelse(Chr=='chrY', 'chrY', 'autosome')))
+
+all_DE_by_week_matrix <- all_DE_by_week %>% 
+  dplyr::select(Id, Chr, GeneID, sig, week) %>%
+  spread(week, sig) %>% 
+  mutate(total = rowSums(.[4:8]))
+
+all_DE_by_week_matrix <- all_DE_by_week_matrix %>%
+  full_join(dplyr::select(all_DE, Id, log2FoldChange))
+
+all_DE_by_week_matrix %>%
+  arrange(desc(total)) %>% 
+  dplyr::select(-total)
+
+summarise(all_DE_by_week_matrix, TotalDE = n()) %>%
+  bind_cols(filter(all_DE_by_week_matrix, log2FoldChange > 0) %>% summarise(MaleUp = n())) %>%
+  bind_cols(filter(all_DE_by_week_matrix, log2FoldChange < 0) %>% summarise(FemaleUp = n())) %>%
+  bind_cols(filter(all_DE_by_week_matrix, Chr == 'chrY') %>% summarise(ChrY = n())) %>%
+  bind_cols(filter(all_DE_by_week_matrix, Chr == 'chrX') %>% summarise(ChrX = n())) %>%
+  bind_cols(filter(all_DE_by_week_matrix, total > 0) %>% summarise(DE_by_week = n()))
+
+
+PlotFC_by_ChrType(all_DE_by_week, 'All DE')
+all_DE_by_week %>% filter(ChrType != 'chrY' & gene_name != 'XIST') %>%
+  PlotFC_by_ChrType("Non Y/XIST DE")
+```
+
+```{r}
+gene_sets <- read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/PollenEtAl.txt", 
+                        "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+                        trim_ws = TRUE)
+gene_sets <- full_join(gene_sets, 
+                       bitr(gene_sets$gene_name, fromType="SYMBOL", toType="ENSEMBL", OrgDb="org.Hs.eg.db"),
+                       by=c('gene_name' = 'SYMBOL')
+                       )
+Neuronal <- gene_sets %>% 
+  filter(set=='Neuronal' & gene_name != 'XIST') %>%
+  left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) 
+PlotFC(Neuronal, 'Neuronal')
+
+NPC <- gene_sets %>% 
+  filter(set=='NPC' & gene_name != 'RPS4Y1') %>%
+  left_join(Fold_changes, by=c('ENSEMBL' = 'Id'))
+PlotFC(NPC, 'Neural Progenitor Cell')
+
+RG <- gene_sets %>% 
+  filter(set=='RadialGlia' & gene_name != 'RPS4Y1') %>%
+  left_join(Fold_changes, by=c('ENSEMBL' = 'Id'))
+PlotFC(RG, 'Radial Glia')
+```
+
