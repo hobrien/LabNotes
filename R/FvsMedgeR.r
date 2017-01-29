@@ -18,14 +18,16 @@ option_list <- list(
               help="maximum age (PCW)", metavar="maximum age"),
   make_option(c("-r", "--rin"), type="numeric", default=0, 
               help="minimum RIN", metavar="minimum RIN"),
-  make_option(c("-a", "--alpha"), type="numeric", default=0.1, 
-              help="corrected pvalue cutoff", metavar="alpha"),
+  make_option(c("-p", "--pvalue"), type="numeric", default=0.1, 
+              help="corrected pvalue cutoff", metavar="pvalue"),
   make_option(c("-b", "--brainbank"), type="character", default='HDBR', 
               help="Which brainbank to include ('HDBR', 'All')", metavar="brainbank"),
   make_option(c("-e", "--exclude"), type="character", default='15641,18432,16491', 
               help="Samples to exclude (comma separated list, no spaces)", metavar="excluded"),
   make_option(c("-s", "--sex_chromosomes"), action='store_true', type="logical", default=FALSE, 
-              help="Exclude sex chromosomes", metavar="sex_chromosomes")
+              help="Exclude sex chromosomes", metavar="sex_chromosomes"),
+  make_option(c("-a", "--age"), action='store_true', type="logical", default=FALSE, 
+              help="Include age as a cofactor", metavar="age")
 )
 
 opt_parser <- OptionParser(option_list=option_list)
@@ -46,8 +48,11 @@ if ( opt$max-opt$min < 1 ) {
 
 PCW_cutoff <- c(opt$min, opt$max)
 RIN_cutoff <- opt$rin
-alpha <- opt$alpha                                      # threshold of statistical significance
+alpha <- opt$pvalue                                      # threshold of statistical significance
 BrainBank <- opt$brainbank
+pcw <- opt$age
+exclude_sex <- opt$sex_chromosomes
+
 exclude <- strsplit(opt$exclude, ',')[[1]] 
 if (! findInterval(16, PCW_cutoff) == 1) {
   exclude <- exclude[exclude != "15641"]
@@ -71,14 +76,14 @@ projectName <- paste("MvsF",
                             paste(c(BrainBank, 'excl', exclude), collapse='_', sep='_'),
                             BrainBank
                      ),
-                     "FDR", 
-                     alpha, 
-                     "edgeR", 
+                     ifelse(pcw, "PCW_FDR", "FDR"),
+                     alpha,
+                     ifelse(exclude_sex, "noSexChr_edgeR", "edgeR"), 
                      sep='_'
 )                         # name of the project
 
 
-if (opt$sex_chromosomes) {
+if (exclude_sex) {
   excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
 } else {
   excludedFeaturesFile = NA
@@ -95,8 +100,11 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-
-batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+if ( pcw ) {
+  batch <- c("Centre", "RIN", "PCW")                # blocking factor: NULL (default) or "batch" for example
+} else {
+  batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+}
 interact <- 0
 
 varInt <- "Sex"                                    # factor of interest
@@ -135,10 +143,10 @@ checkParameters.edgeR(projectName=projectName,author=author,targetFile=targetFil
 target <- read.delim(targetFile)                        # path to the design/target file
 
 sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
-target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
+target <- left_join(target, dplyr::select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
 
 sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
-target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
+target <- left_join(target, dplyr::select(sample_progress, sample, Centre), by = c("label" = "sample"))
 target <- arrange(target, Sex)
 if (!is.null(RIN_cutoff)) {
   target <- filter(target, RIN >= RIN_cutoff)
@@ -213,11 +221,11 @@ GetGeneIDs <- function(Ids) {
 }
 DEgenes=NA
 MalevsFemale.up <- read.delim("tables/MalevsFemale.up.txt", check.names=FALSE)
-MalevsFemale.up <- select(MalevsFemale.up, Id, Female, Male, FC, log2FoldChange, pvalue, padj)
+MalevsFemale.up <- dplyr::select(MalevsFemale.up, Id, Female, Male, FC, log2FoldChange, pvalue, padj)
 MalevsFemale.up <- bind_cols(GetGeneIDs(MalevsFemale.up$Id), MalevsFemale.up)
 write.table(MalevsFemale.up, file="tables/MaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
 MalevsFemale.down <- read.delim("tables/MalevsFemale.down.txt", check.names=FALSE)
-MalevsFemale.down <- select(MalevsFemale.down, Id, Female, Male, FC, log2FoldChange, pvalue, padj)
+MalevsFemale.down <- dplyr::select(MalevsFemale.down, Id, Female, Male, FC, log2FoldChange, pvalue, padj)
 MalevsFemale.down <- bind_cols(GetGeneIDs(MalevsFemale.down$Id), MalevsFemale.down)
 write.table(MalevsFemale.down, file="tables/FemaleUp.txt", sep="\t", quote=FALSE, row.names=FALSE)
 DEgenes <- nrow(MalevsFemale.down) + nrow(MalevsFemale.up)
