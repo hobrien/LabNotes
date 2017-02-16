@@ -16,12 +16,12 @@ option_list <- list(
               help="minimum age (PCW)", metavar="minimum age"),
   make_option(c("-x", "--max"), type="integer", default=NULL, 
               help="maximum age (PCW)", metavar="maximum age"),
-  make_option(c("-r", "--rin"), type="numeric", default=0, 
+  make_option(c("-r", "--rin"), type="numeric", default=NA, 
               help="minimum RIN", metavar="minimum RIN"),
   make_option(c("-p", "--pvalue"), type="numeric", default=0.1, 
               help="corrected pvalue cutoff", metavar="pvalue"),
   make_option(c("-b", "--brainbank"), type="character", default='HDBR', 
-              help="Which brainbank to include ('HDBR', 'All')", metavar="brainbank"),
+              help="Which brainbank to include ('HDBR', 'All', HDBRexpression)", metavar="brainbank"),
   make_option(c("-e", "--exclude"), type="character", default='15641,18432,16491', 
               help="Samples to exclude (comma separated list, no spaces)", metavar="excluded"),
   make_option(c("-s", "--sex_chromosomes"), action='store_true', type="logical", default=FALSE, 
@@ -32,14 +32,16 @@ option_list <- list(
 
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
-
+#opt$min=14
+#opt$max=15
+#opt$brainbank='HDBRexpression'
 if (is.null(opt$min) | is.null(opt$max)){
   print_help(opt_parser)
   stop("Min and Max ages must be specified", call.=FALSE)
 }
-if (opt$brainbank != 'HDBR' & opt$brainbank != 'All'){
+if (opt$brainbank != 'HDBR' & opt$brainbank != 'All' & opt$brainbank != 'HDBRexpression'){
   print_help(opt_parser)
-  stop("BrainBank options are 'HDBR' and 'All'", call.=FALSE)
+  stop("BrainBank options are 'HDBR', 'HDBRexpression' and 'All'", call.=FALSE)
 }
 if ( opt$max-opt$min < 1 ) {
   print_help(opt_parser)
@@ -47,22 +49,27 @@ if ( opt$max-opt$min < 1 ) {
 }
 
 PCW_cutoff <- c(opt$min, opt$max)
+#PCW_cutoff <-c(12,20)
 RIN_cutoff <- opt$rin
 alpha <- opt$pvalue                                      # threshold of statistical significance
 BrainBank <- opt$brainbank
 pcw <- opt$age
 exclude_sex <- opt$sex_chromosomes
 
-exclude <- strsplit(opt$exclude, ',')[[1]] 
-if (! findInterval(16, PCW_cutoff) == 1) {
-  exclude <- exclude[exclude != "15641"]
-}
-if (! findInterval(17, PCW_cutoff) == 1) {
-  exclude <- exclude[exclude != "18432"]
-}
-if (! findInterval(13, PCW_cutoff) == 1) {
-  exclude <- exclude[exclude != "16491"]
-}
+exclude <- strsplit(opt$exclude, ',')[[1]]
+if (BrainBank == 'HDBRexpression') {
+  exclude <- exclude[exclude != "15641" & exclude != "18432" & exclude != "16491"]
+} else {
+  if (! findInterval(15, PCW_cutoff) == 1) {
+    exclude <- exclude[exclude != "15641"]
+  }
+  if (! findInterval(17, PCW_cutoff) == 1) {
+    exclude <- exclude[exclude != "18432"]
+  }
+  if (! findInterval(13, PCW_cutoff) == 1) {
+    exclude <- exclude[exclude != "16491"]
+  }
+}  
 
 
 projectName <- paste("MvsF", 
@@ -96,11 +103,20 @@ rawDir <- "~/BTSync/FetalRNAseq/Counts/raw"                                     
 
 targetFile <- "~/BTSync/FetalRNAseq/LabNotes/MvsFmac.txt"
 
+SequencingCentreFile <- "~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt"
+
+if (BrainBank == 'HDBRexpression'){
+  SampleInfoFile <- "~/BTSync/FetalRNAseq/LabNotes/HDBRsample_info.txt"
+} else {
+  SampleInfoFile <- "~/BTSync/FetalRNAseq/LabNotes/sample_info.txt"
+}
 featuresToRemove <- c("alignment_not_unique",        # names of the features to be removed
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-if ( pcw ) {
+if (BrainBank == 'HDBRexpression'){
+  batch <- c()
+}else if ( pcw ) {
   batch <- c("Centre", "RIN", "PCW")                # blocking factor: NULL (default) or "batch" for example
 } else {
   batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
@@ -123,6 +139,7 @@ colors <- c("dodgerblue","firebrick1",               # vector of colors of each 
 ################################################################################
 ###                             running script                               ###
 ################################################################################
+LabNotes <- "~/BTSync/FetalRNAseq/LabNotes/"
 dir.create(workDir)
 setwd(workDir)
 library(devtools)
@@ -130,7 +147,8 @@ load_all(pkg = "~/BTSync/Code/R/SARTools")
 library(dplyr)
 library(tidyr)
 library(readr)
-source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+source(paste0(LabNotes, "R/FormatGGplot.R"))
+source(paste0(LabNotes, 'R/AnalyseDE.R'))
 
 # checking parameters
 checkParameters.edgeR(projectName=projectName,author=author,targetFile=targetFile,
@@ -140,29 +158,7 @@ checkParameters.edgeR(projectName=projectName,author=author,targetFile=targetFil
                       normalizationMethod=normalizationMethod,colors=colors)
 
 # loading target file
-target <- read.delim(targetFile)                        # path to the design/target file
-
-sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
-target <- left_join(target, dplyr::select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
-
-sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
-target <- left_join(target, dplyr::select(sample_progress, sample, Centre), by = c("label" = "sample"))
-target <- arrange(target, Sex)
-if (!is.null(RIN_cutoff)) {
-  target <- filter(target, RIN >= RIN_cutoff)
-}
-if (!is.null(PCW_cutoff)) {
-  target <- filter(target, PCW >= PCW_cutoff[1] & PCW < PCW_cutoff[2])
-}
-if (length(exclude) > 0) {
-  target <- filter(target, !label %in% exclude)
-}
-if (BrainBank == 'HDBR') {
-  target <- filter(target, ! grepl('A', label))
-}
-target <- mutate(target, PCW = floor(PCW))
-target <- droplevels(target)
-target[,varInt] <- as.factor(target[,varInt])
+target <- GetTarget(PCW_cutoff[1], PCW_cutoff[2], RIN_cutoff=RIN_cutoff, exclude=exclude, BrainBank=BrainBank)
 
 # loading counts
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
