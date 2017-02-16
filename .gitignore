@@ -36,3 +36,6 @@ Python/.ipynb_checkpoints/*
 
 #Stupid Mac files
 *.DS_Store
+
+ Results folder
+ Results/*
