@@ -1,0 +1,214 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(clusterProfiler)
+library(tidyverse)
+LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
+source(paste0(LabNotes, 'R/AnalyseDE.R'))
+source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
+
+```
+
+##Read in info about HDBR Expression samples from ENA
+```{r}
+HDBRexpression <- read_delim("~/BTSync/FetalRNAseq/LabNotes/HDBRexpression.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(-ENA_SAMPLE, 
+                -BioSD_SAMPLE,
+                -additional_information,
+                -block,
+                -SPOT_LENGTH,
+                -READ_INDEX_1_BASE_COORD,
+                -ORIENTATION,
+                -TechnologyType,
+                -ENA_EXPERIMENT,
+                -SUBMITTED_FILE_NAME,
+                -ExtractName,
+                -MaterialType,
+                -starts_with('ProtocolREF'),
+                -starts_with('Performer'),
+                -starts_with('LIBRARY'),
+                -starts_with('NOMINAL'),
+                -ends_with('_1')) %>%
+  filter(grepl('post conception weeks', developmental_stage)) %>%
+  mutate(PCW = gsub('post conception weeks', '', developmental_stage)) %>%
+  mutate(PCW = as.numeric(gsub('Late', '', PCW)))
+
+#remove hind brain samples
+
+# Should we include Hippocampus/pituitary and diencephalon? They're not in table 1
+HDBRexpression <- filter(HDBRexpression, organism_part == 'basal ganglion' | 
+                       organism_part == 'brain fragment' |
+                       organism_part == 'cerebral cortex' |
+                       organism_part == 'diencephalon' |
+                       organism_part == 'diencephalon and midbrain' |
+                       organism_part == 'forebrain' |
+                       organism_part == 'forebrain and midbrain' |
+                       organism_part == 'forebrain fragment' |
+                       organism_part == 'hippocampus' |
+                       organism_part == 'midbrain' |
+                       organism_part == 'pituitary and diencephalon' |
+                       organism_part == 'telencephalon' |
+                       organism_part == 'temporal lobe'
+)
+
+HDBRexpression$Sex <- ifelse(HDBRexpression$karyotype == '46, xx' |
+                             HDBRexpression$karyotype == '46, XX',
+                             'Female',
+                             ifelse(HDBRexpression$karyotype == '46, xy' |
+                                    HDBRexpression$karyotype == '46, XY',
+                                    'Male',
+                                    HDBRexpression$karyotype
+                                   )
+                             )
+#Manually set the Sex of individuals with unknown karyotype based on Ychr/XIST counts
+HDBRexpression$Sex <- ifelse(HDBRexpression$individual == '11572' |
+                             HDBRexpression$individual == '1118',
+                             'Male',
+                             HDBRexpression$Sex
+                             )
+
+
+```
+
+##Write info about included datasets to samples.txt
+
+- I commented out the first line to avoid rerunning and appending duplicate data to the file
+```{r}
+#read.delim("~/BTSync/FetalRNAseq/LabNotes/HDBRcomplete.txt", header=F) %>%
+  dplyr::select(ENA_RUN = V1, count_file=V2) %>% 
+  full_join(HDBRexpression) %>% 
+  mutate(seq_file = gsub('.*/', '', FASTQ_URI)) %>% 
+  mutate(seq_file = gsub('.fastq.gz', '', seq_file)) %>% 
+  mutate(source = 'HDBR', path = '/c8000xd3/rnaseq-heath/SRA') %>%
+  filter(PCW >= 12 & PCW <= 14) %>%
+  dplyr::select(seq_file, individual, source, path) %>%
+  write_tsv("~/BTSync/FetalRNAseq/LabNotes/sequences.txt", col_names=FALSE, append=TRUE)
+```
+
+##Write info about all non-Carnegie Stage individuals to file
+```{r}
+
+#remove reverse reads (eliminates duplication)
+HDBRexpression <- filter(HDBRexpression, grepl('_1.fq.gz', ScanName))
+
+
+HDBRexpression %>%
+  dplyr::select(BrainBankID=individual, Sex, PCW) %>% 
+  mutate(RIN = NA) %>%
+  group_by(BrainBankID) %>%
+  dplyr::slice(1L) %>% ungroup() %>% 
+  filter(BrainBankID != 11875) %>% # duplicate sample included in our original dataset
+  write_tsv("~/BTSync/FetalRNAseq/LabNotes/HDBRsample_info.txt")
+  
+```
+
+- 7 PCW14 samples are brain fragments only (3 females and 4 males). 
+- 1 is diencephalon and telencephalon (male)
+- 1 is cortex/temporal lobe/diencephalon and midbrain (male)
+```{r}
+
+HDBRexpression %>% dplyr::group_by(individual, organism_part, Sex, PCW) %>%
+  filter(PCW >=12 & PCW<=20) %>%
+  summarise(n=n()) %>%
+  spread(organism_part, n) %>%
+  arrange(PCW, Sex) %>%
+  write_tsv("~/BTSync/FetalRNAseq/LabNotes/HDBRinfo.txt")
+```
+
+- There are >= 5 of each sex at 12 and 13 PCW, 3 females vs 6 males at 14 PCW and small numbers are later time-points. 
+- There are some samples with unknown karyotypes but not at 14 PCW
+
+``` {r}
+HDBRexpression %>% group_by(individual) %>%
+  dplyr::slice(1L) %>% ungroup() %>%
+  group_by(PCW, Sex) %>%
+  summarise(n=n()) %>% 
+  ggplot(aes(x=PCW, y=n)) + 
+    geom_bar(stat='identity') +
+    facet_grid(Sex ~ .) +
+    scale_y_continuous(breaks=seq(0,10,2)) +
+    tufte_theme()
+  
+```
+
+``` {r}
+HDBRexpression %>% 
+  filter(organism_part == 'brain fragment' ) %>%
+  group_by(individual) %>%
+  dplyr::slice(1L) %>% ungroup() %>%
+  group_by(PCW, Sex) %>%
+  summarise(n=n()) %>% 
+  ggplot(aes(x=PCW, y=n)) + 
+    geom_bar(stat='identity') +
+    facet_grid(Sex ~ .) +
+    scale_y_continuous(breaks=seq(0,10,2)) +
+    tufte_theme()
+  
+```
+
+```{r}
+HDBRexpressionFold_changes <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBRexpression_excl_11373_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  mutate(sig = ifelse(padj < 0.1, 1, 0)) %>%
+  dplyr::select(Id, log2FoldChange, sig) %>%
+  mutate(week = 12) %>%
+  bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_13_HDBRexpression_excl_11775_11572_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+    mutate(sig = ifelse(padj < 0.1, 1, 0)) %>%
+    dplyr::select(Id, log2FoldChange, sig) %>%
+    mutate(week = 13)
+  ) %>%
+  bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBRexpression_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+    mutate(sig = ifelse(padj < 0.1, 1, 0)) %>%
+    dplyr::select(Id, log2FoldChange, sig) %>%
+    mutate(week = 14)
+  ) %>%
+  mutate(Id = gsub('\\..*', '', Id))
+
+gene_sets <- GetGeneSets()
+Neuronal <- gene_sets %>% 
+  filter(set=='Neuronal' & gene_name != 'XIST') %>%
+  left_join(HDBRexpressionFold_changes, by=c('ENSEMBL' = 'Id')) %>%
+  mutate(Id = ENSEMBL)
+#png(file="~/BTSync/FetalRNAseq/LabNotes/Results/Neuronal.png", bg="transparent", width=128, height=96, units='mm', res=227)
+PlotFC(Neuronal, 'Neuronal Genes')
+#dev.off()
+
+#png(file="~/BTSync/FetalRNAseq/LabNotes/Results/NPC.png", bg="transparent", width=128, height=96, units='mm', res=227)
+NPC <- gene_sets %>% 
+  filter(set=='NPC' & gene_name != 'RPS4Y1') %>%
+  left_join(HDBRexpressionFold_changes, by=c('ENSEMBL' = 'Id')) %>%
+  mutate(Id = ENSEMBL)
+PlotFC(NPC, 'Neural Progenitor Cell Genes')
+#dev.off()
+
+#png(file="~/BTSync/FetalRNAseq/LabNotes/Results/RadialGlia.png", bg="transparent", width=128, height=96, units='mm', res=227)
+RG <- gene_sets %>% 
+  filter(set=='RadialGlia' & gene_name != 'RPS4Y1') %>%
+  left_join(HDBRexpressionFold_changes, by=c('ENSEMBL' = 'Id')) %>%
+  mutate(Id = ENSEMBL)
+PlotFC(RG, 'Radial Glia Genes')
+#dev.off()
+
+#png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AdultNeuron.png", bg="transparent", width=128, height=96, units='mm', res=227)
+AN <- gene_sets %>% 
+  filter(set=='AdultNeuronal' & gene_name != 'RPS4Y1') %>%
+  left_join(HDBRexpressionFold_changes, by=c('ENSEMBL' = 'Id')) %>%
+  mutate(Id = ENSEMBL)
+PlotFC(AN, 'Adult Neuron Genes')
+#dev.off()
+
+#png(file="~/BTSync/FetalRNAseq/LabNotes/Results/FetalReplicating.png", bg="transparent", width=128, height=96, units='mm', res=227)
+FR <- gene_sets %>% 
+  filter(set=='Fetal_replicating' & gene_name != 'RPS4Y1') %>%
+  left_join(HDBRexpressionFold_changes, by=c('ENSEMBL' = 'Id')) %>%
+  mutate(Id = ENSEMBL)
+PlotFC(FR, 'Replicating Fetal Genes')
+#dev.off()
+
+```
