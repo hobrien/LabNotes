@@ -1,0 +1,195 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(clusterProfiler)
+source("~/BTSync/FetalRNAseq/LabNotes/R/AnalyseDE.R")
+```
+
+```{r}
+summary <- read_delim("~/BTSync/FetalRNAseq/PreviousFindings/summary.txt",
+"\t", escape_double = FALSE, col_types = cols(log2FoldChangeM = col_double(),
+qval = col_double()), trim_ws = TRUE)
+
+#remove non-significant results from Werling (using the most liberal threshold from their paper, 866 DE genes with p<=.05 and Fold diff >=1.2)
+summary <- filter(summary, Source == 'Weling' & abs(log2FoldChangeM) >=log2(1.2) & pval<= 0.05) %>% bind_rows(filter(summary, Source != 'Weling'))
+
+#remove duplicate results for Shi et al, keeping lowest p-value
+summary <- filter(summary, Source == 'Shi') %>% 
+  arrange(pval) %>% 
+  group_by(EnsemblID) %>% 
+  dplyr::slice(1L) %>% ungroup() %>% bind_rows(filter(summary, Source != 'Shi'))
+
+#remove duplicate results for Kang et al, keeping lowest p-value
+summary <- filter(summary, Source == 'Kang') %>% 
+  arrange(qval) %>% 
+  group_by(GeneID) %>% 
+  dplyr::slice(1L) %>% ungroup() %>% 
+  bind_rows(filter(summary, Source != 'Kang'))
+
+# remove duplicate results for Trabzuni et al, keeping lowest p-value
+# convert fold changes to log2fold changes
+# since I can't take the log of negative values, so the solution is to move the negative values to the other column
+summary <- filter(summary, Source == 'Trabzuni') %>% 
+  arrange(pval) %>% 
+  group_by(GeneID) %>% 
+  dplyr::slice(1L) %>% ungroup() %>%
+  mutate(log2FoldChangeM = log2(1-log2FoldChangeF), log2FoldChangeF= log2(log2FoldChangeF)) %>%
+  bind_rows(filter(summary, Source != 'Trabzuni'))
+
+# convert fold changes to log2fold changes
+summary <- filter(summary, Source == 'Vawter') %>%
+  mutate(log2FoldChangeF = log2(1-log2FoldChangeM), log2FoldChangeM= log2(log2FoldChangeM)) %>%
+  bind_rows(filter(summary, Source != 'Vawter'))
+
+summary <- filter(summary, Source == 'Weickert') %>%
+  mutate(log2FoldChangeF = log2(1-log2FoldChangeM), log2FoldChangeM= log2(log2FoldChangeM)) %>%
+  bind_rows(filter(summary, Source != 'Weickert'))
+
+#fill in missing fold change values
+summary <- filter(summary, is.na(log2FoldChangeM)) %>% 
+  mutate(log2FoldChangeM = 0 - log2FoldChangeF) %>% 
+  bind_rows(filter(summary, ! is.na(log2FoldChangeM)))
+summary <- filter(summary, is.na(log2FoldChangeF)) %>% 
+  mutate(log2FoldChangeF = 0 - log2FoldChangeM) %>% 
+  bind_rows(filter(summary, ! is.na(log2FoldChangeF)))
+
+#fill in missing GeneId values
+summary <- filter(summary, is.na(GeneID)) %>%
+  dplyr::select(-GeneID) %>%
+  full_join(., bitr(.$EnsemblID, "ENSEMBL", "SYMBOL", "org.Hs.eg.db", drop=FALSE), by=c("EnsemblID" = "ENSEMBL")) %>% 
+  dplyr::rename(GeneID = SYMBOL) %>% 
+  bind_rows(filter(summary, ! is.na(GeneID)))
+
+#fill in missing EnsemblId values
+summary <- filter(summary, is.na(EnsemblID)) %>%
+  dplyr::select(-EnsemblID) %>%
+  full_join(., bitr(.$GeneID, "SYMBOL", "ENSEMBL", "org.Hs.eg.db", drop=FALSE), by=c("GeneID" = "SYMBOL")) %>% 
+  dplyr::rename(EnsemblID = ENSEMBL) %>% 
+  bind_rows(filter(summary, ! is.na(EnsemblID)))
+
+#replace 'Weling' with '"Werling"
+summary$Source <- ifelse(summary$Source == 'Weling', 'Werling', summary$Source)
+```
+
+format with one column per study
+
+```{r}
+shi <- filter(summary, Source == 'Shi') %>%
+  mutate(x = paste0(signif(log2FoldChangeM, digits=2), ' (', signif(pval, digits=2), ')')) %>%
+  dplyr::select(EnsemblID, x)
+colnames(shi)[2] <- "Shi et al. 2015 (uncorrected p < .05)"
+
+kang <- filter(summary, Source == 'Kang') %>%
+  mutate(x = paste0(signif(log2FoldChangeM, digits=2), ' (', signif(qval, digits=2), ')')) %>%
+  dplyr::select(EnsemblID, x)
+colnames(kang)[2] <- 'Kang et al. 2011 (q < .01)'
+
+werling <- filter(summary, Source == 'Werling') %>%
+  mutate(x = paste0(signif(log2FoldChangeM, digits=2), ' (', signif(pval, digits=2), ')')) %>%
+  dplyr::select(EnsemblID, x)
+colnames(werling)[2] <- 'Werling et al. 2016 (p < .05, FC > 1.2)'
+
+trabzuni <- filter(summary, Source == 'Trabzuni') %>%
+  mutate(x = paste0(signif(log2FoldChangeM, digits=2), ' (', signif(pval, digits=2), ')')) %>%
+  dplyr::select(EnsemblID, x)
+colnames(trabzuni)[2] <- 'Trabzuni et al. 2013 (p, FDR < .01)'
+
+vawter <- filter(summary, Source == 'Vawter') %>%
+  mutate(x = signif(log2FoldChangeM, digits=2)) %>%
+  dplyr::select(EnsemblID, x)
+colnames(vawter)[2] <- 'Vawter et al. 2004 (p < .05, FC > 1.5)'
+
+weickert <- filter(summary, Source == 'Weickert') %>%
+  mutate(x = paste0(signif(log2FoldChangeM, digits=2), ' (', signif(pval, digits=2), ')')) %>%
+  dplyr::select(EnsemblID, x)
+colnames(weickert)[2] <- 'Weickert et al. 2009 (p, FDR < 0.2)'
+
+xu <- filter(summary, Source == 'Xu') %>%
+  mutate(x = paste0(signif(log2FoldChangeM, digits=2), ' (', signif(pval, digits=2), ')')) %>%
+  dplyr::select(EnsemblID, x)
+colnames(xu)[2] <- 'Xu et al. 2014 (q < 0.05)'
+
+chart <- full_join(shi, kang) %>% 
+  full_join(werling) %>% 
+  full_join(trabzuni) %>%
+  full_join(vawter) %>%
+  full_join(weickert) %>%
+  full_join(xu)
+```
+
+combine sig. results from each of our analyses
+
+```{r}
+all_weeks <- bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_DESeq/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE),
+                   read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_DESeq/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+                   )%>%
+  mutate(Week12_20 = paste0(signif(log2FoldChange, digits=2), ' (', signif(padj, digits=2), ')')) %>%
+  dplyr::select(EnsemblID=Id, Week12_20)
+
+week12 <- bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBR_FDR_0.1_edgeR/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE),
+                   read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBR_FDR_0.1_edgeR/tables/MalevsFemale.down.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+                   )%>%
+  mutate(Week12 = paste0(signif(log2FoldChange, digits=2), ' (', signif(padj, digits=2), ')')) %>%
+  dplyr::select(EnsemblID=Id, Week12)
+
+week13 <- bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_13_HDBR_excl_16491_FDR_0.1_edgeR/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE),
+                   read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_13_HDBR_excl_16491_FDR_0.1_edgeR/tables/MalevsFemale.down.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+                   )%>%
+  mutate(Week13 = paste0(signif(log2FoldChange, digits=2), ' (', signif(padj, digits=2), ')')) %>%
+  dplyr::select(EnsemblID=Id, Week13)
+
+week14 <- bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_FDR_0.1_edgeR/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE),
+                   read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_FDR_0.1_edgeR/tables/MalevsFemale.down.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+                   )%>%
+  mutate(Week14 = paste0(signif(log2FoldChange, digits=2), ' (', signif(padj, digits=2), ')')) %>%
+  dplyr::select(EnsemblID=Id, Week14)
+
+week15_16 <- bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_15_17_HDBR_excl_15641_FDR_0.1_edgeR/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE),
+                   read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_15_17_HDBR_excl_15641_FDR_0.1_edgeR/tables/MalevsFemale.down.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+                   )%>%
+  mutate(Week15_16 = paste0(signif(log2FoldChange, digits=2), ' (', signif(padj, digits=2), ')')) %>%
+  dplyr::select(EnsemblID=Id, Week15_16)
+
+week17_20 <- bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_17_20_HDBR_excl_18432_FDR_0.1_edgeR/tables/MalevsFemale.up.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE),
+                   read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_17_20_HDBR_excl_18432_FDR_0.1_edgeR/tables/MalevsFemale.down.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE)
+                   )%>%
+  mutate(Week17_20 = paste0(signif(log2FoldChange, digits=2), ' (', signif(padj, digits=2), ')')) %>%
+  dplyr::select(EnsemblID=Id, Week17_20)
+
+chart <- all_weeks %>%
+  full_join(week12) %>%
+  full_join(week13) %>%
+  full_join(week14) %>%
+  full_join(week15_16) %>%
+  full_join(week17_20) %>%
+  bind_cols(GetGeneIDs(.$EnsemblID)) %>%
+  separate(EnsemblID, c('EnsemblID'), sep='\\.', extra='drop') %>%
+  dplyr::select(EnsemblID, GeneID, Chr, Week12_20, Week12, Week13, Week14, Week15_16, Week17_20) %>%
+  left_join(shi) %>%
+  left_join(kang) %>% 
+  left_join(werling) %>% 
+  left_join(trabzuni) %>%
+  left_join(vawter) %>%
+  left_join(weickert) %>%
+  left_join(xu)
+
+
+write_tsv(chart, "~/BTSync/FetalRNAseq/LabNotes/Results/all_sig.txt")
+```
+
