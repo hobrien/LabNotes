@@ -16,7 +16,12 @@
 # Rscript ~/BTSync/FetalRNAseq/LabNotes/R/FvsMedgeR.r --min 12 --max 15 --brainbank HDBRexpression -e 11373,11775,11572
 # Rscript ~/BTSync/FetalRNAseq/LabNotes/R/FvsMedgeR.r --min 12 --max 13 --brainbank HDBRexpression -e 11373
 # Rscript ~/BTSync/FetalRNAseq/LabNotes/R/FvsMedgeR.r --min 13 --max 14 --brainbank HDBRexpression -e 11775,11572
-Rscript ~/BTSync/FetalRNAseq/LabNotes/R/FvsMedgeR.r --min 13 --max 15 --brainbank HDBRexpression -e 11775,11572
+# Rscript ~/BTSync/FetalRNAseq/LabNotes/R/FvsMedgeR.r --min 13 --max 15 --brainbank HDBRexpression -e 11775,11572
+
+for SampleID in 17812	18282	18349	18355	18687	19043	17921	19031	17221	18015	16428	16488	16640	16929	17053	17071	18529	18856
+do
+    Rscript ~/BTSync/FetalRNAseq/LabNotes/R/FvsMedgeR.r --min 14 --max 15 -e $SampleID
+done
 
 cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBRexpression_FDR_0.1_edgeR/tables/MaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/MaleUp12rep.txt
 cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBRexpression_FDR_0.1_edgeR/tables/FemaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/FemaleUp12rep.txt
@@ -52,7 +57,7 @@ cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBR_FDR_0.1_edgeR/tables/FemaleUp.txt  ~
 cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBR_FDR_0.1_edgeR/tables/MaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/MaleUp12.txt
 cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_HDBR_FDR_0.1_edgeR/tables/MalevsFemale.background.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/BG12.txt
 
-cp ~/BTSync/FetalRNAseq/Counts/MvsF_11_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/FemaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/FemaleUp11_19.txt
-cp ~/BTSync/FetalRNAseq/Counts/MvsF_11_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/MaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/MaleUp11_19.txt
-cp ~/BTSync/FetalRNAseq/Counts/MvsF_11_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/MalevsFemale.background.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/BG11_19.txt
+cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/FemaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/FemaleUp12_19.txt
+cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/MaleUp.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/MaleUp12_19.txt
+cp ~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/MalevsFemale.background.txt  ~/BTSync/FetalRNAseq/LabNotes/Results/BG12_19.txt
 
