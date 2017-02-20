@@ -10,9 +10,6 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 
-projectName <- "MvsF_12_20_noA_Cooks.75_excl_15641_18432_16491_new"                         # name of the project
-
-workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
 
 author <- "Heath O'Brien"                                # author of the statistical analysis/report
 
@@ -23,29 +20,67 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
 
 varInt <- "Sex"                                    # factor of interest
 condRef <- "Female"                                      # reference biological condition
-batch <- c("PCW", "Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
 interact <- c()
 RIN_cutoff <- 0
-PCW_cutoff <- c(12, 20)
+pcw <- TRUE
+if ( pcw ) {
+  batch <- c("Centre", "RIN", "PCW")                # blocking factor: NULL (default) or "batch" for example
+} else {
+  batch <- c("Centre", "RIN")                # blocking factor: NULL (default) or "batch" for example
+}
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
 #if numeric, features with maxCooks values above this number are removed 
+PCW_cutoff <- c(12, 20)
 cooksCutoff <-  0.75 #FALSE                          # TRUE/FALSE to perform the outliers detection (default is TRUE)
 independentFiltering <- TRUE                         # TRUE/FALSE to perform independent filtering (default is TRUE)
-alpha <- 0.05                                    # threshold of statistical significance
+alpha <- 0.1                                    # threshold of statistical significance
 pAdjustMethod <- "BH"                                # p-value adjustment method: "BH" (default) or "BY"
 testMethod <- 'Wald'
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
 BrainBank <- 'HDBR' # 'All' #
-exclude <- c()
-exclude <- c('16491')
 exclude <- c('15641', '18432', '16491')
-#exclude <- c("15641", "16548", "17160", "17923", "18294", "18983", "17921", "17486", "16024", "16115", "16810", "16826", "17048", "17053", "17071", "17333", "18432", "18666", "17264")
+if (! findInterval(16, PCW_cutoff) == 1) {
+  exclude <- exclude[exclude != "15641"]
+}
+if (! findInterval(17, PCW_cutoff) == 1) {
+  exclude <- exclude[exclude != "18432"]
+}
+if (! findInterval(13, PCW_cutoff) == 1) {
+  exclude <- exclude[exclude != "16491"]
+}
+
+exclude_sex <- TRUE
+if (exclude_sex) {
+  excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
+} else {
+  excludedFeaturesFile = NA
+}
+
 colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
             "MediumVioletRed","SpringGreen")
-excludedFeaturesFile = NA
-#excludedFeaturesFile = "~/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt" 
+
+projectName <- paste("MvsF", 
+                     ifelse(PCW_cutoff[2]-PCW_cutoff[1] > 1, 
+                            paste(PCW_cutoff, 
+                                  collapse ='_'
+                            ),
+                            PCW_cutoff[1]
+                     ),
+                     ifelse(length(exclude > 0),
+                            paste(c(BrainBank, 'excl', exclude), collapse='_', sep='_'),
+                            BrainBank
+                     ),
+                     ifelse(pcw, "PCW_FDR", "FDR"),
+                     alpha,
+                     ifelse(exclude_sex, "noSexChr_DESeq", "DESeq"), 
+                     sep='_'
+)                         # name of the project
+
+workDir <- paste("~/BTSync/FetalRNAseq/Counts", projectName, sep='/')      # working directory for the R session
+
 ################################################################################
 ###                             running script                               ###
 ################################################################################
@@ -74,10 +109,10 @@ targetFile <- "~/BTSync/FetalRNAseq/LabNotes/MvsFmac.txt"
 target <- read.delim(targetFile)                        # path to the design/target file
 
 sample_info <- read.delim("~/BTSync/FetalRNAseq/LabNotes/sample_info.txt")
-target <- left_join(target, select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
+target <- left_join(target, dplyr::select(sample_info, BrainBankID, Sex, PCW, RIN), by = c("label" = "BrainBankID"))
 
 sample_progress <- read.delim("~/BTSync/FetalRNAseq/LabNotes/SampleProgress.txt")
-target <- left_join(target, select(sample_progress, sample, Centre), by = c("label" = "sample"))
+target <- left_join(target, dplyr::select(sample_progress, sample, Centre), by = c("label" = "sample"))
 target <- arrange(target, Sex)
 if (!is.null(RIN_cutoff)) {
   target <- filter(target, RIN >= RIN_cutoff)
@@ -92,11 +127,12 @@ if (BrainBank == 'HDBR') {
     target <- filter(target, ! grepl('A', label))
 }
 target <- mutate(target, PCW = floor(PCW))
+target <- droplevels(target)
 # loading counts
 # this doesn't use the batch info
 counts <- loadCountData(target=target, rawDir=rawDir, featuresToRemove=featuresToRemove)
 if (! is.na(excludedFeaturesFile)) {
-  excludedFeatures <- read_csv(excludedFeaturesFile, col_names = FALSE)
+  excludedFeatures <- read_tsv(excludedFeaturesFile, col_names = FALSE)
   counts <- counts[!rownames(counts) %in% excludedFeatures$X1, ]
 }
 # description plots
