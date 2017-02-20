@@ -116,10 +116,10 @@ GetTarget <- function(min, max, RIN_cutoff=0, exclude=NA, BrainBank='HDBR', varI
                       '13142',
                       '12993',
                       '13008') #these are already the correct week
-    target$PCW <- ifelse(target$PCW %% 1 == 0 & ! target$label %in% newer_samples,
-                         target$PCW -1, floor(target$PCW))
+    #target$PCW <- ifelse(target$PCW %% 1 == 0 & ! target$label %in% newer_samples,
+    #                     target$PCW -1, floor(target$PCW))
   }
-  
+  target$PCW <- floor(target$PCW)
   target <- droplevels(target)
   target <- mutate(target, Sex = factor(ifelse(Sex == 'unknown', NA, Sex)))
   target <- as.data.frame(target)
@@ -148,7 +148,7 @@ GetGeneIDs <- function(Ids) {
 }
 
 GetCounts <- function(){
-  MalevsFemale_complete <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_11_20_HDBR_excl_15641_18432_16491_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+  MalevsFemale_complete <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
                                       "\t", escape_double = FALSE, trim_ws = TRUE)
   SexChrGenes <- read_delim("/Users/heo3/BTSync/FetalRNAseq/LabNotes/SexChrGenes.txt", 
                             delim='\t', 
@@ -184,4 +184,47 @@ GetGeneSets <- function() {
     dplyr::select(gene_name, set, reference, ENSEMBL) %>%
     bind_rows(gene_sets)
   gene_sets
+}
+
+PlotExpression<-function(geneID, fileName, id="A value that hopefully isn't in the dataset") {
+  Ensembl_Id <- bitr(geneID, fromType="SYMBOL", toType="ENSEMBL", OrgDb="org.Hs.eg.db")[,2]
+  data <- filter(fileName, Id == Ensembl_Id) %>%  
+    dplyr::select(starts_with('norm')) %>%
+    gather() %>%
+    separate(key, into=c('norm', 'label'), sep='[.]') %>%
+    dplyr::select(label, value) %>%
+    left_join(target)
+  plot<-  ggplot(subset(data, label != id), aes(x=PCW, y=value, colour=Sex)) + 
+    geom_jitter(height = 0, width=.1, alpha=.75) + 
+    geom_point(data=subset(data, label==id), colour='orange') +
+    geom_smooth() +
+    ylab("normalised counts") +
+    tufte_theme() +
+    scale_colour_brewer(type = "qual", palette = 6) +
+    ggtitle(geneID) +
+    theme(legend.position=c(0.1,.9)) +
+    theme(plot.background=element_blank())
+  plot
+}
+
+PlotTimepoint<-function(geneID, fileName) {
+  data <- fileName %>%  
+    dplyr::select(starts_with('norm')) %>%
+    gather() %>%
+    separate(key, into=c('norm', 'label'), sep='[.]') %>%
+    dplyr::select(label, value) %>%
+    left_join(target)
+  mean <- fileName %>% 
+    dplyr::select(Male, Female) %>%
+    gather()
+  plot<-  ggplot(data, aes(x=Sex, y=value, colour=Sex)) + 
+    geom_errorbar(aes(x=key, ymin=value, ymax=value), colour='black', size=1, width=.5, data=mean) +
+    geom_jitter(height = 0, width=.1, alpha=.75) + 
+    ylab("normalised counts") +
+    xlab('') +
+    tufte_theme() +
+    scale_colour_brewer(type = "qual", palette = 6) +
+    ggtitle(geneID) +
+    theme(plot.background=element_blank())
+  plot
 }
