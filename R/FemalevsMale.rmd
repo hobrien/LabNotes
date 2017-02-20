@@ -7,6 +7,8 @@ output: html_document
 library(tidyverse)
 library(gridExtra)
 library(clusterProfiler)
+library(gtable)
+library(grid)
 LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
 source(paste0(LabNotes, 'R/AnalyseDE.R'))
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
@@ -15,7 +17,7 @@ MalevsFemale_complete <- GetCounts()
 
 ## Histogram of sample size per week/sex
 ```{r}
-target <- GetTarget(11, 20)
+target <- GetTarget(12, 20)
 png(file="~/BTSync/FetalRNAseq/LabNotes/Results/PCWhist.png", bg="transparent", width=128, height=96, units='mm', res=227)
 layout(matrix(c(1,2), 2, byrow = TRUE))
 p1 <- ggplot(target, aes(x=PCW, fill=Sex)) +
@@ -60,11 +62,11 @@ grid.arrange(p1, p2, ncol=2)
 
 
 ```{r }
-
-Counts <- MalevsFemale_complete %>%
-  dplyr::select(-starts_with('norm'), -baseMean, -Female, -Male, -FC, -log2FoldChange, -pvalue, -padj, -tagwise.dispersion, -trended.dispersion, -Chr, -ChrType) %>% 
-  tidyr::gather(Sample, Count, -Id) %>% 
-  mutate(Sample = as.character(Sample)) %>% View()
+count_matrix <- MalevsFemale_complete %>%
+  dplyr::select(-Id, -starts_with('norm'), -baseMean, -Female, -Male, -FC, -log2FoldChange, -pvalue, -padj, -tagwise.dispersion, -trended.dispersion, -Chr, -ChrType)
+Counts <- count_matrix %>% 
+  tidyr::gather(Sample, Count) %>% 
+  mutate(Sample = as.character(Sample)) %>% 
   group_by(Sample) %>%
   dplyr::summarise(TotalCount=sum(Count))
 
@@ -135,15 +137,12 @@ Fold_changes <- GetFoldChanges()
 CPM1 <- Fold_changes %>%
   filter(! is.na(log2FoldChange)) %>%
   group_by(week) %>%
-  dplyr::summarise(n=n()) %>%
-  mutate(week = ifelse(week == 15.5, 15, ifelse(week==18,16,week)))
+  dplyr::summarise(n=n()) #%>%
+  #mutate(week = ifelse(week == 15.5, 15, ifelse(week==18,16,week)))
 
 ```
 
 ```{r}
-count_matrix <- MalevsFemale_complete %>%
-  dplyr::select(-Id, -starts_with('norm'), -baseMean, -Female, -Male, -FC, -log2FoldChange, -pvalue, -padj, -tagwise.dispersion, -trended.dispersion)
-
 feature_stats <- data.frame(Samples=c(ncol(count_matrix)), TotalFeatures=c(nrow(count_matrix)))
 feature_stats <- count_matrix %>%
   mutate(sum=rowSums(.)) %>%
@@ -157,8 +156,7 @@ feature_stats <- MalevsFemale_complete %>%
   
 dplyr::select(feature_stats, Samples, TotalFeatures, NonZeroFeatures, IncludedFeatures)
 
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/NumTranscripts.png", bg="transparent", width=128, height=96, units='mm', res=227)
-count_matrix %>%
+p1 <- count_matrix %>%
   gather(Sample, Count) %>%
   mutate(Sample = as.character(Sample)) %>%
   filter(Count > 0) %>%
@@ -176,8 +174,10 @@ count_matrix %>%
     theme(axis.text.x=element_text(size=8)) +
     scale_colour_brewer(type = "qual", palette = 6) +
     theme(legend.position="right")
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/NumTranscripts.png", bg="transparent", width=128, height=96, units='mm', res=227)
+p1
 dev.off()  
-
+p1
 
 ```
 
@@ -188,6 +188,7 @@ dev.off()
 
 
 ```{r}
+#Genes that are DE in combined analysis
 all_DE <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/FemaleUp.txt",
 "\t", escape_double = FALSE, trim_ws = TRUE) %>%
   bind_rows(read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_12_20_HDBR_excl_15641_18432_16491_PCW_FDR_0.1_edgeR/tables/MaleUp.txt",
@@ -229,20 +230,66 @@ all_DE_by_week %>% filter(ChrType != 'chrY' & gene_name != 'XIST') %>%
 ```
 
 ```{r}
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AllGenesFC.png", bg="transparent", width=128, height=96, units='mm', res=227)
-MalevsFemale_complete %>% 
+p1 <- all_DE %>%
+    mutate(ChrType=ifelse(Chr=='chrX', 'chrX', ifelse(Chr=='chrY', 'chrY', 'autosome')), Sex = ifelse(log2FoldChange < 0, 'F', 'M')) %>%
+  ggplot(aes(x=Sex, fill=ChrType)) + geom_bar(position='stack') + 
+    tufte_theme() +
+    scale_y_continuous(breaks=seq(100,1000,100)) +
+    scale_fill_manual(values=brewer.pal(6, "Set1")[c(1,2,4)]) +
+    theme(legend.position='right') +
+    theme(strip.switch.pad.grid = unit(10, 'cm')) +
+    ylab('Number DE genes (FDR<0.1)') +
+    xlab('Fetal Sex') +
+    ggtitle("All Ages (12-19 PCW)")
+  
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AllSigBar.png", bg="transparent", width=128, height=96, units='mm', res=227)
+p1
+dev.off()
+p1
+
+p2 <- Fold_changes %>% filter(sig == 1) %>%
+  mutate(week = paste(ifelse(week > 16, 
+                      '15-16',
+                      ifelse(week >= 15, 
+                             '17-19', 
+                             week)), 'PCW'),
+         Sex = ifelse(log2FoldChange < 0, 'F', 'M')) %>% 
+  left_join(dplyr::select(MalevsFemale_complete, Id, ChrType)) %>%
+  ggplot(aes(x=Sex, fill=ChrType)) + geom_bar(position='stack') + 
+  facet_grid(. ~ week) +
+    tufte_theme() +
+    scale_y_continuous(breaks=seq(100,1000,100)) +
+    scale_fill_manual(values=brewer.pal(6, "Set1")[c(1,2,4)]) +
+    theme(legend.position='right') +
+    theme(strip.switch.pad.grid = unit(10, 'cm')) +
+    ylab('Number DE genes (FDR<0.1)') +
+    xlab('Fetal Sex')
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/ByWeekSigBar.png", bg="transparent", width=128, height=96, units='mm', res=227)
+p2
+dev.off()
+p2
+
+```
+
+```{r}
+p1 <- MalevsFemale_complete %>% 
   dplyr::select(Id, ChrType) %>%
   inner_join(Fold_changes, by='Id') %>%
   PlotFC_by_ChrType("All genes CMP >= 1 in 45 or more samples")
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AllGenesFC.png", bg="transparent", width=128, height=96, units='mm', res=227)
+p1
 dev.off()
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AllNonYGenesFC.png", bg="transparent", width=128, height=96, units='mm', res=227)
-MalevsFemale_complete %>% 
+p1
+p2<-MalevsFemale_complete %>% 
   dplyr::select(Id, ChrType) %>%
   filter(ChrType != 'chrY' & Id != 'ENSG00000229807') %>% 
   inner_join(Fold_changes, by='Id') %>%
   PlotFC_by_ChrType("All Non Y/XIST genes")
-dev.off()
 
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AllNonYGenesFC.png", bg="transparent", width=128, height=96, units='mm', res=227)
+p2
+dev.off()
+p2
 ```
 
 ```{r}
@@ -251,42 +298,51 @@ Neuronal <- gene_sets %>%
   filter(set=='Neuronal' & gene_name != 'XIST') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
+NeuronalFC <- PlotFC(Neuronal, 'Neuronal Genes')
 png(file="~/BTSync/FetalRNAseq/LabNotes/Results/Neuronal.png", bg="transparent", width=128, height=96, units='mm', res=227)
-PlotFC(Neuronal, 'Neuronal Genes')
+NeuronalFC
 dev.off()
+NeuronalFC
 
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/NPC.png", bg="transparent", width=128, height=96, units='mm', res=227)
 NPC <- gene_sets %>% 
   filter(set=='NPC' & gene_name != 'RPS4Y1') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
-PlotFC(NPC, 'Neural Progenitor Cell Genes')
+NPCFC <- PlotFC(NPC, 'Neural Progenitor Cell Genes')
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/NPC.png", bg="transparent", width=128, height=96, units='mm', res=227)
+NPCFC
 dev.off()
+NPCFC
 
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/RadialGlia.png", bg="transparent", width=128, height=96, units='mm', res=227)
 RG <- gene_sets %>% 
   filter(set=='RadialGlia' & gene_name != 'RPS4Y1') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
-PlotFC(RG, 'Radial Glia Genes')
+RGFC<-PlotFC(RG, 'Radial Glia Genes')
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/RadialGlia.png", bg="transparent", width=128, height=96, units='mm', res=227)
+RGFC
 dev.off()
+RGFC
 
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AdultNeuron.png", bg="transparent", width=128, height=96, units='mm', res=227)
 AN <- gene_sets %>% 
   filter(set=='AdultNeuronal' & gene_name != 'RPS4Y1') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
-PlotFC(AN, 'Adult Neuron Genes')
+ANFC<-PlotFC(AN, 'Adult Neuron Genes')
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AdultNeuron.png", bg="transparent", width=128, height=96, units='mm', res=227)
+ANFC
 dev.off()
+ANFC
 
-png(file="~/BTSync/FetalRNAseq/LabNotes/Results/FetalReplicating.png", bg="transparent", width=128, height=96, units='mm', res=227)
 FR <- gene_sets %>% 
   filter(set=='Fetal_replicating' & gene_name != 'RPS4Y1') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
-PlotFC(FR, 'Replicating Fetal Genes')
+FRFC<-PlotFC(FR, 'Replicating Fetal Genes')
+png(file="~/BTSync/FetalRNAseq/LabNotes/Results/FetalReplicating.png", bg="transparent", width=128, height=96, units='mm', res=227)
+FRFC
 dev.off()
-
+FRFC
 ```
 
 ```{r}
@@ -304,4 +360,41 @@ MaleDEG <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_FDR_0.1_edgeR/ta
 
 MaleEnrichment <- enricher(MaleDEG$GeneID, TERM2GENE=disease2gene)
 summary(MaleEnrichment)
+
 ```
+```{r}
+dplyr::select(MaleEnrichment@result, ID, Count, geneID)
+PlotExpression('MCM2', MalevsFemale_complete, '17921')
+PlotExpression('NEUROD4', MalevsFemale_complete, '17921')
+PlotExpression('ESPL1', MalevsFemale_complete, '17921')
+PlotExpression('VIM', MalevsFemale_complete, '17921')
+PlotExpression('AASS', MalevsFemale_complete, '17921')
+PlotExpression('FAM64A', MalevsFemale_complete, '17921')
+PlotExpression('GLI2', MalevsFemale_complete, '17921')
+PlotExpression('TFAP2C', MalevsFemale_complete, '17921')
+PlotExpression('LIPG', MalevsFemale_complete, '17921')
+```
+```{r}
+dplyr::select(FemaleEnrichment@result, ID, Count, geneID)
+PlotExpression('ATP1B1', MalevsFemale_complete, '17921')
+PlotExpression('NAP1L5', MalevsFemale_complete, '17921')
+PlotExpression('LGI1', MalevsFemale_complete, '17921')
+PlotExpression('MAGEE1', MalevsFemale_complete, '17921')
+PlotExpression('NAP1L3', MalevsFemale_complete, '17921')
+PlotExpression('CCK', MalevsFemale_complete, '17921')
+PlotExpression('RYR2', MalevsFemale_complete, '17921')
+PlotExpression('FGF12', MalevsFemale_complete, '17921')
+PlotExpression('SCG2', MalevsFemale_complete, '17921')
+```
+```{r}
+PlotExpression('NES', MalevsFemale_complete, '17921')
+PlotExpression('DCX', MalevsFemale_complete, '17921')
+PlotExpression('GRIN2A', MalevsFemale_complete, '17921')
+PlotExpression('HTR1B', MalevsFemale_complete, '17921')
+PlotExpression('GRIN3A', MalevsFemale_complete, '17921')
+PlotExpression('HTR2A', MalevsFemale_complete, '17921')
+PlotExpression('GABRG2', MalevsFemale_complete, '17921')
+```
+
+
+
