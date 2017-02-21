@@ -38,13 +38,16 @@ if [ ! -f $BASEDIR/$SampleID/$SampleID.bam ]
 then
     sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*fastq*; done)
     echo "$MAPPER mapping for $SampleID"
+    echo "Read files: $sequences"
+    sequences=`echo $sequences | tr ' ' '|'`
     hisat2 --fr --threads 8 -x $REF/genome --known-splicesite-infile $ANNOTATION/splicesites.txt \
-      -1 $sequences | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
+      -1 ${sequences%%|*} -2 ${sequences##*|} | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
     if [ $? -eq 0 ]
     then
         echo "Finished $MAPPER mapping for $SampleID"
     else
         echo "$MAPPER mapping failed on $SampleID"
+        rm $BASEDIR/$SampleID/$SampleID.bam
         exit 1
     fi    
 fi
