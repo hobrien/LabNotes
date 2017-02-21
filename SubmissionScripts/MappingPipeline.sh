@@ -16,7 +16,7 @@ export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 SampleID=$1 
 MAPPER=HISAT2
-BASEDIR=/c8000xd3/rnaseq-heath/ASEmappings/
+BASEDIR=/c8000xd3/rnaseq-heath/ASEmappings
 ANNOTATION=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode
 REF=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta
 
@@ -39,7 +39,7 @@ then
     sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*fastq*; done)
     echo "$MAPPER mapping for $SampleID"
     hisat2 --fr --threads 8 -x $REF/genome --known-splicesite-infile $ANNOTATION/splicesites.txt \
-      -1 $sequences | samtools view -S -bo $BASEDIR/SampleID.bam -
+      -1 $sequences | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
     if [ $? -eq 0 ]
     then
         echo "Finished $MAPPER mapping for $SampleID"
