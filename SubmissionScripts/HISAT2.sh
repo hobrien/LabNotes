@@ -8,6 +8,7 @@
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 REF=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta
+ANNOTATION=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode
 MAPPER=HISAT2
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 SampleID=$1 
@@ -42,12 +43,10 @@ then
     fi    
 fi
 
-if [ ! -f /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/splicesites.txt ]
+if [ ! -f $ANNOTATION/splicesites.txt ]
 then
     echo "Making list of known splice sites"
-    hisat2_extract_splice_sites.py \
-      /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf \
-      > /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode/splicesites.txt
+    hisat2_extract_splice_sites.py $ANNOTATION/genes.gtf > $ANNOTATION/splicesites.txt
     if [ $? -eq 0 ]
     then
         echo "Finished making list of known splice sites"
@@ -61,7 +60,7 @@ if [ ! -f $BASEDIR/BAM/accepted_hits.bam ]
 then
     echo "$MAPPER mapping for $SampleID"
     sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ /c8000xd3/rnaseq-heath/SRA -name $name*fastq*; done)
-    hisat2 --fr --threads 8 -x $REF/genome \
+    hisat2 --fr --threads 8 -x $REF/genome  --known-splicesite-infile $ANNOTATION/splicesites.txt \
       -1 $sequences \
       | samtools view -S -bo $BASEDIR/accepted_hits.bam -
     if [ $? -eq 0 ]
