@@ -39,4 +39,6 @@ then
 fi
 
 hisat2 --fr --threads 8 -x $REF/genome --known-splicesite-infile $ANNOTATION/splicesites.txt \
-      -1 $1 -2 $2 | samtools view -S -bo $3
+      -1 $1 -2 $2 
+exit $?
+
