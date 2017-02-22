@@ -11,7 +11,7 @@
 # Once this has been run on all datasets for a sample, they can be combined and used for
 # allele-specific read counting using CombineMappings.sh
 
-export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
+#export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 SampleID=$1 
@@ -39,9 +39,7 @@ then
     sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*fastq*; done)
     echo "$MAPPER mapping for $SampleID"
     echo "Read files: $sequences"
-    sequences=`echo $sequences | tr ' ' '|'`
-    hisat2 --fr --threads 8 -x $REF/genome --known-splicesite-infile $ANNOTATION/splicesites.txt \
-      -1 ${sequences%%|*} -2 ${sequences##*|} | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
+    bash ~/LabNotes/SubmissionScripts/HISAT2.sh $sequences | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
     if [ $? -eq 0 ]
     then
         echo "Finished $MAPPER mapping for $SampleID"
@@ -52,10 +50,10 @@ then
     fi    
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_sort.bam ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_sort.bam ]
 then
     echo "Sorting $SampleID"
-    samtools sort $BASEDIR/$SampleID/$SampleID.bam $BASEDIR/$SampleID/$SampleID_sort
+    samtools sort -o $BASEDIR/$SampleID/${SampleID}_sort.bam $BASEDIR/$SampleID/$SampleID.bam
     if [ $? -eq 0 ]
     then
         echo "Finished sorting for $SampleID"
@@ -65,10 +63,10 @@ then
     fi
 fi   
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_sort.bam.bai ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_sort.bam.bai ]
 then
     echo "Indexing $SampleID"
-    samtools index $BASEDIR/$SampleID/$SampleID_sort.bam    
+    samtools index $BASEDIR/$SampleID/${SampleID}_sort.bam    
     if [ $? -eq 0 ]
     then
         echo "Finished indexing for $SampleID"
@@ -78,10 +76,10 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_stats.txt ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_stats.txt ]
 then
     echo "Running RNAseqQC $SampleID"
-    bam_stat.py -i $BASEDIR/$SampleID/$SampleID_sort.bam > $BASEDIR/$SampleID/$SampleID_stats.txt
+    bam_stat.py -i $BASEDIR/$SampleID/${SampleID}_sort.bam > $BASEDIR/$SampleID/${SampleID}_stats.txt
     if [ $? -eq 0 ]
     then
         echo "Finished running RNAseqQC for $SampleID"
@@ -91,7 +89,7 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/$SampleID.remap.fq1.gz ] || [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/$SampleID.remap.fq2.gz ]
+if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_sort.remap.fq1.gz ] || [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_sort.remap.fq2.gz ]
 then
     echo "finding intersecting SNPs for $SampleID"
     mkdir $BASEDIR/$SampleID/find_intersecting_snps
@@ -102,7 +100,7 @@ then
           --snp_tab /c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5/snp_tab.h5 \
           --snp_index /c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5/snp_index.h5 \
           --haplotype /c8000xd3/rnaseq-heath/Genotypes/Imputation3/HDF5/haplotypes.h5 \
-          $BASEDIR/$SampleID/$SampleID_sort.bam
+          $BASEDIR/$SampleID/${SampleID}_sort.bam
     if [ $? -eq 0 ]
     then
         echo "Finished finding intersecting SNPs for $SampleID"
@@ -112,13 +110,13 @@ then
     fi  
 fi  
 
-if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap.bam ]
+if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap.bam ]
 then
     echo "remapping reads with intersecting SNPs for $SampleID"
-    hisat2 --fr --threads 8 -x $REF/genome --known-splicesite-infile $ANNOTATION/splicesites.txt \
-      -1 $BASEDIR/$SampleID/find_intersecting_snps/$SampleID.remap.fq1.gz \
-      -2  $BASEDIR/$SampleID/find_intersecting_snps/$SampleID.remap.fq2.gz \
-      | samtools view -S -bo $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap.bam -
+    bash ~/LabNotes/SubmissionScripts/HISAT2.sh \
+      $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_sort.remap.fq1.gz \
+      $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_sort.remap.fq2.gz \
+      | samtools view -S -bo $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap.bam -
 
     if [ $? -eq 0 ]
     then
@@ -129,11 +127,12 @@ then
     fi
 fi
      
-if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort.bam ]
+if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort.bam ]
 then
     echo "Sorting remapped BAM $SampleID"
-    samtools sort $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap.bam \
-      $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort
+    samtools sort -o $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort.bam \
+      $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap.bam
+      
     if [ $? -eq 0 ]
     then
         echo "Finished sorting remapped BAM for $SampleID"
@@ -143,10 +142,10 @@ then
     fi
 fi   
 
-if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort.bam.bai ]
+if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort.bam.bai ]
 then
     echo "Indexing remapped BAM for $SampleID"
-    samtools index $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort.bamm    
+    samtools index $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort.bam    
     if [ $? -eq 0 ]
     then
         echo "Finished indexing remapped BAM for $SampleID"
@@ -156,13 +155,13 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort_keep.bam ]
+if [ ! -f $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort_keep.bam ]
 then
     echo "Filtering remapped reads for $SampleID"
     python ~/src/WASP-0.2.1/mapping/filter_remapped_reads.py \
-          $BASEDIR/$SampleID/find_intersecting_snps/$SampleID.to.remap.bam \
-          $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort.bam \
-          $BASEDIR/$SampleID/find_intersecting_snps/$SampleID__remap_sort_keep.bam 
+          $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_sort.to.remap.bam \
+          $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort.bam \
+          $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort_keep.bam 
     if [ $? -eq 0 ]
     then
         echo "Finished filtering remapped reads for $SampleID"
@@ -172,12 +171,12 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_sort_filtered.bam ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_sort_filtered.bam ]
 then
     echo "Merging filtered reads for $SampleID"
-    samtools merge $BASEDIR/$SampleID/$SampleID_sort_filtered.bam \
-              $BASEDIR/$SampleID/find_intersecting_snps/$SampleID_remap_sort_keep.bam  \
-              $BASEDIR/$SampleID/find_intersecting_snps/$SampleID.keep.bam
+    samtools merge $BASEDIR/$SampleID/${SampleID}_sort_filtered.bam \
+              $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_remap_sort_keep.bam  \
+              $BASEDIR/$SampleID/find_intersecting_snps/${SampleID}_sort.keep.bam
     if [ $? -eq 0 ]
     then
         echo "Finished merging filtered reads for $SampleID"
@@ -187,11 +186,11 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_filtered_sort.bam ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_filtered_sort.bam ]
 then
     echo "Sorting filtered BAM $SampleID"
-    samtools sort $BASEDIR/$SampleID/$SampleID_sort_filtered.bam \
-      $BASEDIR/$SampleID/$SampleID_filtered_sort
+    samtools sort -o $BASEDIR/$SampleID/${SampleID}_filtered_sort.bam \
+      $BASEDIR/$SampleID/${SampleID}_sort_filtered.bam 
     if [ $? -eq 0 ]
     then
         echo "Finished sorting filtered BAM for $SampleID"
@@ -201,10 +200,10 @@ then
     fi
 fi   
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_filtered_sort.bam.bai ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_filtered_sort.bam.bai ]
 then
     echo "Indexing filtered BAM for $SampleID"
-    samtools index $BASEDIR/$SampleID/$SampleID_filtered_sort.bam 
+    samtools index $BASEDIR/$SampleID/${SampleID}_filtered_sort.bam 
     if [ $? -eq 0 ]
     then
         echo "Finished indexing filtered BAM for $SampleID"
@@ -214,12 +213,12 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_filtered_sort_dedup.bam ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_filtered_sort_dedup.bam ]
 then
     echo "Deduplicating filtered BAM for $SampleID"
     python ~/src/WASP-0.2.1/mapping/rmdup_pe.py \
-        $BASEDIR/$SampleID/$SampleID_filtered_sort.bam  \
-        $BASEDIR/$SampleID/$SampleID_filtered_sort_dedup.bam
+        $BASEDIR/$SampleID/${SampleID}_filtered_sort.bam  \
+        $BASEDIR/$SampleID/${SampleID}_filtered_sort_dedup.bam
     if [ $? -eq 0 ]
     then
         echo "Finished deduplicating filtered BAM for $SampleID"
@@ -229,12 +228,13 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_filtered_dedup_sort.bam ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_filtered_dedup_sort.bam ]
 then
     echo "Sorting filtered, deduplicated BAM for $SampleID"
     # Sort BAM files by query name
-    samtools sort  $BASEDIR/$SampleID/$SampleID_filtered_sort_dedup.bam \
-      $BASEDIR/$SampleID/$SampleID_filtered_dedup_sor
+    samtools sort -o $BASEDIR/$SampleID/${SampleID}_filtered_dedup_sort.bam \
+      $BASEDIR/$SampleID/${SampleID}_filtered_sort_dedup.bam 
+      
     if [ $? -eq 0 ]
     then
         echo "Finished sortting filtered, deduplicated BAM for $SampleID"
@@ -244,10 +244,10 @@ then
     fi    
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_filtered_dedup_sort.bam.bai ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_filtered_dedup_sort.bam.bai ]
 then
     echo "Indexing filtered, deduplicated BAM for $SampleID"
-    samtools index $BASEDIR/$SampleID/$SampleID_filtered_dedup_sort.bam 
+    samtools index $BASEDIR/$SampleID/${SampleID}_filtered_dedup_sort.bam 
     if [ $? -eq 0 ]
     then
         echo "Finished indexing filtered, deduplicated BAM for $SampleID"
@@ -257,10 +257,10 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_filtered_dedup_sort_RG.bam ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_filtered_dedup_sort_RG.bam ]
 then
     echo "Adding read groups for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/AddRG.sh $BASEDIR/$SampleID/$SampleID_filtered_dedup_sort.bam $SampleID
+    bash ~/LabNotes/SubmissionScripts/AddRG.sh $BASEDIR/$SampleID/${SampleID}_filtered_dedup_sort.bam $SampleID
     if [ $? -eq 0 ]
     then
         echo "Finished adding read groups for $SampleID"
