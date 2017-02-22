@@ -6,41 +6,29 @@
 #$ -l h_vmem=20G
 #
 
-BASEDIR=/c8000xd3/rnaseq-heath/Mappings/
+BASEDIR=/c8000xd3/rnaseq-heath/ASEmappings/
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 SampleID=$1
 #bash ~/LabNotes/SubmissionScripts/RenameFiles $SampleID
 echo "Combining mappings for $SampleID"
-if [ ! -d $BASEDIR/$SampleID/BAM ]
+if [ ! -d $BASEDIR/$SampleID ]
 then
-    echo "Making directory $BASEDIR/$SampleID/BAM"
-    mkdir -p $BASEDIR/$SampleID/BAM
+    echo "Making directory $BASEDIR/$SampleID"
+    mkdir $BASEDIR/$SampleID
     if [ $? -eq 0 ]
     then
-        echo "Finished making directory $BASEDIR/$SampleID/BAM"
+        echo "Finished making directory $BASEDIR/$SampleID"
     else
-        echo "Could make directory $BASEDIR/$SampleID/BAM"
-        exit 1
-    fi
-fi
-if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.chr.counts.txt ]
-then
-    echo "Combining counts for $SampleID"
-    Rscript ~/LabNotes/R/CombineCounts.R $SampleID
-    if [ $? -eq 0 ]
-    then
-        echo "Finished combining counts for $SampleID"
-    else
-        echo "Could not combine counts for $SampleID"
+        echo "Could make directory $BASEDIR/$SampleID"
         exit 1
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.bam ]
+if [ ! -f $BASEDIR/$SampleID/$SampleID.bam ]
 then
     echo "Merging mappings for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/MergeSAM.sh `find $BASEDIR -name accepted_hits_filtered_sort_dedup_sort_RG.bam | grep $SampleID- | sort`
+    bash ~/LabNotes/SubmissionScripts/MergeSAM.sh `find $BASEDIR -name ${SampleID}-*_filtered_dedup_sort_RG.bam | grep $SampleID- | sort`
 
     if [ $? -eq 0 ]
     then
@@ -49,13 +37,13 @@ then
         echo "Could merge mappings for $SampleID"
         exit 1
     fi
-    mv $BASEDIR/$SampleID-1/BAM/accepted_hits_filtered_sort_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/BAM/$SampleID.bam
+    mv $BASEDIR/$SampleID-1/${SampleID}-1_filtered_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/$SampleID.bam
 fi
 
-if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.bam.bai ]
+if [ ! -f $BASEDIR/$SampleID/$SampleID.bam.bai ]
 then
     echo "Indexing merged mappings for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/SamtoolsIndex.sh $BASEDIR/$SampleID/BAM/$SampleID.bam
+    bash ~/LabNotes/SubmissionScripts/SamtoolsIndex.sh $BASEDIR/$SampleID/$SampleID.bam
 
     if [ $? -eq 0 ]
     then
@@ -66,10 +54,10 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID.ex.stats.txt ]
+if [ ! -f $BASEDIR/$SampleID/$SampleID_stats.txt ]
 then
     echo "Indexing merged mappings for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh $BASEDIR/$SampleID/BAM/$SampleID.bam
+    bam_stat.py -i $BASEDIR/$SampleID/${SampleID}.bam > $BASEDIR/$SampleID/${SampleID}_stats.txt
 
     if [ $? -eq 0 ]
     then
@@ -94,10 +82,10 @@ do
             exit 1
         fi
     fi
-    if [ ! -f $BASEDIR/$SampleID/BAM/$SampleID.$chr.ase.rtable ]
+    if [ ! -f $BASEDIR/$SampleID/$SampleID.$chr.ase.rtable ]
     then
         echo "Running ASEReadCounter on $chr for $SampleID"
-        bash ~/LabNotes/SubmissionScripts/ASEReadCounter.sh $BASEDIR/$SampleID/BAM/$SampleID.bam $chr
+        bash ~/LabNotes/SubmissionScripts/ASEReadCounter.sh $BASEDIR/$SampleID/$SampleID.bam $chr
         if [ $? -eq 0 ]
         then
             echo "Finished running ASEReadCounter on $chr for $SampleID"
