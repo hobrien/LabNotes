@@ -32,7 +32,7 @@ then
     then
         echo "Finished combining counts for $SampleID"
     else
-        echo "Could combine counts for $SampleID"
+        echo "Could not combine counts for $SampleID"
         exit 1
     fi
 fi
@@ -66,7 +66,7 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID.in.stats.txt ]
+if [ ! -f $BASEDIR/$SampleID/$SampleID.ex.stats.txt ]
 then
     echo "Indexing merged mappings for $SampleID"
     bash ~/LabNotes/SubmissionScripts/RNAseqQC.sh $BASEDIR/$SampleID/BAM/$SampleID.bam
