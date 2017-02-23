@@ -36,8 +36,18 @@ fi
 
 if [ ! -f $BASEDIR/$SampleID/$SampleID.bam ]
 then
-    sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*fastq*; done)
     echo "$MAPPER mapping for $SampleID"
+    sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*f*q.gz; done)
+    if [ ! $sequences ]
+    then
+        echo "trying without gzip"
+        sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*f*q; done)
+    fi
+    if [ ! $sequences ]
+    then
+        echo "could not find sequence files for $SampleID"
+        exit 1
+    fi
     echo "Read files: $sequences"
     bash ~/LabNotes/SubmissionScripts/HISAT2.sh $sequences | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
     if [ $? -eq 0 ]
