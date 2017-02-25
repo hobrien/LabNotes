@@ -3,6 +3,7 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
+#$ -l h_vmem=20G
 #
 
 export PATH=/share/apps/R-3.2.2/bin:/share/apps/:$PATH
