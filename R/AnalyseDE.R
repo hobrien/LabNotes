@@ -166,21 +166,22 @@ GetGeneSets <- function() {
   gene_sets <- read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/PollenEtAl.txt", 
                           "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
                           trim_ws = TRUE) %>%
-    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisEtAl.txt", 
-                         "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
-                         trim_ws = TRUE)) %>%
     bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisEtAl2.txt", 
                          "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
                          trim_ws = TRUE)) %>%
-    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisReanalysis.txt", 
-                         "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
-                         trim_ws = TRUE)) %>%
-    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/CampEtAl.txt", 
-                       "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
-                       trim_ws = TRUE)) %>%
-    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/Pollen15.txt", 
-                       "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
-                       trim_ws = TRUE))
+    filter(set %in% c('cluster7', 'cluster9') | reference == 'PollenEtAl2014')
+    #bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisEtAl.txt", 
+    #                     "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+    #                     trim_ws = TRUE)) %>%
+    #bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisReanalysis.txt", 
+    #                     "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+    #                     trim_ws = TRUE)) %>%
+    #bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/CampEtAl.txt", 
+    #                   "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+    #                   trim_ws = TRUE)) %>%
+    #bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/Pollen15.txt", 
+    #                   "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+    #                   trim_ws = TRUE))
   gene_sets <- full_join(gene_sets, 
                          bitr(gene_sets$gene_name, fromType="SYMBOL", toType="ENSEMBL", OrgDb="org.Hs.eg.db"),
                          by=c('gene_name' = 'SYMBOL')
