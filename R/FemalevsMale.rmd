@@ -295,6 +295,9 @@ p2
 
 ```{r}
 gene_sets <- GetGeneSets()
+gene_sets <- dplyr::select(MalevsFemale_complete, ENSEMBL = Id, ChrType) %>%
+  right_join(gene_sets)
+
 Neuronal <- gene_sets %>% 
   filter(set=='Neuronal' & gene_name != 'XIST') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
@@ -326,20 +329,20 @@ dev.off()
 RGFC
 
 AN <- gene_sets %>% 
-  filter(set=='AdultNeuronal' & gene_name != 'RPS4Y1') %>%
+  filter(set=='cluster7' & gene_name != 'RPS4Y1') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
-ANFC<-PlotFC(AN, 'Adult Neuron Genes')
+ANFC<-PlotFC(AN, 'Top 21 Adult Neuron Genes (cluster 7)')
 png(file="~/BTSync/FetalRNAseq/LabNotes/Results/AdultNeuron.png", bg="transparent", width=128, height=96, units='mm', res=227)
 ANFC
 dev.off()
 ANFC
 
 FR <- gene_sets %>% 
-  filter(set=='Fetal_replicating' & gene_name != 'RPS4Y1') %>%
+  filter(set=='cluster9' & gene_name != 'RPS4Y1') %>%
   left_join(Fold_changes, by=c('ENSEMBL' = 'Id')) %>%
   mutate(Id = ENSEMBL)
-FRFC<-PlotFC(FR, 'Replicating Fetal Genes')
+FRFC<-PlotFC(FR, 'Top 21 Replicating Fetal Genes (cluster 9)')
 png(file="~/BTSync/FetalRNAseq/LabNotes/Results/FetalReplicating.png", bg="transparent", width=128, height=96, units='mm', res=227)
 FRFC
 dev.off()
@@ -353,15 +356,21 @@ disease2gene <- gene_sets[, c("set", "gene_name")]
 FemaleDEG <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_FDR_0.1_edgeR/tables/FemaleUp.txt",
 "\t", escape_double = FALSE, trim_ws = TRUE)
 
-FemaleEnrichment <- enricher(FemaleDEG$GeneID, TERM2GENE=disease2gene)
-summary(FemaleEnrichment)
+FemaleEnrichment <- summary(enricher(FemaleDEG$GeneID, TERM2GENE=disease2gene))
+FemaleEnrichment$Direction <- 'FemaleBiased'
 
 MaleDEG <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_FDR_0.1_edgeR/tables/MaleUp.txt",
 "\t", escape_double = FALSE, trim_ws = TRUE)
 
-MaleEnrichment <- enricher(MaleDEG$GeneID, TERM2GENE=disease2gene)
-summary(MaleEnrichment)
-
+MaleEnrichment <- summary(enricher(MaleDEG$GeneID, TERM2GENE=disease2gene))
+MaleEnrichment$Direction <- 'MaleBiased'
+Enrichment <- bind_rows(FemaleEnrichment, MaleEnrichment) %>% 
+  separate(GeneRatio, c('x1', 'y1'), sep='/', remove=FALSE) %>% 
+  separate(BgRatio, c('x2', 'y2'), sep='/', remove=FALSE) %>%
+  mutate(Enrichment=(as.numeric(x1)/as.numeric(y1))/(as.numeric(x2)/as.numeric(y2))) %>%
+  dplyr::select(Direction, ID, GeneRatio, BgRatio, Enrichment, pvalue, p.adjust, qvalue, geneID)
+write_tsv(Enrichment, "~/BTSync/FetalRNAseq/LabNotes/Results/Enrichment.txt")
+Enrichment
 ```
 ```{r}
 dplyr::select(MaleEnrichment@result, ID, Count, geneID)
