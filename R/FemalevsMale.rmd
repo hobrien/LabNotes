@@ -7,8 +7,7 @@ output: html_document
 library(tidyverse)
 library(gridExtra)
 library(clusterProfiler)
-library(gtable)
-library(grid)
+library(GGally)
 LabNotes="/Users/heo3/BTSync/FetalRNAseq/LabNotes/"
 source(paste0(LabNotes, 'R/AnalyseDE.R'))
 source("~/BTSync/FetalRNAseq/LabNotes/R/FormatGGplot.R")
@@ -18,6 +17,8 @@ MalevsFemale_complete <- GetCounts()
 ## Histogram of sample size per week/sex
 ```{r}
 target <- GetTarget(12, 20)
+
+target %>% group_by(Sex) %>% summarise(mean(PCW))
 png(file="~/BTSync/FetalRNAseq/LabNotes/Results/PCWhist.png", bg="transparent", width=128, height=96, units='mm', res=227)
 layout(matrix(c(1,2), 2, byrow = TRUE))
 p1 <- ggplot(target, aes(x=PCW, fill=Sex)) +
@@ -396,5 +397,120 @@ PlotExpression('HTR2A', MalevsFemale_complete, '17921')
 PlotExpression('GABRG2', MalevsFemale_complete, '17921')
 ```
 
+- Very low/negative fold-change correlation between weeks (when Y/XIST excluded)
+- For some reason, week 17-19 is correlated with everything
+- When week 14 is split into two samples, the second set is highly correlated with the full set (r=0.904), but the correlation with the first set is much weeker (r=0.675), and there are some serious outliers (one sample with log2FC=-10 for this analysis vs close to 0 for all others)
 
+
+```{r}
+Excluded <- MalevsFemale_complete %>% filter(ChrType == 'chrY' | Id == 'ENSG00000229807') %>%
+  dplyr::select(Id)
+W14_DE <-
+FC_ByWeek <- Fold_changes %>%
+  dplyr::select(-sig) %>%
+  spread(week, log2FoldChange) %>% 
+  dplyr::select(Id, 'w12'=`12`, 'w13'=`13`, 'w14'=`14`, 'w15_16'=`15.5`, 'w17_19'=`18`) %>%
+  full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_19043_17921_19031_17221_18015_17053_17071_18529_18856_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(Id, w14_1= log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+  full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_17812_18282_18349_18355_18687_16428_16488_16640_16929_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  dplyr::select(Id, w14_2=log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+  full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_17812_18282_18349_17221_18015_16428_16488_18529_18856_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  dplyr::select(Id, w14_3=log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+  full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_19043_17921_19031_18355_18687_17053_17071_16640_16929_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  dplyr::select(Id, w14_4=log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+  anti_join(Excluded) 
+dplyr::select(FC_ByWeek, -Id, -starts_with('w14_')) %>%
+  ggpairs()
+dplyr::select(FC_ByWeek, starts_with('w14')) %>%
+  ggpairs()
+filter(Fold_changes, week==14 & sig==1) %>% 
+  inner_join(FC_ByWeek) %>% 
+  dplyr::select(starts_with('w14')) %>% 
+  ggpairs()
+```
+
+- For some reason, the second set is getting some genes with relatively small differences between Male and Female counts, but very large fold changes
+- The fold changes are more complex estimates, so simply dividing Male by Female doesn't give the exact same numeber (and in fact I had to add 1 to deal with division by zero errors)
+- However, in the case of the second set, fold changes calculated this way correlate highely with the original estimates (r=0.903 with no major outliers)
+- The correlation is much lower in the case of the first set (r=.591, with a point at 0,-10)
+- In the case of the second set, the original FC values correlate better with the full set than the recalculated ones (r=0.904 vs. r=0.847), while in the case of set 1, the correlation is lower (r=0.675 vs. r=0.733)
+- It seems pretty clear that something went horribly wrong in the first run 
+
+```{r}
+recalculated <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_19043_17921_19031_17221_18015_17053_17071_18529_18856_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  separate(Id, c('Id'), sep = "[.]", extra='drop') %>%
+  mutate(w14_1_2 = log2((Male+1)/(Female+1))) %>%
+  dplyr::select(Id, w14_1_2) %>%
+  inner_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_17812_18282_18349_18355_18687_16428_16488_16640_16929_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  separate(Id, c('Id'), sep = "[.]", extra='drop') %>%
+  mutate(w14_2_2 = log2((Male+1)/(Female+1))) %>%
+  dplyr::select(Id, w14_2_2)
+  ) %>%
+  inner_join(FC_ByWeek)
+
+recalculated %>% dplyr::select(w14, w14_1, w14_1_2, w14_2, w14_2_2) %>%
+    ggpairs()
+
+```
+
+- The correlation with the replication set is ...not good
+- It's similar to the between-weeks values
+
+```{r}
+HDBRexpression <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBRexpression_FDR_0.1_edgeR/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% dplyr::select(Id, w14_rep=log2FoldChange) %>% separate(Id, c('Id'), sep = "[.]", extra='drop') %>%
+  inner_join(recalculated) 
+
+HDBRexpression %>% dplyr::select(w14, w14_1_2, w14_2, w14_rep) %>%
+    ggpairs()
+
+```
+
+
+```{r}
+DEseq_FC <- read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_FDR_0.1_DEseq/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(Id, w14= log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop') %>%
+  full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_19043_17921_19031_17221_18015_17053_17071_18529_18856_FDR_0.1_DEseq/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(Id, w14_1= log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+  full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_18282_18349_18355_18687_16428_16488_16640_16929_FDR_0.1_DEseq/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  dplyr::select(Id, w14_2=log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+    full_join(
+    read_delim("~/BTSync/FetalRNAseq/Counts/MvsF_14_HDBR_excl_17921_FDR_0.1_DEseq/tables/MalevsFemale.complete.txt",
+"\t", escape_double = FALSE, trim_ws = TRUE) %>% 
+  dplyr::select(Id, w14_3=log2FoldChange) %>%
+  separate(Id, c('Id'), sep = "[.]", extra='drop')
+  ) %>%
+  anti_join(Excluded) 
+dplyr::select(DEseq_FC, -Id) %>%
+  ggpairs()
+```
 
