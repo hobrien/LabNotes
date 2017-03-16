@@ -56,10 +56,10 @@ PlotFC <- function(genes, set_name) {
 
 PlotFC_by_ChrType <- function(genes, set_name) {
   plot <- ggplot(genes, aes(x=week, y=log2FoldChange, group=Id)) +
-    geom_line(alpha=.25, aes(colour=ChrType)) +
-    geom_point(colour='red', size=1, alpha=.25, data=filter(genes, sig==1)) +
+    geom_line(alpha=1, aes(colour=ChrType)) +
+    geom_point(colour='black', size=1, alpha=.25, data=filter(genes, sig==1)) +
     scale_x_continuous(breaks=c(12,13,14,15.5,18), labels=c('12', '13', '14', '15-16', '17-19')) +
-    scale_colour_manual(values=c('black', 'orange', 'blue')) +
+    scale_colour_manual(values=brewer.pal(6, "Set1")[c(1,2,4)]) + 
     tufte_theme() +
     ylab("<--- Female-biased        Male-biased --->") +
     xlab("Post Conception Week") +
@@ -168,12 +168,24 @@ GetGeneSets <- function() {
                           trim_ws = TRUE) %>%
     bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisEtAl.txt", 
                          "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
-                         trim_ws = TRUE))
+                         trim_ws = TRUE)) %>%
+    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisEtAl2.txt", 
+                         "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+                         trim_ws = TRUE)) %>%
+    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/DarmanisReanalysis.txt", 
+                         "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+                         trim_ws = TRUE)) %>%
+    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/CampEtAl.txt", 
+                       "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+                       trim_ws = TRUE)) %>%
+    bind_rows(read_delim("~/BTSync/FetalRNAseq/GSEA/MSigDB/Pollen15.txt", 
+                       "\t", escape_double = FALSE, col_names=c('gene_name', 'set', 'reference'), 
+                       trim_ws = TRUE))
   gene_sets <- full_join(gene_sets, 
                          bitr(gene_sets$gene_name, fromType="SYMBOL", toType="ENSEMBL", OrgDb="org.Hs.eg.db"),
                          by=c('gene_name' = 'SYMBOL')
   )
-  BG <- MalevsFemale_complete %>%
+  BG <- GetCounts() %>%
     filter(! is.na(FC)) %>%
     dplyr::select(Id) %>%
     mutate(set="Background", reference = NA)
