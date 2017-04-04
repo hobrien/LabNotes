@@ -10,29 +10,34 @@
 library(shiny)
 library(tidyverse)
 source("FormatGGplot.R")
+library(DT)
 
 counts <- read_delim("./Data/counts.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
-fitted <- read_delim("./Data/fitted.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
+fitted <- read_delim("./Data/fitted.txt", "\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  mutate(pvalue = as.numeric(format(pvalue, digits=2)), padj = as.numeric(format(padj, digits=2))) %>%
+  dplyr::rename(log2FoldDiff = log2FoldChange)
 target <- read_delim("./Data/target.txt", "\t", escape_double = FALSE, trim_ws = TRUE) %>%
   mutate(label=as.character(label))
 
 PlotTimepoint<-function(geneID, counts, fitted, target, ages) {
+  geneID = sub("(ENSG[0-9]+)\\.[0-9]+", '\\1', geneID)
   ageSplit <- strsplit(ages, '-')[[1]]
   min <- ageSplit[1]
   max <- ageSplit[length(ageSplit)]
-  data <- counts %>% filter(SYMBOL == geneID ) %>%  
-    dplyr::select(-SYMBOL) %>%
+  data <- counts %>% filter(SYMBOL == geneID | Id == geneID) %>%  
+    dplyr::select(-SYMBOL, -Id) %>%
     gather() %>%
     separate(key, into=c('norm', 'label'), sep='[.]') %>%
     dplyr::select(label, value) %>%
     left_join(target) %>%
     filter(PCW >= min & PCW <= max)
-  mean <- filter(fitted, SYMBOL == geneID & ageBin==ages)
-  fc <- mean$log2FoldChange[1] %>% format(digits=2)
-  pval <- mean$padj[1] %>% format(digits=2)
+  mean <- filter(fitted, SYMBOL == geneID | Id == geneID) %>% filter(ageBin==ages)
+  fc <- mean$log2FoldDiff[1] %>% format(digits=2)
+  pval <- mean$pvalue[1]
+  qval <- mean$padj[1]
   mean <- mean %>% dplyr::select(Male, Female) %>%
     gather('Sex', 'mean')
-  title<-paste0(geneID, ': log2 difference = ', fc, ', adjusted pvalue = ', pval)
+  title<-paste0(geneID, ': log2 difference = ', fc, ', p=', pval, ', q=', qval)
   plot<-  ggplot(data, aes(x=Sex, colour=Sex)) + 
     geom_jitter(aes(y=value), height = 0, width=.1, alpha=.75) + 
     geom_errorbar(aes(ymin=mean, ymax=mean), colour='black', size=1, width=.5, data=mean) +
@@ -59,7 +64,7 @@ PlotSampleSize<-function(target, ages){
     scale_y_continuous(breaks=seq(0,100, 5)) +
     scale_x_continuous(breaks=c(11,12,13,14,15,16),
                        labels=c('11','12','13','14','15-16','17-19')) +
-    tufte_theme() +
+    main_theme() +
     xlab("Post Conception Weeks") +
     scale_fill_brewer(type = "qual", palette = 6) 
   plot
@@ -73,6 +78,35 @@ shinyServer(function(input, output) {
   })
   output$sampleSizeHist <- renderPlot({
     PlotSampleSize(target, input$ages)
+  })
+  output$summary <- renderPrint({
+    summary(cars)
+  })
+  
+  all_PCW = filter(fitted, ageBin=='12-19') %>% dplyr::select(-ageBin) %>% arrange(padj)
+  PCW12 = filter(fitted, ageBin=='12') %>% dplyr::select(-ageBin) %>% arrange(padj)
+  PCW13 = filter(fitted, ageBin=='13') %>% dplyr::select(-ageBin) %>% arrange(padj)
+  PCW14 = filter(fitted, ageBin=='14') %>% dplyr::select(-ageBin) %>% arrange(padj)
+  PCW15_16 = filter(fitted, ageBin=='15-16') %>% dplyr::select(-ageBin) %>% arrange(padj)
+  PCW17_19 = filter(fitted, ageBin=='17-19') %>% dplyr::select(-ageBin) %>% arrange(padj)
+  
+  output$mytable1 <- DT::renderDataTable({
+    DT::datatable(all_PCW[all_PCW$padj < input$pvalue, ])
+  })
+  output$mytable2 <- DT::renderDataTable({
+    DT::datatable(PCW12[PCW12$padj < input$pvalue, ])
+  })
+  output$mytable3 <- DT::renderDataTable({
+    DT::datatable(PCW13[PCW13$padj < input$pvalue, ])
+  })
+  output$mytable4 <- DT::renderDataTable({
+    DT::datatable(PCW14[PCW14$padj < input$pvalue, ])
+  })
+  output$mytable5 <- DT::renderDataTable({
+    DT::datatable(PCW15_16[PCW15_16$padj < input$pvalue, ])
+  })
+  output$mytable6 <- DT::renderDataTable({
+    DT::datatable(PCW17_19[PCW17_19$padj < input$pvalue, ])
   })
   
 })
