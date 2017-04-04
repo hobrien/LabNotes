@@ -108,5 +108,41 @@ shinyServer(function(input, output) {
   output$mytable6 <- DT::renderDataTable({
     DT::datatable(PCW17_19[PCW17_19$padj < input$pvalue, ])
   })
+  output$download12_19 <- downloadHandler(
+    filename = function() { 'PCW12_19.csv' },
+    content = function(file) {
+      write_tsv(all_PCW[all_PCW$padj < input$pvalue, ], file)
+    }
+  )
+  output$download12 <- downloadHandler(
+    filename = function() { 'PCW12.csv' },
+    content = function(file) {
+      write_tsv(PCW12[PCW12$padj < input$pvalue, ], file)
+    }
+  )
+  output$download13 <- downloadHandler(
+    filename = function() { 'PCW13.csv' },
+    content = function(file) {
+      write_tsv(PCW13[PCW13$padj < input$pvalue, ], file)
+    }
+  )
+  output$download14 <- downloadHandler(
+    filename = function() { 'PCW14.csv' },
+    content = function(file) {
+      write_tsv(PCW14[PCW14$padj < input$pvalue, ], file)
+    }
+  )
+  output$download15_16 <- downloadHandler(
+    filename = function() { 'PCW15_16.csv' },
+    content = function(file) {
+      write_tsv(PCW15_16[PCW15_16$padj < input$pvalue, ], file)
+    }
+  )
+  output$download17_19 <- downloadHandler(
+    filename = function() { 'PCW17_19.csv' },
+    content = function(file) {
+      write_tsv(PCW17_19[PCW17_19$padj < input$pvalue, ], file)
+    }
+  )
   
 })

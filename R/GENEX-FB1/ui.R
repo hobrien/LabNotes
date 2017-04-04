@@ -34,7 +34,32 @@ navbarPage("Gene Expression in the Fetal Brain: Sex Biases:",
                          radioButtons("p_type", "Maximum p-value", c('Uncorrected p-values' = 'p', 'FDR corrected p-values (q-values)'= 'q'), selected = 'q', inline = FALSE,
                                       width = NULL),
                          sliderInput("pvalue", "p-value:", 
-                                     min = 0, max = 1, value = 0.1, step= 0.01)
+                                     min = 0, max = 1, value = 0.1, step= 0.01),
+                         conditionalPanel(
+                           'input.dataset === "12-19 PCW"',
+                           downloadButton('download12_19', 'Download')
+                         ),
+                         conditionalPanel(
+                           'input.dataset === "12 PCW"',
+                           downloadButton('download12', 'Download')
+                         ),
+                         conditionalPanel(
+                           'input.dataset === "13 PCW"',
+                           downloadButton('download13', 'Download')
+                         ),
+                         conditionalPanel(
+                           'input.dataset === "14 PCW"',
+                           downloadButton('download14', 'Download')
+                         ),
+                         conditionalPanel(
+                           'input.dataset === "15-16 PCW"',
+                           downloadButton('download15_16', 'Download')
+                         ),
+                         conditionalPanel(
+                           'input.dataset === "17-19 PCW"',
+                           downloadButton('download17_19', 'Download')
+                         )
+                         
                        ),
                        mainPanel(
                          tabsetPanel(
