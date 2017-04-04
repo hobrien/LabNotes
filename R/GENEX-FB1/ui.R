@@ -31,7 +31,7 @@ navbarPage("Gene Expression in the Fetal Brain: Sex Biases:",
             tabPanel("Table",
                      sidebarLayout(
                        sidebarPanel(
-                         radioButtons("p_type", "Maximum p-value", c('Uncorrected p-values' = 'p', 'FDR corrected p-values (q-values)'= 'q'), selected = 'q', inline = FALSE,
+                         radioButtons("p_type", "Maximum p-value", c('Uncorrected p-values' = 'pvalue', 'FDR corrected p-values (q-values)'= 'padj'), selected = 'padj', inline = FALSE,
                                       width = NULL),
                          sliderInput("pvalue", "p-value:", 
                                      min = 0, max = 1, value = 0.1, step= 0.01),

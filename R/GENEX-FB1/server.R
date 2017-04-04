@@ -93,22 +93,22 @@ shinyServer(function(input, output) {
   PCW17_19 = filter(fitted, ageBin=='17-19') %>% dplyr::select(-ageBin) %>% arrange(padj)
   
   output$mytable1 <- DT::renderDataTable({
-    DT::datatable(all_PCW[all_PCW$padj < input$pvalue, ])
+    DT::datatable(all_PCW[all_PCW[, input$p_type] < input$pvalue, ])
   })
   output$mytable2 <- DT::renderDataTable({
-    DT::datatable(PCW12[PCW12$padj < input$pvalue, ])
+    DT::datatable(PCW12[PCW12[, input$p_type] < input$pvalue, ])
   })
   output$mytable3 <- DT::renderDataTable({
-    DT::datatable(PCW13[PCW13$padj < input$pvalue, ])
+    DT::datatable(PCW13[PCW13[, input$p_type] < input$pvalue, ])
   })
   output$mytable4 <- DT::renderDataTable({
-    DT::datatable(PCW14[PCW14$padj < input$pvalue, ])
+    DT::datatable(PCW14[PCW14[, input$p_type] < input$pvalue, ])
   })
   output$mytable5 <- DT::renderDataTable({
-    DT::datatable(PCW15_16[PCW15_16$padj < input$pvalue, ])
+    DT::datatable(PCW15_16[PCW15_16[, input$p_type] < input$pvalue, ])
   })
   output$mytable6 <- DT::renderDataTable({
-    DT::datatable(PCW17_19[PCW17_19$padj < input$pvalue, ])
+    DT::datatable(PCW17_19[PCW17_19[, input$p_type] < input$pvalue, ])
   })
   output$download12_19 <- downloadHandler(
     filename = function() { 'PCW12_19.csv' },
