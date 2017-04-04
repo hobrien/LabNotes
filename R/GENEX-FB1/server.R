@@ -62,10 +62,12 @@ PlotSampleSize<-function(target, ages){
     side_theme() +
     ggtitle("Sample Size") +
     scale_y_continuous(breaks=seq(0,100, 5)) +
-    scale_x_continuous(breaks=c(11,12,13,14,15,16),
+    scale_x_continuous(limits=c(11, 17),
+                       breaks=c(11,12,13,14,15,16),
                        labels=c('11','12','13','14','15-16','17-19')) +
-    main_theme() +
+    side_theme() +
     xlab("Post Conception Weeks") +
+    ylab("Count") +
     scale_fill_brewer(type = "qual", palette = 6) 
   plot
 }

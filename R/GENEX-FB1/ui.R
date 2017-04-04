@@ -16,7 +16,7 @@ navbarPage("Gene Expression in the Fetal Brain: Sex Biases:",
             tabPanel("Plot",
                      sidebarLayout(
                        sidebarPanel(
-                         textInput("geneID", "geneID"),
+                         textInput("geneID", "Gene symbol or Ensembl ID", value='GRIN2A'),
                          radioButtons("ages", "Post-Conception Weeks", c('12', '13', '14', '15-16', '17-19', '12-19'), selected = '12-19', inline = FALSE,
                                       width = NULL),
                          plotOutput("sampleSizeHist", height=200)
