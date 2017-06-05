@@ -3,6 +3,7 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
+#$ -pe smp 8
 #
 
 # This will take an individual pair of read files and take them through all steps of
@@ -48,7 +49,8 @@ then
         exit 1
     fi
     echo "Read files: $sequences"
-    bash ~/LabNotes/SubmissionScripts/HISAT2.sh $sequences | samtools view -S -bo $BASEDIR/$SampleID/$SampleID.bam -
+    sequences="$sequences $BASEDIR/$SampleID/$SampleID.bam" # Add output file to arguments
+    qsub -N h${SampleID}_map ~/LabNotes/SubmissionScripts/HISAT2.sh $sequences
     if [ $? -eq 0 ]
     then
         echo "Finished $MAPPER mapping for $SampleID"
