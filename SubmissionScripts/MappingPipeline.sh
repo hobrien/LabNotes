@@ -3,7 +3,6 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
-#$ -pe smp 8
 #
 
 # This will take an individual pair of read files and take them through all steps of
