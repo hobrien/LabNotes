@@ -175,6 +175,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/NCBI/GRCh38Decoy/Homo_sapiens_NCBI_GRCh38Decoy.tar.gz```
     - ```tar -xzf Homo_sapiens_UCSC_hg19.tar.gz```
     - ```tophat --keep-fasta-order --transcriptome-index /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx --library-type fr-secondstrand --mate-inner-dist 150  --mate-std-dev 50 --num-threads 8 --output-dir /home/heath/Mappings/15533_150 /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome /home/heath/Trimmed/15533_TGACCA_L007_R1_001_trimmed.fastq.gz /home/heath/Trimmed/15533_TGACCA_L007_R2_001_trimmed.fastq.gz```
+##Switch to mapping with HISAT
+- this gives very similar results, but runs a lot faster
+- I'm using Tophat mapping for the differential expression analysis, but HISAT for Allele-specific analyses
 
 ##Mapping QC
 - install [bamQC](https://github.com/s-andrews/BamQC) on rocks
@@ -246,8 +249,15 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - ```cat /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bl |blast2bed12.py > /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/AbundantSequences/humRibosomal.bed````
     - This is working great now, except that insertion_profile.py was reporting results for 52 bp reads. I'm testing it now with the -l 100 option to see if that helps
     - It would be nice if it could separate SNPs from reads 1 and 2, but otherwise, it's pretty nice                     
-
-#Allele-specific alignment
+- for HISAT mappings, I've not bothered to run the full suite of QC metric, but I am calculating basic stats because I find it to be a lot more useful than flagstat
+    - it reports the total number of records, but then breaks them down into unmapped, unique, non-unique, and secondary alignments
+    - taking a sum of the first three categories gives the total number of input reads
+    - when trimming, the total number of reads remains constant, but some reads end up with a length of zero
+    - the number of reads reported in this summary is lower than the number of reads in the input file (by 4.4 million), so the mapper must be trowing away short reads
+    - 3.7 million less reads are unmapped after trimming, and 2.9 million less are unique while 2.2 million more are non-unique
+    - this means basically means that 3.7 crap reads that don't map plus 700 k crap reads that do map are filtered out and that 2.2 million uniquely mapping reads are non-unique after trimming
+    - this means that the difference in the number of records (1.9 million) is less than the difference in the number of reads (4.4 million), because 2.2 million non-unique reads map a total of 4.7 million times
+    - while 2.9 million fewer reads are uniquely mapped, 3.5 million fewer reads are mapped in proper pairs. At first I thought this mean that the mapping accuracy is higher with the untrimmed data, but each read that is unmapped on non-uniquely mapped results in two reads being unpaired
 
 ##I am going to need to do a liftover before running this because the vcf is for hg19
 ###LiftoverVcf (picard-tools)    
