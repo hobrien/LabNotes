@@ -18,7 +18,8 @@ MAPPER=HISAT2
 BASEDIR=/c8000xd3/rnaseq-heath/ASEmappings
 ANNOTATION=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Annotation/Genes.gencode
 REF=/c8000xd3/rnaseq-heath/Ref/Homo_sapiens/GRCh38/NCBI/GRCh38Decoy/Sequence/WholeGenomeFasta
-sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /neurocluster/sequencers/foetalRNAseq/ /neurocluster/databank/foetal-rna/ -name $name*f*q.gz; done)
+seq_folder=$(grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 5 | head -1)
+sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find $seq_folder -name $name*f*q.gz; done)
 
 echo "Starting mapping for $BASEDIR/$SampleID"
 if [ ! -d $BASEDIR/$SampleID ]
@@ -40,7 +41,7 @@ then
     if [ ! $sequences ]
     then
         echo "trying without gzip"
-        sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find /c8000xd2/foetalRNAseq/ /c8000xd3/databank/foetal-rna/ -name $name*f*q; done)
+        sequences=$(for name in `grep -P "\s$SampleID(\s|$)"  ~/LabNotes/sequences.txt | cut -f 1`; do find $seq_folder -name $name*f*q; done)
     fi
     if [ ! $sequences ]
     then
