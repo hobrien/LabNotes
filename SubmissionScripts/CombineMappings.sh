@@ -3,10 +3,11 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
+#$ -pe smp 2
 #$ -l h_vmem=20G
 #
 
-BASEDIR=/c8000xd3/rnaseq-heath/ASEmappings/
+BASEDIR=/c8000xd3/rnaseq-heath/ASEmappings
 
 # see http://www.tldp.org/LDP/LG/issue18/bash.html for bash Parameter Substitution
 SampleID=$1
@@ -28,7 +29,7 @@ fi
 if [ ! -f $BASEDIR/$SampleID/$SampleID.bam ]
 then
     echo "Merging mappings for $SampleID"
-    bash ~/LabNotes/SubmissionScripts/MergeSAM.sh `find $BASEDIR -name ${SampleID}-*_filtered_dedup_sort_RG.bam | grep $SampleID- | sort`
+    bash ~/LabNotes/SubmissionScripts/MergeSAM.sh `find /c8000xd3/rnaseq-heath/ASEmappings/${SampleID}-*/find_intersecting_snps/ -name ${SampleID}-*_remap_sort_keep_merge_sort_dedup_sort_RG.bam | grep $SampleID- | sort`
 
     if [ $? -eq 0 ]
     then
@@ -37,7 +38,7 @@ then
         echo "Could merge mappings for $SampleID"
         exit 1
     fi
-    mv $BASEDIR/$SampleID-1/${SampleID}-1_filtered_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/$SampleID.bam
+    mv $BASEDIR/$SampleID-1/find_intersecting_snps/${SampleID}-1_remap_sort_keep_merge_sort_dedup_sort_RG_merge.bam $BASEDIR/$SampleID/$SampleID.bam
 fi
 
 if [ ! -f $BASEDIR/$SampleID/$SampleID.bam.bai ]
@@ -54,16 +55,16 @@ then
     fi
 fi
 
-if [ ! -f $BASEDIR/$SampleID/$SampleID_stats.txt ]
+if [ ! -f $BASEDIR/$SampleID/${SampleID}_stats.txt ]
 then
-    echo "Indexing merged mappings for $SampleID"
+    echo "Collecting stats on merged mapping for $SampleID"
     bam_stat.py -i $BASEDIR/$SampleID/${SampleID}.bam > $BASEDIR/$SampleID/${SampleID}_stats.txt
 
     if [ $? -eq 0 ]
     then
-        echo "Finished indexing merged mappings for $SampleID"
+        echo "Finished collecting stats on merged mappings for $SampleID"
     else
-        echo "Could index merged mappings for $SampleID"
+        echo "Could colect stats on merged mappings for $SampleID"
         exit 1
     fi
 fi
