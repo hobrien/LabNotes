@@ -16,7 +16,10 @@ The VCF is coded according to the reference allele, so I am going to have to cou
 I'm not sure what to do about missing data. Currently I'm encoding any SNP with a missing allele as homozygous for the major allele.
 """ 
 
-def main():
+def main(argv):
+ with open(argv[0], 'w') as genotype_file:
+  with open(argv[1], 'w') as snp_pos_file:
+    snp_pos_file.write('\t'.join(['snp', 'chr', 'pos']) + '\n')
     for line in fileinput.input([]):
        line = line.strip()
        try:
@@ -24,12 +27,15 @@ def main():
                continue
            elif line[0] == '#': # column names
                fields = line.split('\t')
-               print '\t'.join(['id'] + fields[9:])
+               genotype_file.write('\t'.join(['id'] + fields[9:]) + '\n')
                continue
        except IndexError:
            continue
-       line=line.replace('/', '|')  
+       line=line.replace('/', '|')
        fields = line.split('\t')
+       if fields[0][:3] != 'chr':
+          fields[0] = 'chr' + fields[0]
+       snp_pos_file.write('\t'.join([fields[2], fields[0], fields[1]]) + '\n')
        output = [fields[2]]
        if minor_allele(line) == 0:
            minor_homo = '0|0'
@@ -48,7 +54,7 @@ def main():
            else:
                print field
                sys.exit(field)
-       print '\t'.join(output)                  
+       genotype_file.write('\t'.join(output)+'\n')                  
                
         
 def minor_allele(line):
@@ -63,6 +69,6 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
            
 if __name__ == "__main__":
     global usage
-    usage = "bcftools view -H -r chrX:XXX XXX.vcf | python GetGenotypes.py VCF_index.txt"
+    usage = "bcftools view xxx.vcf | python VCF2numeric.py genoype_file snp_pos_file"
     warnings.formatwarning = warning_on_one_line
-    main()
+    main(sys.argv[1:])
