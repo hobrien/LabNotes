@@ -12,8 +12,6 @@ import re
 I interpret this to mean that the het is encoded 1 and the minor allele homozygote is encoded 2 (ie; the number of copies of the minor allele)
 I assume that I should use the minor allele of the sample, not the global minor allele (this certainly makes it easier)
 The VCF is coded according to the reference allele, so I am going to have to count the number of 0s and 1s to figure out which is the minor allele and recode accordingly.
-
-I'm not sure what to do about missing data. Currently I'm encoding any SNP with a missing allele as homozygous for the major allele.
 """ 
 
 def main(argv):
@@ -45,12 +43,15 @@ def main(argv):
            major_homo = '0|0'
            
        for field in fields[9:]:
-           if field[:3] == major_homo or field[:3].find('.') >= 0:
+           if field[:3] == major_homo:
                output += ['0']
            elif field[:3] == '0|1' or field[:3] == '1|0':
                output += ['1']
            elif field[:3] == minor_homo:
                output += ['2']
+           elif field[:3].find('.') >= 0:
+               output += ['NA']
+               warnings.warn("missing genotype (%s)" % field[:3])
            else:
                print field
                sys.exit(field)
