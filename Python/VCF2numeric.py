@@ -13,7 +13,7 @@ I interpret this to mean that the het is encoded 1 and the minor allele homozygo
 I assume that I should use the minor allele of the sample, not the global minor allele (this certainly makes it easier)
 The VCF is coded according to the reference allele, so I am going to have to count the number of 0s and 1s to figure out which is the minor allele and recode accordingly.
 
-
+I'm not sure what to do about missing data. Currently I'm encoding any SNP with a missing allele as homozygous for the major allele.
 """ 
 
 def main():
@@ -24,10 +24,11 @@ def main():
                continue
            elif line[0] == '#': # column names
                fields = line.split('\t')
-               print '\t'.join(fields[2:3] + fields[9:])
+               print '\t'.join(['id'] + fields[9:])
                continue
        except IndexError:
            continue
+       line=line.replace('/', '|')  
        fields = line.split('\t')
        output = [fields[2]]
        if minor_allele(line) == 0:
@@ -38,13 +39,14 @@ def main():
            major_homo = '0|0'
            
        for field in fields[9:]:
-           if field[:3] == major_homo:
+           if field[:3] == major_homo or field[:3].find('.') >= 0:
                output += ['0']
            elif field[:3] == '0|1' or field[:3] == '1|0':
                output += ['1']
            elif field[:3] == minor_homo:
                output += ['2']
            else:
+               print field
                sys.exit(field)
        print '\t'.join(output)                  
                
