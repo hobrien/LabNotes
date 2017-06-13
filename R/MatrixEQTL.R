@@ -31,12 +31,21 @@ target <- target[ , order(names(target))]
 target <- dplyr::select(target, id, everything())
 
 # convert vcf file to table of genotypes and list of SNP locations
-vcf_file_name = "/Users/heo3/BTSync/FetalRNAseq/Imputation/chr22.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz"
+individual_vcf_files = "/Users/heo3/BTSync/FetalRNAseq/Imputation/chr*.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz"
+vcf_file_name = "/Users/heo3/BTSync/FetalRNAseq/Imputation/chr_all.dose.rename.filter_samples.filter_sites.rsID.recoded.GRCh38.sort.vcf.gz"
 python_script_name = "~/BTsync/FetalRNAseq/LabNotes/Python/VCF2numeric.py"
 snps_location_file_name = "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/snp_pos.txt"
 snps_file_name = "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/genotypes.txt"
 
-system(paste('bcftools view', vcf_file_name, '| python', python_script_name, snps_file_name, snps_location_file_name))
+# use file tests to avoid re-doing unnecessary shell commands, which are pretty time consuming
+if (! file_test("-f", vcf_file_name)) {
+  system(paste('bcftools concat', individual_vcf_files, '>', vcf_file_name))
+}
+
+if (! file_test("-f", snps_location_file_name) | ! file_test("-f", snps_file_name)) {
+  system(paste('bcftools view', vcf_file_name, '| python', python_script_name, snps_file_name, snps_location_file_name))
+}
+
 snp_tbl<- read_delim(snps_file_name, delim='\t')
 snp_tbl <- dplyr::rename(snp_tbl,  `18208` = `18121`)
 snp_tbl <- snp_tbl[ , order(names(snp_tbl))]
@@ -95,8 +104,8 @@ snpspos = read.table(snps_location_file_name, header = TRUE, stringsAsFactors = 
 
 
 ###############################################################
-output_file_name_cis = tempfile();
-output_file_name_tra = tempfile();
+output_file_name_cis = "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/cis_eqtl.txt"
+output_file_name_tra = "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/trans_eqtl.txt"
 
 pvOutputThreshold_cis = 2e-2;
 pvOutputThreshold_tra = 1e-2;
@@ -128,82 +137,8 @@ me = Matrix_eQTL_main(
 unlink(output_file_name_tra);
 unlink(output_file_name_cis);
 
-## Results:
+write_tsv(filter(me$cis$eqtls, FDR <=.1), "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/cis_eqtl.txt")
+write_tsv(filter(me$trans$eqtls, FDR <=.1), "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/trans_eqtl.1.txt")
+write_tsv(filter(me$trans$eqtls, FDR <=.1e-10), "~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/trans_eqtl.txt")
 
-cat('Analysis done in: ', me$time.in.sec, ' seconds', '\n');
-cat('Detected local eQTLs:', '\n');
-show(me$cis$eqtls)
-cat('Detected distant eQTLs:', '\n');
-show(me$trans$eqtls)
-
-## Plot the Q-Q plot of local and distant p-values
-
-plot(me)
-
-
-
-
-base.dir = find.package("MatrixEQTL")
-useModel = modelLINEAR
-SNP_file_name = paste(base.dir, "/data/SNP.txt", sep="")
-expression_file_name = paste(base.dir, "/data/GE.txt", sep="")
-covariates_file_name = paste(base.dir, "/data/Covariates.txt", sep="")
-output_file_name = tempfile()
-pvOutputThreshold = 1e-2
-errorCovariance = numeric()
-snps = SlicedData$new();
-snps$fileDelimiter = "\t";      # the TAB character
-snps$fileOmitCharacters = "NA"; # denote missing values;
-snps$fileSkipRows = 1;          # one row of column labels
-snps$fileSkipColumns = 1;       # one column of row labels
-snps$fileSliceSize = 2000;      # read file in pieces of 2,000 rows
-snps$LoadFile( SNP_file_name );
-
-## Load gene expression data
-
-gene = SlicedData$new();
-gene$fileDelimiter = "\t";      # the TAB character
-gene$fileOmitCharacters = "NA"; # denote missing values;
-gene$fileSkipRows = 1;          # one row of column labels
-gene$fileSkipColumns = 1;       # one column of row labels
-gene$fileSliceSize = 2000;      # read file in slices of 2,000 rows
-gene$LoadFile(expression_file_name);
-
-## Load covariates
-
-
-cvrt = SlicedData$new();
-cvrt$fileDelimiter = "\t";      # the TAB character
-cvrt$fileOmitCharacters = "NA"; # denote missing values;
-cvrt$fileSkipRows = 1;          # one row of column labels
-cvrt$fileSkipColumns = 1;       # one column of row labels
-if(length(covariates_file_name)>0) {
-  cvrt$LoadFile(covariates_file_name);
-}
-
-me = Matrix_eQTL_engine(
-  snps = snps,
-  gene = gene,
-  cvrt = cvrt,
-  output_file_name = output_file_name,
-  pvOutputThreshold = pvOutputThreshold,
-  useModel = useModel,
-  errorCovariance = errorCovariance,
-  verbose = TRUE,
-  pvalue.hist = TRUE,
-  min.pv.by.genesnp = FALSE,
-  noFDRsaveMemory = FALSE);
-
-unlink(output_file_name);
-
-cat('Analysis done in: ', me$time.in.sec, ' seconds', '\n');
-cat('Detected eQTLs:', '\n');
-show(me$all$eqtls)
-plot(me)
-
-
-#Test local and distand gene-SNP pairs separately and plot Q-Q plots of local and distant p-values
-
-snps_location_file_name = paste(base.dir, "/data/snpsloc.txt", sep="");
-gene_location_file_name = paste(base.dir, "/data/geneloc.txt", sep="");
-
+save.image(file="~/BTSync/FetalRNAseq/Github/GENEX-FB2/MatrixEQTL/results.RData")
