@@ -1,7 +1,5 @@
   * [Create VCF with imputed SNPs](#create-vcf-with-imputed-snps)
     * [Prepare files for imputation](#prepare-files-for-imputation)
-      * [PLINK](#plink)
-      * [checkVCF](#checkvcf)
     * [Concatenate and filter imputed data](#concatenate-and-filter-imputed-data)
       * [bcftools](#bcftools)
     * [Add SNP IDs to imputed VCFs](#add-snp-ids-to-imputed-vcfs)
@@ -13,17 +11,19 @@
       * [Use trim\_galore cutadapt wrapper](#use-trim_galore-cutadapt-wrapper)
   * [Mapping](#mapping)
     * [Start mapping reads with tophat](#start-mapping-reads-with-tophat)
+    * [Switch to mapping with HISAT](#switch-to-mapping-with-hisat)
     * [Mapping QC](#mapping-qc)
     * [Try to run RNAseq\-specific QC:](#try-to-run-rnaseq-specific-qc)
       * [RNA\-SeQ](#rna-seq)
       * [CollectRnaSeqMetrics](#collectrnaseqmetrics)
       * [RSeQC](#rseqc)
-  * [Allele\-specific alignment](#allele-specific-alignment)
     * [I am going to need to do a liftover before running this because the vcf is for hg19](#i-am-going-to-need-to-do-a-liftover-before-running-this-because-the-vcf-is-for-hg19)
       * [LiftoverVcf (picard\-tools)](#liftovervcf-picard-tools)
       * [CrossMap](#crossmap)
     * [WASP](#wasp)
     * [Clip overlapping reads](#clip-overlapping-reads)
+  * [eQTL analyses](#eqtl-analyses)
+    * [MatrixEQTL](#matrixeqtl)
   * [Transcript Identification](#transcript-identification)
     * [Cufflinks](#cufflinks)
     * [Cuffcompare](#cuffcompare)
@@ -36,13 +36,14 @@
       * [DEXSeq](#dexseq)
     * [Cufflinks](#cufflinks-1)
   * [SNP calling](#snp-calling)
-  * [ASEReadCounter](#asereadcounter)
+  * [<a href="https://software\.broadinstitute\.org/gatk/gatkdocs/org\_broadinstitute\_gatk\_tools\_walkers\_rnaseq\_ASEReadCounter\.php">ASEReadCounter</a>](#asereadcounter)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 
 
-#Create VCF with imputed SNPs
-##Prepare files for imputation
+
+# Create VCF with imputed SNPs
+## Prepare files for imputation
 - All steps needed for this analysis are run by the check-bim script on [this](http://www.well.ox.ac.uk/~wrayner/tools/) site (v4.2.5, with a few modifications for additional processing steps)
     - changed output from bed to VCF
     - added sort and compression steps
@@ -58,8 +59,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - files are uploaded from BTSync/FetalRNAseq/Genome-wide\ genotyping/Imputation3
     - Imputed data are in /Volumes/FetalRNAseq/ImputedGenotypes/Imputation3 and in /c8000xd3/rnaseq-heath/Genotypes/Imputation3 on rocks
         
-##Concatenate and filter imputed data
-###bcftools
+## Concatenate and filter imputed data
+### bcftools
 - modify vcf headers to add info about all filter classes (PASS/Genotyped/ Genotyped_only) (see [this](https://github.com/samtools/bcftools/issues/470) post)
     - ```head -13 ~/LabNotes/header.txt > header_temp.txt```
     - ```echo "##contig=<ID=$chr>" >> header_temp.txt```
@@ -89,7 +90,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```bcftools reheader -h temp.head -o All_chromosomes_relabelled.vcf.gz All_chromosomes.vcf.gz```
     - ```rm temp.head```
 
-##Add SNP IDs to imputed VCFs
+## Add SNP IDs to imputed VCFs
 - SNP DB [Schema](http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp146.sql) and [data](http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp146.txt.gz) downloaded from the [USCSC Genome Browser](https://genome.ucsc.edu/) and imported into FetalRNAseq mySQL DB
     - ```mysql -u root FetalRNAseq < SQL/snp146.sql```
     - chromosome (field 1), position (2) and ref (4) and alt (5) alleles can be used to uniquely identify each SNP (I hope!)
@@ -107,9 +108,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I've now modified AddSNPID.py to do what the name suggests:
         - ```bcftools view All_chromosomes_relabelled.vcf.gz | python ../LabNotes/Python/AddSNPID.py |bgzip -c >All_chromosomes_rsID.vcf.gz```
         
-#Prepare Sequencing data
-##Sequence data QC
-###FastQC        
+# Prepare Sequencing data
+## Sequence data QC
+### FastQC        
 - Running FastQC on Edinburgh data
     - I would like to 
         - (a) work with compressed data and 
@@ -134,8 +135,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - ```find Uncompressed/ -name fastqc_data.txt | xargs grep 'Total Sequences' | grep -v trim | grep -v SRR | grep -v Undetermined | grep -v _CER_ | grep -v _T_ctx_ | perl -pe 's/(\.sanfastq)?_fastqc\/fastqc_data\.txt\:Total Sequences//' | perl -pe 's/.*\///' > seq_lengths.txt```
     - Results are analysed in FastQC.md
 
-##Trimming sequences
-###Trim Adaptors from reads using cutadapt
+## Trimming sequences
+### Trim Adaptors from reads using cutadapt
 - I was able to install cutadapt on rocks by first installing pip in ~/.local (``` python ~/src/get-pip.py --user```) using it:
     - ```~/.local/bin/pip install --user --upgrade cutadapt```
 - After much struggle with the stupid space names, I finally had the genius of symlinking the data in my home folder:
@@ -161,7 +162,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```unzip -d FastQC/Uncompressed 'FastQC/*_trimmed_fastqc.zip'```
     - ```find Uncompressed/ -name summary.txt |grep trimmed |xargs perl -pe 's/_trimmed.*//' >>trimmed_summary.txt```
 
-###Use trim_galore cutadapt wrapper
+### Use trim_galore cutadapt wrapper
 - For some obscure reason, the reads are becoming unpaired after trimming. I get very high pair congruence when mapping the raw data with Tophat, but very low congruence with the trimmed data
 - I've also decided that it's a good idea to do some quality trimming because unlike Star, Tophat does not do read clipping
 - [trim_galore](http://www.bioinformatics.babraham.ac.uk/projects/trim_galore) is a perl wrapper for cutadapt that makes it a little more flexible and easy to use. It also solves this problem
@@ -169,17 +170,17 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I am going to solve this by clipping 5 bp from the 5' end of each read in addition to the quality and adapter trimming:
         - ```find /c8000xd3/databank/foetal-rna/Exeter_sequencing/15533_Oct_2014/ -name *.fastq.gz | xargs qsub SubmissionScripts/Trim.sh```
 
-#Mapping            
-##Start mapping reads with tophat
+# Mapping            
+## Start mapping reads with tophat
 - follow the instructions [here](http://www.illumina.com/documents/products/technotes/RNASeqAnalysisTopHat.pdf) to get started with tophat
     - ```wget --ftp-user=igenome --ftp-password=G3nom3s4u ftp://ftp.illumina.com/Homo_sapiens/NCBI/GRCh38Decoy/Homo_sapiens_NCBI_GRCh38Decoy.tar.gz```
     - ```tar -xzf Homo_sapiens_UCSC_hg19.tar.gz```
     - ```tophat --keep-fasta-order --transcriptome-index /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.inx --library-type fr-secondstrand --mate-inner-dist 150  --mate-std-dev 50 --num-threads 8 --output-dir /home/heath/Mappings/15533_150 /home/heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Sequence/Bowtie2Index/genome /home/heath/Trimmed/15533_TGACCA_L007_R1_001_trimmed.fastq.gz /home/heath/Trimmed/15533_TGACCA_L007_R2_001_trimmed.fastq.gz```
-##Switch to mapping with HISAT
+## Switch to mapping with HISAT
 - this gives very similar results, but runs a lot faster
 - I'm using Tophat mapping for the differential expression analysis, but HISAT for Allele-specific analyses
 
-##Mapping QC
+## Mapping QC
 - install [bamQC](https://github.com/s-andrews/BamQC) on rocks
     -``` cd src```
     - ```git clone https://github.com/s-andrews/BamQC```
@@ -206,7 +207,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```cat BamQC/15533_300/accepted_hits_bamqc/bamqc_data.txt | python LabNotes/Python/ExtractInsertSize.py >BamQC/15533_300/insert_sizes.txt```    
     - results are analysed in BamQC.md
 
-##Try to run RNAseq-specific QC:
+## Try to run RNAseq-specific QC:
 ### RNA-SeQ
 - Eilis used something called RNA-SeQ. She went thru several steps to format the mapping before this would work 
     - ```java -jar ~/Documents/src/picard-tools-1.119/CreateSequenceDictionary.jar R=genome.fa O=genome.bam```
@@ -217,7 +218,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```java -jar ~/Documents/src/RNA-SeQC_v1.1.8.jar -n 1000 -s "ID_15533|accepted_hits3.bam|Test" -t ~/BTSync/FetalRNAseq/Reference/gencode.v19.annotation.gtf -r ~/BTSync/FetalRNAseq/Reference/genome.fa -o RNAseQC -gc ~/BTSync/FetalRNAseq/Reference/gencode.v7.gc.txt```
         - still not working 
         
-###CollectRnaSeqMetrics
+### CollectRnaSeqMetrics
 - Run [CollectRnaSeqMetrics]( http://broadinstitute.github.io/picard/command-line-overview.html#CollectRnaSeqMetrics) from [Picard Tools](http://broadinstitute.github.io/picard/)
             
     - had to install a more recent version of java on rocks
@@ -228,7 +229,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - ```/home/heath/bin/java -Xmx2g -jar /home/heath/src/picard-tools-2.1.1/picard.jar CreateSequenceDictionary R=/home/heath/Ref/hg19.fa O=/home/heath/Ref/hg19.dict```    
     - A (sort of) explanation of the output is [here](https://broadinstitute.github.io/picard/picard-metric-definitions.html#RnaSeqMetrics)
 
-###RSeQC
+### RSeQC
 - Run [RSeQC](http://rseqc.sourceforge.net)
     - I figured it would be best to use a BED file made from the actual annotation I'm using
         - [BEDOPS](https://bedops.readthedocs.org/en/latest/) seemed like a good option for this, but I can't figure out how to get a proper [BED12](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) file from it, so I grabbed the recommended [perl script](https://code.google.com/p/ea-utils/source/browse/trunk/clipper/gtf2bed)
@@ -259,8 +260,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - this means that the difference in the number of records (1.9 million) is less than the difference in the number of reads (4.4 million), because 2.2 million non-unique reads map a total of 4.7 million times
     - while 2.9 million fewer reads are uniquely mapped, 3.5 million fewer reads are mapped in proper pairs. At first I thought this mean that the mapping accuracy is higher with the untrimmed data, but each read that is unmapped on non-uniquely mapped results in two reads being unpaired
 
-##I am going to need to do a liftover before running this because the vcf is for hg19
-###LiftoverVcf (picard-tools)    
+## I am going to need to do a liftover before running this because the vcf is for hg19
+### LiftoverVcf (picard-tools)    
 - there is a picard tool for this purpose. I just need to download the chain from UCSC
     - ```~/bin/java -jar ~/src/picard-tools-2.1.1/picard.jar LiftoverVcf```
         - this isn't working. all SNPs are being rejected. I think this is because the chromosomes are coded '1', etc rather than 'chr1', etc.
@@ -273,12 +274,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - there is an additional problem in that picard-tools-2.1.1 is unable to find the sequences even when the names match. something about [using bytes instead of names](https://github.com/broadinstitute/picard/releases/download/2.2.0/README.txt). Newer versions work
     - finally, the memory requirements for this are HUGE! It took 12 GB to process 20,000 lines. Chromosome 1 has 3.7 million lines, so that's going to require truly massive memory, or a hell of a lot of splitting and concatinating.
 
-###CrossMap
+### CrossMap
 - fortunately, it looks like something called [CrossMap](http://crossmap.sourceforge.net) is going to come to my rescue. 
     - It works fine on 100,000 lines. We'll see how it does on all of them
     - The only problem is that it produces an uncompressed VCF, so I'll have to run bgzip after it finishes    
 
-##WASP
+## WASP
 - Run [WASP](https://github.com/bmvdgeijn/WASP) allele-aware alignment
     - I compiled snp2hd5, which worked fine, though there was a fairly obvious problem with the vcf parsing that I had to be fixed
     - It is reporting an error on the last line of the chr22 vcf
@@ -320,7 +321,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
             - Filtering on position appears to clean everything up:
                 - ```bcftools filter -Oz -e 'POS>=89346516' chr22.GRCh38.vcf.gz > chr22.GRCh38.filter.vcf.gz```
                  
-##Clip overlapping reads
+## Clip overlapping reads
 - the tool of choice for this appears to be [clipOverlap](http://genome.sph.umich.edu/wiki/BamUtil:_clipOverlap) from [bamUtil](http://genome.sph.umich.edu/wiki/BamUtil)
 - this clips the read with the lowest quality score, which isn't as good as comparing the bases of the overlapping reads, but is probably good enough
 - this turned out to be a huge pain to install, until [bioconda](https://bioconda.github.io/index.html#setup) saved the day
@@ -328,9 +329,25 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```conda config --add channels bioconda```
     - ```conda install bamutil```
   
-                            
-#Transcript Identification
-##Cufflinks
+# eQTL analyses
+## MatrixEQTL
+- this requires 5 (!) files with bespoke formatting:
+    - [expression file](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/Sample_Data/GE.txt)
+        - I can get normalised counts from the EdgeR analysis. I'll probably just code this in the R script as well
+    - [genotypes file](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/Sample_Data/SNP.txt)
+        - I've written a script to convert a VCF file to this format (it prints SNP position file at the same time):
+            ```bcftools view genotypes.vcf.gz | python ~/LabNotes/Python/VCF2numeric.py genotypes.txt snp_pos.txt``` 
+    - [covariates file](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/Sample_Data/Covariates.txt)
+        - I added code to create this file from the target file and import it to the MatrixEQTL.R script
+    - [gene location file](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/Sample_Data/geneloc.txt)
+        ```echo "geneid\tchr\ts1\ts2" > geneloc.txt```
+        ```cat genes.gtf | awk '{if ($3 == "gene") print $10, $1, $4, $5}' | sed 's/[".;]//g' >> geneloc.txt```
+    - [SNP location file](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/Sample_Data/snpsloc.txt)
+        - see genotypes file above
+- all of this is now done in the MatrixEQTL.R script
+                           
+# Transcript Identification
+## Cufflinks
 - Run [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks)
     - Cufflinks is running on 15533, but it's taken 3 days so far and no indication of progress
     - Cufflinks finished after 1 day when I ran it on 15468, which isn't a much smaller dataset, so I'm not sure what's going on with that
@@ -338,7 +355,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I think it would also be helpful to get rid of all of the non-chromosome sequences.
         - FilterBAM.sh should do this
 
-##Cuffcompare
+## Cuffcompare
 - I downloaded a set of masked chromosome files from [UCSC](http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromFa.tar.gz) which can be used to filter results with the -s option:
     - ```cuffcompare -V -r /c8000xd3/rnaseq-heath/Ref/Homo_sapiens/NCBI/GRCh38Decoy/Annotation/Genes.gencode/genes.gtf -s /c8000xd3/rnaseq-heath/Ref/chroms```
 - I've now run Cuffcompare on all samples
@@ -356,21 +373,21 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - does a pretty poor job of distinguishing x from i as far as I can tell
     - need to plot exon size by feature type to investigate this
 
-##Make DB of GencodeGTF:
+## Make DB of GencodeGTF:
     - ```cat  gencode.v24.chr_patch_hapl_scaff.annotation.gtf |python ~/BTSync/FetalRNAseq/LabNotes/Python/GTF2CSV.py > ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.annotation.csv```
     - ```mv features.csv ~/BTSync/FetalRNAseq/Reference/gencode.v24.chr_patch_hapl_scaff.features.csv```
     - ```mysql db_name < ~/BTSync/FetalRNAseq/LabNotes/SQL/refGTF.sql```
     - ```SELECT DISTINCT feature FROM GencodeFeatures```
         - transcript_support_level, exon_number, level, gene_type, transcript_type, gene_name, transcript_name, tag, ccdsid, exon_id, gene_id, protein_id, transcript_id, gene_status, transcript_status, havana_gene, havana_transcript, ont        
 
-##Run Cufflinks on SRA data from Liu:2016ji (GSE71315)
+## Run Cufflinks on SRA data from Liu:2016ji (GSE71315)
 - downloaded sra toolkit and ran fastq-dump (GetSRA.sh)
 - hopefully I get similar results to what I have for our data
 - I've downloaded all bulk tissue riboZero RNAseq datasets and Tophat is running on one
 - The mapping QC looks VERY similar to our data, but a lot less reads, resulting in 10+ fold fewer novel junctions
     - This suggests that using a higher coverage threshold is the answer to cleaning up the novel cufflinks data
       
-#Expression analysis
+# Expression analysis
 - Analyse expressed SNPs
     - Run mpileup on SNPs from grant:
         - ```cat ~/BTSync/FetalRNAseq/Info/ExpressedSNPs.txt | python ~/BTSync/FetalRNAseq/LabNotes/Python/GetSNPpos.py | xargs -n 1 -I % samtools mpileup -d 8000 -f ~/BTSync/FetalRNAseq/Reference/genome.fa -r % -ABQ 0 accepted_hits.bam |python ~/BTSync/FetalRNAseq/LabNotes/Python/CountBases.py ```  
@@ -394,7 +411,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - I need to at least filter out any variants absent from all samples
                     
 
-#Cell-type deconvolution
+# Cell-type deconvolution
 - there is a nice description in the supplement of the common mind paper on how they did this
     - they used [this](http://web.stanford.edu/group/barres_lab/barreslab_rnaseq.xlsx) 7 cell type mouse dataset from {Zhang:2014bt}
     - I need to convert the MGI Symbols to HUGO symbols
@@ -408,20 +425,20 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
                 - The list of homologs includes 85 previous HUGO symbols, 468  Synonyms, and 54 unmatched Symbols
                 - If necessary, I can recover all but the unmatched ones using the [HUGO symbol checker](http://www.genenames.org/cgi-bin/symbol_checker)
 
-##HTSeq-count
+## HTSeq-count
 - Install:
     - ```pip install HTSeq```
     - run htseq-count.sh
     - wrote SubmitHtseq-count.sh to run on all samples sequentially      
 
-##DESeq2
+## DESeq2
 - Used [SARTools](https://github.com/PF2-pasteur-fr/SARTools) script to run analysis
 - Ran on output of HTseq-count (using default settings) on the .chr bam file (excludes rDNA)
 - Applied an arbitrary grouping to the analysis so there shouldn't be any DE Genes
 - 17198 looks really strange in the DESeq analysis because it has very few reads overlapping coding features. I am rerunning with this sample excluded (17025 is also excluded because it has very few reads mapping)
 - report includes normalised counts for each gene for each sample (in Counts/tables/num2vsnum1.complete.txt) that can be used to see if a given SNP affects expression of a gene of interest
 
-###DEXSeq
+### DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
     - There's some problem with the system version of R interacting with my installation of anaconda
     - I'm just going to try installing R with anaconda and using that:
@@ -430,11 +447,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - ```conda install -c rgrout r-rcpparmadillo```
         - When I tried again to install DEXSeq, it asked me if I want to update RcppArmadillo. I selected 'no'
           
-##Cufflinks
+## Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
 - Cuffquant produces a binary .cxb file. I'll need to run this on everything, then run cuffnorm to get FPKM values
 
-#SNP calling
+# SNP calling
 - This is needed to ensure that the samples used for RNAseq match the ones used for genotyping
 - In theory, SNPs called from the RNAseq mappings should match the SNPs in the imputed VCF
 - I don't need a huge number of SNPs for this analysis, so I extracted the mappings to chr22:
@@ -449,7 +466,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - Use bcftools gtcheck to confirm that samples match:
     - ```bash ~/LabNotes/SubmissionScripts/SubmitGTcheck.sh```
 
-#[ASEReadCounter](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_ASEReadCounter.php)
+# [ASEReadCounter](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_ASEReadCounter.php)
 - This tool
  from GATK seems like it's probably the best bet to extract AS read counts (tho it looks like WASP has a tool now also?)
 - Unfortunately, GATK it awful picky about input BAM files. I need to run [ValidateSAM](https://broadinstitute.github.io/picard/command-line-overview.html#ValidateSamFile) from Picard and fix all the issues with them before proceeding
