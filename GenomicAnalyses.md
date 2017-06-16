@@ -54,6 +54,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - ```cd Imputation3```
     - ```perl ../LabNotes/Perl/HRC-1000G-check-bim.pl -b ../FB_Merged.bim -f ../plink.frq -r ../../Ref/HRC.r1-1.GRCh37.wgs.mac5.sites.tab -h```
     - ```bash Run-plink.sh```
+    - I've now written a script to run all of these steps on the server (ProcessPLINK.sh)
 - Run imputation using HRC r1.1 2016 and Eagle v2.3 for phasing with Mixed population for QC (see ScreenShots/Imputation3.png)
     - files are uploaded from BTSync/FetalRNAseq/Genome-wide\ genotyping/Imputation3
     - Imputed data are in /Volumes/FetalRNAseq/ImputedGenotypes/Imputation3 and in /c8000xd3/rnaseq-heath/Genotypes/Imputation3 on rocks
