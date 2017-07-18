@@ -447,7 +447,20 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I wasn't able to install DEXSeq because RcppArmadillo would not compile. I installed it using coda:
         - ```conda install -c rgrout r-rcpparmadillo```
         - When I tried again to install DEXSeq, it asked me if I want to update RcppArmadillo. I selected 'no'
-          
+        
+### JunctionSeq
+- This is a soupped up version of DEXSeq that also uses info about splice junctions.
+- I ran it successfully on Carolina's data last year, and it looked pretty good, though there were problems with rare exons being called as differentially spliced because of reads from preRNA
+- I ran QoRT on all of my data to get counts across all features.
+    - I had to run this on the original sorted BAM file from Tophat because The filtered versions were causing failures that reported orphaned reads.
+- This takes a LONG time to run on the server and requires a LOT of memory.
+    - I currently have one run going (called JunctionSeq) that is meant to be a single process, but it says it's using 10. Not sure what's up with that.
+    - A second process (called JunctionSeq16) started out running on 16 processors, but I had to drop it down to 6 to get enough memory (30 GB per core; 20 failed)
+    - Since these are taking days, I'm trying to run it on small subsets of my data to get a handle on how it scales (single process, #$ -l h_vmem=12G)
+        - I'm calling these JuncitonSeq6
+        - It ran on 6 samples in 6.5 hrs with maxvmem=5.615G (RunJunctionSeq6.sh.o25182)
+        - It's currently running on 10 samples (job=RunJunctionSeq6.sh.o25192)
+    
 ## Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
 - Cuffquant produces a binary .cxb file. I'll need to run this on everything, then run cuffnorm to get FPKM values
