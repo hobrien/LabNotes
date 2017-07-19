@@ -438,6 +438,10 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - Applied an arbitrary grouping to the analysis so there shouldn't be any DE Genes
 - 17198 looks really strange in the DESeq analysis because it has very few reads overlapping coding features. I am rerunning with this sample excluded (17025 is also excluded because it has very few reads mapping)
 - report includes normalised counts for each gene for each sample (in Counts/tables/num2vsnum1.complete.txt) that can be used to see if a given SNP affects expression of a gene of interest
+- This is now set up to run on the server, analysing all data and data divided by week, using both DESeq and EdgeR.
+- It also does DESeq analyses excluding samples with anomalous sequencing depth
+- It also analyses changes over development time, in both sexes, as well as an interaction between them.
+- It is also supposed to systematically try excluding samples from the PCW14 analysis, but this isn't running
 
 ### DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
