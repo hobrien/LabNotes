@@ -459,7 +459,10 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - Since these are taking days, I'm trying to run it on small subsets of my data to get a handle on how it scales (single process, #$ -l h_vmem=12G)
         - I'm calling these JuncitonSeq6
         - It ran on 6 samples in 6.5 hrs with maxvmem=5.615G (RunJunctionSeq6.sh.o25182)
-        - It's currently running on 10 samples (job=RunJunctionSeq6.sh.o25192)
+        - It ran on 10 samples in 8.7 hrs with maxvmem=6.086G (job=RunJunctionSeq6.sh.o25192)
+        - It ran on 16 samples in 19.6 hrs with maxvmem=9.438G (RunJunctionSeq6.sh.o25193)
+        - Doing a quick and dirty extrapolation from a quadratic fit to these data, I estimate that the 130 sample job running on 6 cores will finish after 300 years!
+        - I'm keeping this job running for now, but I killed the mystery job to free up resources
     
 ## Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
