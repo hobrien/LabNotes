@@ -441,6 +441,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - This is now set up to run on the server, analysing all data and data divided by week, using both DESeq and EdgeR.
 - It also does DESeq analyses excluding samples with anomalous sequencing depth
 - It also analyses changes over development time, in both sexes, as well as an interaction between them.
+    - Initially, the coefficients that this was giving me were nonsense. This was because by default, the results() function of DESeq gives coefficients for dropping the last term from the model (in this case, ReadLength). Why it doesn't default to giving coefficients for dropping the term that is dropped in the reduced model is beyond me.
+    - After supplying the name='PCW' argument to results(), I get usable coefficients
+    - baseMean is the estimated expression for a sample with mean age and log2foldchange is the change per week.
+    - The formula to fit a curve is ```baseMean*2^(log2FoldDiff*(PCW-mean_age))```
+    - There should be a way to feed this formula to ```geom_smooth()```, but I just calculated it for each week, and used ```geom_line()```
+    - This is now implemented in the Shiny app
 - It is also supposed to systematically try excluding samples from the PCW14 analysis, but this isn't running
 - Code PCA plot by sequencing batch
     - The info about sex is really important for interpreting these plots, so I figured out how to use different shapes for other factors
