@@ -447,6 +447,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - This isn't trivial because the prcomp object that pca creates doesn't have simple eigenvectors
     - ggbiplot takes care of converting it to an object that can be plotted with ggplot, but the release version doesn't make it easy to customise the aesthetic mappings.
     - Need this version of ggbiplot: devtools::install_github("richardjtelford/ggbiplot", ref = "experimental") which simply converts the prcomp object into something that can be plotted with ggplot
+- The output of this analysis is enhanced with info about which chromosomes the genes are on, wether the chromosome is autosomal, X or Y, the HUGO symbol, and the gene type
+    - I've also added 'psuedoautosomal' as an additional chrType, using [this](http://www.genenames.org/genefamilies/PAR) list of PAR genes
 
 ### DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
