@@ -432,13 +432,16 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - run htseq-count.sh
     - wrote SubmitHtseq-count.sh to run on all samples sequentially      
 
-## DESeq2
+## DESeq2/EdgeR
 - Used [SARTools](https://github.com/PF2-pasteur-fr/SARTools) script to run analysis
 - Ran on output of HTseq-count (using default settings) on the .chr bam file (excludes rDNA)
 - Applied an arbitrary grouping to the analysis so there shouldn't be any DE Genes
 - 17198 looks really strange in the DESeq analysis because it has very few reads overlapping coding features. I am rerunning with this sample excluded (17025 is also excluded because it has very few reads mapping)
 - report includes normalised counts for each gene for each sample (in Counts/tables/num2vsnum1.complete.txt) that can be used to see if a given SNP affects expression of a gene of interest
 - This is now set up to run on the server, analysing all data and data divided by week, using both DESeq and EdgeR.
+    - Generally, nominal p-values are lower with DESeq2 than they are with EdgeR
+    - EdgeR misses a bunch of genes that are DE according to DESeq because the coverage cutoff (1 CPM) is much more stringent than the DESeq independent filtering threshold
+    - DESeq misses a bunch of genes that are DE according to EdgeR because they have samples with high Cooks distances. However, there's only one gene from the full dataset that this applies to (ENSG00000237973). Visual inspection of the data indicates that this gene is expressed at a low level in most samples but at a high level in a subset, only on of which is female.
 - It also does DESeq analyses excluding samples with anomalous sequencing depth
 - It also analyses changes over development time, in both sexes, as well as an interaction between them.
     - Initially, the coefficients that this was giving me were nonsense. This was because by default, the results() function of DESeq gives coefficients for dropping the last term from the model (in this case, ReadLength). Why it doesn't default to giving coefficients for dropping the term that is dropped in the reduced model is beyond me.
