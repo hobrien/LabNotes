@@ -442,6 +442,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - It also does DESeq analyses excluding samples with anomalous sequencing depth
 - It also analyses changes over development time, in both sexes, as well as an interaction between them.
 - It is also supposed to systematically try excluding samples from the PCW14 analysis, but this isn't running
+- Code PCA plot by sequencing batch
+    - The info about sex is really important for interpreting these plots, so I figured out how to use different shapes for other factors
+    - This isn't trivial because the prcomp object that pca creates doesn't have simple eigenvectors
+    - ggbiplot takes care of converting it to an object that can be plotted with ggplot, but the release version doesn't make it easy to customise the aesthetic mappings.
+    - Need this version of ggbiplot: devtools::install_github("richardjtelford/ggbiplot", ref = "experimental") which simply converts the prcomp object into something that can be plotted with ggplot
 
 ### DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
