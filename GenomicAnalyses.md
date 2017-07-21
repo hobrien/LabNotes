@@ -451,6 +451,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I wasn't able to install DEXSeq because RcppArmadillo would not compile. I installed it using coda:
         - ```conda install -c rgrout r-rcpparmadillo```
         - When I tried again to install DEXSeq, it asked me if I want to update RcppArmadillo. I selected 'no'
+    - I ran this on 6 samples and the cpu time was 8.3 hrs, which is slower than JunctionSeq, HOWEVER, it only required 4.9 GB of memory, making it possible to use 8 cores with a wallclock time of 1.7 hrs and total maxvmem=39.038G (RunDEXSeq.sh.o25298)
+        - note that this is also using a fuller model with RIN and ReadLength
+    - On 10 samples and the cpu time was 10.5 hrs, and maxvmem was 5.35. On 8 cores wallclock time was 1.9 hrs and total maxvmem=42.8 (RunDEXSeq.sh.o25309)
+        - this appears to be scaling exactly the same as JunctionSeq, using slightly more cpu and slightly less cpu
+    - On 16 samples the cpu time was 28.9 hrs with a maxvmem=6.6. On 8 cores with 8G of memory, wallclock time was 4.7 hrs and total maxvmem=52.820 (RunDEXSeq.sh.o25325).
         
 ### JunctionSeq
 - This is a soupped up version of DEXSeq that also uses info about splice junctions.
