@@ -464,6 +464,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - Need this version of ggbiplot: devtools::install_github("richardjtelford/ggbiplot", ref = "experimental") which simply converts the prcomp object into something that can be plotted with ggplot
 - The output of this analysis is enhanced with info about which chromosomes the genes are on, wether the chromosome is autosomal, X or Y, the HUGO symbol, and the gene type
     - I've also added 'psuedoautosomal' as an additional chrType, using [this](http://www.genenames.org/genefamilies/PAR) list of PAR genes
+    - I've plotted sex bias across the X chromosome, and the start of the chromosome which contains the larger of the PARs includes a cluster of male-biased genes. Female-biased genes are spread across the chromosome, which several genes with the largest bias clustering around XIST
 
 ### DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
