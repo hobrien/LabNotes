@@ -450,6 +450,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - The formula to fit a curve is ```baseMean*2^(log2FoldDiff*(PCW-mean_age))```
     - There should be a way to feed this formula to ```geom_smooth()```, but I just calculated it for each week, and used ```geom_line()```
     - This is now implemented in the Shiny app
+- It also runs with sex chromosomes features excluded
+    - This produces identical nominal p-values, but much higher FDR q-values.
+    - I thought I understood this but I'm still confused:
+        - when sex chromosomes are included, the threshold for independent filtering (which is set automatically to maximum the number of significant tests at q=0.1) is set to 0.35, resulting in 32788 features being excluded, and 30 DE autosomal Genes
+        - when sex chromosomes are excluded, the threshold is 1.7, resulting in 36436 features being excluded (a larger number despite the fact that the total number of features at the beginning is smaller).
+        - HOWEVER, this smaller number of tests results in lower adjusted FDR values
 - It is also supposed to systematically try excluding samples from the PCW14 analysis, but this isn't running
 - Code PCA plot by sequencing batch
     - The info about sex is really important for interpreting these plots, so I figured out how to use different shapes for other factors
