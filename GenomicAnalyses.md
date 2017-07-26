@@ -470,7 +470,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I ran this on 6 samples and the cpu time was 8.3 hrs, which is slower than JunctionSeq, HOWEVER, it only required 4.9 GB of memory, making it possible to use 8 cores with a wallclock time of 1.7 hrs and total maxvmem=39.038G (RunDEXSeq.sh.o25298)
         - note that this is also using a fuller model with RIN and ReadLength
     - On 10 samples and the cpu time was 10.5 hrs, and maxvmem was 5.35. On 8 cores wallclock time was 1.9 hrs and total maxvmem=42.8 (RunDEXSeq.sh.o25309)
-        - this appears to be scaling exactly the same as JunctionSeq, using slightly more cpu and slightly less cpu
+        - this appears to be scaling exactly the same as JunctionSeq, using slightly more cpu and slightly less memory
     - On 16 samples the cpu time was 28.9 hrs with a maxvmem=6.6. On 8 cores with 8G of memory, wallclock time was 4.7 hrs and total maxvmem=52.820 (RunDEXSeq.sh.o25325).
         
 ### JunctionSeq
@@ -488,7 +488,19 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - It ran on 16 samples in 19.6 hrs with maxvmem=9.438G (RunJunctionSeq6.sh.o25193)
         - Doing a quick and dirty extrapolation from a quadratic fit to these data, I estimate that the 130 sample job running on 6 cores will finish after 300 years!
         - I'm keeping this job running for now, but I killed the mystery job to free up resources
-    
+        - After filtering out features with mean counts < 100, I ran this on 121k features. The job died after 2.9 hrs (=18.6 hrs since it was run on 8 cores). maxvmem was 149G= 18.6 per core. This is somehow not any faster than analysing the full dataset and seems to be using WAY more memory. 
+
+### [Kallisto](https://pachterlab.github.io/kallisto/)
+- [This](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3) paper recommends filtering out *transcripts* with low counts, not counting bins
+    - This approach is endorsed in the [DEXSeq manual](https://bioconductor.org/packages/release/bioc/vignettes/DEXSeq/inst/doc/DEXSeq.pdf) 
+- Kallisto can be used to estimate transcript abundance. The output from it can also be used as input for [Sleuth](https://pachterlab.github.io/sleuth/about) to test for differential transcript abundance
+    - this is not the same as differential transcript usage because it looks at each transcript independently, not relative to the overall expression of the gene
+    - If I can't get DEXSeq to run in reasonable time, I will have to settle for differential transcript abundance, as well as looking at junctions in the same way.
+- I was able to get Kallisto to run on one of my samples with 100 bootstraps with maxvmem=4.174G and wallclock=3.2 hrs
+    - It is possible to run the bootstraps across multiple processors, but there's not much point since I have to run it on each of my 130 samples.
+    - I need to borrow the code from MappingPipeline.sh to get the sample names to line up properly with the fastq files
+    - All fastq files per sample are combined at this stage, so the code needs to be a bit different. 
+
 ## Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
 - Cuffquant produces a binary .cxb file. I'll need to run this on everything, then run cuffnorm to get FPKM values
