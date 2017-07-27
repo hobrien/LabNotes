@@ -452,9 +452,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - This is now implemented in the Shiny app
 - It also runs with sex chromosomes features excluded
     - This produces identical nominal p-values, but much higher FDR q-values.
-    - I thought I understood this but I'm still confused:
+    - This is because the q values are p-values scaled by the number of tests *divided by* the rank of the test ```(q =p*m/i)```. Having a bunch of extra tests at the top of the lists means that marginal tests are ranked lower and more likely to be deemed significant.
+    - If you add extra significant tests, m increases but m/i decreases.
         - when sex chromosomes are included, the threshold for independent filtering (which is set automatically to maximum the number of significant tests at q=0.1) is set to 0.35, resulting in 32788 features being excluded, and 30 DE autosomal Genes
+            - for ENSG00000189134.3, ```q=0.0000651*25351/16=0.114```
         - when sex chromosomes are excluded, the threshold is 1.7, resulting in 36436 features being excluded (a larger number despite the fact that the total number of features at the beginning is smaller).
+        - for ENSG00000189134.3, ```q=0.0000722*31369/76=0.030```
         - HOWEVER, this smaller number of tests results in lower adjusted FDR values
 - It is also supposed to systematically try excluding samples from the PCW14 analysis, but this isn't running
 - Code PCA plot by sequencing batch
