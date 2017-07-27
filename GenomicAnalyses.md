@@ -1,3 +1,8 @@
+
+Table of Contents
+=================
+
+  * [Table of Contents](#table-of-contents)
   * [Create VCF with imputed SNPs](#create-vcf-with-imputed-snps)
     * [Prepare files for imputation](#prepare-files-for-imputation)
     * [Concatenate and filter imputed data](#concatenate-and-filter-imputed-data)
@@ -31,16 +36,17 @@
     * [Run Cufflinks on SRA data from Liu:2016ji (GSE71315)](#run-cufflinks-on-sra-data-from-liu2016ji-gse71315)
   * [Expression analysis](#expression-analysis)
   * [Cell\-type deconvolution](#cell-type-deconvolution)
+  * [Differential Expression Analyses](#differential-expression-analyses)
     * [HTSeq\-count](#htseq-count)
-    * [DESeq2](#deseq2)
-      * [DEXSeq](#dexseq)
+    * [DESeq2/EdgeR](#deseq2edger)
+    * [DEXSeq](#dexseq)
+    * [JunctionSeq](#junctionseq)
+    * [<a href="https://pachterlab\.github\.io/kallisto/">Kallisto</a>](#kallisto)
     * [Cufflinks](#cufflinks-1)
   * [SNP calling](#snp-calling)
   * [<a href="https://software\.broadinstitute\.org/gatk/gatkdocs/org\_broadinstitute\_gatk\_tools\_walkers\_rnaseq\_ASEReadCounter\.php">ASEReadCounter</a>](#asereadcounter)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
-
-
 
 # Create VCF with imputed SNPs
 ## Prepare files for imputation
@@ -426,6 +432,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
                 - The list of homologs includes 85 previous HUGO symbols, 468  Synonyms, and 54 unmatched Symbols
                 - If necessary, I can recover all but the unmatched ones using the [HUGO symbol checker](http://www.genenames.org/cgi-bin/symbol_checker)
 
+# Differential Expression Analyses
 ## HTSeq-count
 - Install:
     - ```pip install HTSeq```
@@ -472,7 +479,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I've also added 'psuedoautosomal' as an additional chrType, using [this](http://www.genenames.org/genefamilies/PAR) list of PAR genes
     - I've plotted sex bias across the X chromosome, and the start of the chromosome which contains the larger of the PARs includes a cluster of male-biased genes. Female-biased genes are spread across the chromosome, which several genes with the largest bias clustering around XIST
 
-### DEXSeq
+## DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
     - There's some problem with the system version of R interacting with my installation of anaconda
     - I'm just going to try installing R with anaconda and using that:
@@ -486,7 +493,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - this appears to be scaling exactly the same as JunctionSeq, using slightly more cpu and slightly less memory
     - On 16 samples the cpu time was 28.9 hrs with a maxvmem=6.6. On 8 cores with 8G of memory, wallclock time was 4.7 hrs and total maxvmem=52.820 (RunDEXSeq.sh.o25325).
         
-### JunctionSeq
+## JunctionSeq
 - This is a soupped up version of DEXSeq that also uses info about splice junctions.
 - I ran it successfully on Carolina's data last year, and it looked pretty good, though there were problems with rare exons being called as differentially spliced because of reads from preRNA
 - I ran QoRT on all of my data to get counts across all features.
@@ -503,7 +510,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - I'm keeping this job running for now, but I killed the mystery job to free up resources
         - After filtering out features with mean counts < 100, I ran this on 121k features. The job died after 2.9 hrs (=18.6 hrs since it was run on 8 cores). maxvmem was 149G= 18.6 per core. This is somehow not any faster than analysing the full dataset and seems to be using WAY more memory. 
 
-### [Kallisto](https://pachterlab.github.io/kallisto/)
+## [Kallisto](https://pachterlab.github.io/kallisto/)
 - [This](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3) paper recommends filtering out *transcripts* with low counts, not counting bins
     - This approach is endorsed in the [DEXSeq manual](https://bioconductor.org/packages/release/bioc/vignettes/DEXSeq/inst/doc/DEXSeq.pdf) 
 - Kallisto can be used to estimate transcript abundance. The output from it can also be used as input for [Sleuth](https://pachterlab.github.io/sleuth/about) to test for differential transcript abundance
