@@ -498,6 +498,10 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - I ran it successfully on Carolina's data last year, and it looked pretty good, though there were problems with rare exons being called as differentially spliced because of reads from preRNA
 - I ran QoRT on all of my data to get counts across all features.
     - I had to run this on the original sorted BAM file from Tophat because The filtered versions were causing failures that reported orphaned reads.
+    - This outputs counts for genes (labeled A001), exons (labeled with E and consecutive numbers), known junctions (labeled with J and consecutive numbers and novel junctions (labeled with N and consecutive numbers).
+    - Novel junctions are numbered up to 431, which must mean that 431 different novel splice sites were found in a single gene. There aren't 421 novel splice sites in the counts file though, so that must be the total across all samples, with far fewer in the consensus.
+    - There are a total of 229 novel junctions in 181 different genes, with up to 6 novel junctions per gene.
+    - There is also a file from merging the novel junctions called orphanSplices which appears to include 197 junctions that aren't in genes.
 - This takes a LONG time to run on the server and requires a LOT of memory.
     - I currently have one run going (called JunctionSeq) that is meant to be a single process, but it says it's using 10. Not sure what's up with that.
     - A second process (called JunctionSeq16) started out running on 16 processors, but I had to drop it down to 6 to get enough memory (30 GB per core; 20 failed)
@@ -520,6 +524,15 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - It is possible to run the bootstraps across multiple processors, but there's not much point since I have to run it on each of my 130 samples.
     - I need to borrow the code from MappingPipeline.sh to get the sample names to line up properly with the fastq files
     - All fastq files per sample are combined at this stage, so the code needs to be a bit different. 
+
+## Differential splicing
+- The most direct way to evaluate differences in splicing is to use the spliced reads from the mapping.
+- These can be used for true differential splicing (changes in spliced reads *relative* to reads mapping to the gene) using DEXseq or they can simply be tested for differences in abundance, using eg; DESeq
+- The latter approach is a bit statistically dodgy, because junctions within a gene are not independent of each other (ie; if a gene is DE, then all of the junctions that make it up should be DE). However, it has the advantage that it hopefully won't take 300 years to run. Any DE junctions that are not part of a DE gene can be investigated on a case-by-case basis, or I can come up with some systematic approach to dealing with them
+- Tophat produces a bed file with splice junctions and the number of reads that support them (229,546 junctions)
+- There is also a file with counts over known splice sites output by QoRT, as well as a file that includes novel splices, which could be extracted with ```grep ':N'``` (377,531 + 229 novel)
+    - This includes a lot of zero counts that aren't in Tophat output, but they are all matched up between samples and assigned to genes, which makes life a bit easier. The zero counts are just going to get screened out by DESeq anyway.
+
 
 ## Cufflinks
 - Ran Cuffmerge.sh to get combined gtf, followed by Cuffquant.sh to get FPKM values
