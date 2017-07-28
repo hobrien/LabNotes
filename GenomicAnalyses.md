@@ -523,8 +523,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - I was able to get Kallisto to run on one of my samples with 100 bootstraps with maxvmem=4.174G and wallclock=3.2 hrs
     - It is possible to run the bootstraps across multiple processors, but there's not much point since I have to run it on each of my 130 samples.
     - I need to borrow the code from MappingPipeline.sh to get the sample names to line up properly with the fastq files
-    - All fastq files per sample are combined at this stage, so the code needs to be a bit different. 
-
+    - All fastq files per sample are combined at this stage, so the code needs to be a bit different.
+    - When I run 12107 with --rf-stranded, 33M of 85M reads pseudoaligned. When I run with --fr-stranded, 3M reads are pseudoaligned.
+    
 ## Differential splicing
 - The most direct way to evaluate differences in splicing is to use the spliced reads from the mapping.
 - These can be used for true differential splicing (changes in spliced reads *relative* to reads mapping to the gene) using DEXseq or they can simply be tested for differences in abundance, using eg; DESeq
