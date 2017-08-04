@@ -512,12 +512,16 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - It ran on 16 samples in 19.6 hrs with maxvmem=9.438G (RunJunctionSeq6.sh.o25193)
         - Doing a quick and dirty extrapolation from a quadratic fit to these data, I estimate that the 130 sample job running on 6 cores will finish after 300 years!
         - I'm keeping this job running for now, but I killed the mystery job to free up resources
-        - After filtering out features with mean counts < 100, I ran this on 121k features. The job died after 2.9 hrs (=18.6 hrs since it was run on 8 cores). maxvmem was 149G= 18.6 per core. This is somehow not any faster than analysing the full dataset and seems to be using WAY more memory. 
+        - After filtering out features with mean counts < 100, I ran this on 121k features. The job died after 2.9 hrs (=18.6 hrs since it was run on 8 cores). maxvmem was 149G= 18.6 per core. This is somehow not any faster than analysing the full dataset and seems to be using WAY more memory.
+        - After filtering out *transcripts* with low counts (TPM<1 in at least 56 samples according to Kallisto), it ran on 15 samples using 6 cores in 1.7 hrs (CPU time = 5.3 hrs). maxvmem was 128.495G=22G per core (RunJunctionSeqFilter.sh.o26263)
+           - this is a significant improvement (4 fold) in CPU over analysing all transcripts, but using twice as much memory for some reason
+           - depending on how this scales with sample size, it may still take 75 years to run on the complete dataset
+           - I'm going to at least try running it on ca. 30 samples.
 
-## [Kallisto](https://pachterlab.github.io/kallisto/)
+## Kallisto
 - [This](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3) paper recommends filtering out *transcripts* with low counts, not counting bins
     - This approach is endorsed in the [DEXSeq manual](https://bioconductor.org/packages/release/bioc/vignettes/DEXSeq/inst/doc/DEXSeq.pdf) 
-- Kallisto can be used to estimate transcript abundance. The output from it can also be used as input for [Sleuth](https://pachterlab.github.io/sleuth/about) to test for differential transcript abundance
+- [Kallisto](https://pachterlab.github.io/kallisto/) can be used to estimate transcript abundance. The output from it can also be used as input for [Sleuth](https://pachterlab.github.io/sleuth/about) to test for differential transcript abundance
     - this is not the same as differential transcript usage because it looks at each transcript independently, not relative to the overall expression of the gene
     - If I can't get DEXSeq to run in reasonable time, I will have to settle for differential transcript abundance, as well as looking at junctions in the same way.
 - I was able to get Kallisto to run on one of my samples with 100 bootstraps with maxvmem=4.174G and wallclock=3.2 hrs
@@ -525,7 +529,20 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I need to borrow the code from MappingPipeline.sh to get the sample names to line up properly with the fastq files
     - All fastq files per sample are combined at this stage, so the code needs to be a bit different.
     - When I run 12107 with --rf-stranded, 33M of 85M reads pseudoaligned. When I run with --fr-stranded, 3M reads are pseudoaligned.
-    
+- Kallisto produces a tab-separated output with gene lengths, "effective lengths", estimated counts, and TMP (transcripts per million).
+    - I think it makes sense to use TPM to filter out transcripts with low expression.
+    - To that end, I'm going to write an R script that produces a data frame with TPM across samples. I can then use this to select a list of features to remove from the GTF file, which can then be used to generate a new GFF file for counting features across exons/junctions (this is for a subset of 117 samples).
+    - Of 200k transcripts:
+        - 162k with average TPM > 0.01
+        - 119K with average TPM > 0.1
+        - 50k with average TPM > 1
+        - 4.5k with average TPM > 10
+        - 136k with TPM > 0.01 in at least 46 samples
+        - 111k with TPM > 0.1 in at least 46 samples
+        - 50k with TPM > 1 in at least 46 samples
+        - 4.7k with TPM > 10 in at least 46 samples
+            - for EdgeR, we used CPM > 1 in at least 46 samples
+        
 ## Differential splicing
 - The most direct way to evaluate differences in splicing is to use the spliced reads from the mapping.
 - These can be used for true differential splicing (changes in spliced reads *relative* to reads mapping to the gene) using DEXseq or they can simply be tested for differences in abundance, using eg; DESeq
