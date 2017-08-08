@@ -479,6 +479,23 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
     - I've also added 'psuedoautosomal' as an additional chrType, using [this](http://www.genenames.org/genefamilies/PAR) list of PAR genes
     - I've plotted sex bias across the X chromosome, and the start of the chromosome which contains the larger of the PARs includes a cluster of male-biased genes. Female-biased genes are spread across the chromosome, which several genes with the largest bias clustering around XIST
 
+## biobroom
+- This can be used to extract model results from DESeq/EdgeR (I don't think it works for Sleuth)
+- ```res <- tidy(DESeq(DESeqDataSetFromMatrix(...)))```
+- fitted values (for factors): mutate(res, fitted=baseMean*2^estimate)
+    - this is different from the values that I have been reporting from SARtools, which are simply group means
+- log fold changes are a bit complicated to extract because one has to sum estimates from two rows, but in the binary case is approximately: ```filter(res, term == 'SexMale') %>% mutate(LFC = estimate*2)```
+    - the correct estimate for any contrast is ```filter(res, term == 'SexMale' | term == 'SexFemale') %>% select(gene, term, estimate) %>% spread(term, estimate) %>% mutate(LFC = SexMale-SexFemale)```
+    - This is equivalent to ```results(DESeq(DESeqDataSetFromMatrix(...)), contrast=c('Sex', 'Male', 'Female'))
+    - The former is a lot more typing, but it's WAY faster
+- lfcSE is calculated the same way, while Wald stat, p-value and q-value all duplicated in both rows in the binary
+- Where there are three levels, all stats are the equivalent of dropping the level in that row; ie the following are equivalent:
+    - ```filter(res, term =='"ReadLength2.x.125.bp"```  
+    - ```results(DESeq(DESeqDataSetFromMatrix(...)), contrast=c("ReadLength", "2.x.100.bp", "2.x.75.bp"))```
+    - (though I had to run the latter as ```results(DESeq(DESeqDataSetFromMatrix(...)), contrast=c(0,0,0,0,1,0,1))```
+- No idea what happens with >3 levels    
+- incidentally, raw counts can be extracted as a matrix with ```counts((DESeq(DESeqDataSetFromMatrix(...)))``` and normalised counts with ``counts(DESeq(DESeqDataSetFromMatrix(...)), normalized=TRUE)```
+
 ## DEXSeq
 - This is a pretty heavy duty analysis, so I'm going to try to set it up on rocks
     - There's some problem with the system version of R interacting with my installation of anaconda
