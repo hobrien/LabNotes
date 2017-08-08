@@ -524,6 +524,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - After filtering out features with mean counts < 100, I ran this on 121k features. The job died after 2.9 hrs (=18.6 hrs since it was run on 8 cores). maxvmem was 149G= 18.6 per core. This is somehow not any faster than analysing the full dataset and seems to be using WAY more memory.
         - After filtering out *transcripts* with low counts (TPM<1 in at least 56 samples according to Kallisto), it ran on 15 samples using 6 cores in 1.7 hrs (CPU time = 5.3 hrs). maxvmem was 128.495G=22G per core (RunJunctionSeqFilter.sh.o26263)
            - this is a significant improvement (4 fold) in CPU over analysing all transcripts, but using twice as much memory for some reason
+           - I think this was accidentally run on 8 cores (need to modify this in the R script as well as the bash script)
+           - this means that maxvmem was 128.495G/8=16G per core
            - depending on how this scales with sample size, it may still take 75 years to run on the complete dataset
            - I'm going to at least try running it on ca. 30 samples.
 
