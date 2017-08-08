@@ -498,6 +498,15 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 - I ran it successfully on Carolina's data last year, and it looked pretty good, though there were problems with rare exons being called as differentially spliced because of reads from preRNA
 - I ran QoRT on all of my data to get counts across all features.
     - I had to run this on the original sorted BAM file from Tophat because The filtered versions were causing failures that reported orphaned reads.
+    - This reports a failure to determine strand for a few of our samples.
+        - between 19% and 57% of reads are classified as ```frFirstStrand```
+            - this is opposite to RSeQC, which reports the majority of reads on the second strand
+            - there also appears to be inconsistency between QoRTs (-stranded) and htseq-count (reverse)/tophat (fr-secondstrand), though the QoRTs manual says that -stranded=fr-firststrand in Tophat2
+        - between 0.6% and 4% of reads are classified as ```frSecondStrand```
+        - between 40% and 79% are classified as ```ambig_noGenes``` (presumably mostly intronic)
+        - strand failure appears to be based on a  frFirstStrand/frSecondStrand ratio cutoff of ca. 9 (8.4 < cutoff > 9.2 )
+            - our samples have ratios from 6.2 to 90, with 5 samples below the cutoff
+    - There is some additional issue with 16483 which takes FOREVER (and a ton of memory) to run
     - This outputs counts for genes (labeled A001), exons (labeled with E and consecutive numbers), known junctions (labeled with J and consecutive numbers and novel junctions (labeled with N and consecutive numbers).
     - Novel junctions are numbered up to 431, which must mean that 431 different novel splice sites were found in a single gene. There aren't 421 novel splice sites in the counts file though, so that must be the total across all samples, with far fewer in the consensus.
     - There are a total of 229 novel junctions in 181 different genes, with up to 6 novel junctions per gene.
