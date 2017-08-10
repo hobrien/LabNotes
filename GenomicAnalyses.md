@@ -541,10 +541,11 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - After filtering out features with mean counts < 100, I ran this on 121k features. The job died after 2.9 hrs (=18.6 hrs since it was run on 8 cores). maxvmem was 149G= 18.6 per core. This is somehow not any faster than analysing the full dataset and seems to be using WAY more memory.
         - After filtering out *transcripts* with low counts (TPM<1 in at least 56 samples according to Kallisto), it ran on 15 samples using 6 cores in 1.7 hrs (CPU time = 5.3 hrs). maxvmem was 128.495G=22G per core (RunJunctionSeqFilter.sh.o26263)
            - this is a significant improvement (4 fold) in CPU over analysing all transcripts, but using twice as much memory for some reason
-           - I think this was accidentally run on 8 cores (need to modify this in the R script as well as the bash script)
-           - this means that maxvmem was 128.495G/8=16G per core
-           - depending on how this scales with sample size, it may still take 75 years to run on the complete dataset
-           - I'm going to at least try running it on ca. 30 samples.
+               - I think this was accidentally run on 8 cores (need to modify this in the R script as well as the bash script)
+               - this means that maxvmem was 128.495G/8=16G per core
+               - depending on how this scales with sample size, it may still take 75 years to run on the complete dataset
+           - On 32 samples, this ran in 8 hrs on 4 cores (CPU time = 22 hrs), maxvmem was 82.567G = 20G per core
+           - this is actually slightly less memory than the 15 sample case, but 4x the CPU time. If this scaling holds, I will need 22 * 4 * 4 = 352 CPU hours to run the complete dataset. That's 2 days on 8 cores with 24G per core. Should be doable!
 
 ## Kallisto
 - [This](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3) paper recommends filtering out *transcripts* with low counts, not counting bins
@@ -570,7 +571,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
         - 50k with TPM > 1 in at least 46 samples
         - 4.7k with TPM > 10 in at least 46 samples
             - for EdgeR, we used CPM > 1 in at least 46 samples
-        
+- Using default parameter, Sleuth requires a seemingly infinite amount of RAM
+    - I thought this was because of all the bootstrap replicates, so I redid Kallisto wiht 10 reps
+    - This turns out to be unnecessary because there's an option to limit the number of reps used by Sleuth HOWEVER, the problem turned out to be that by default, Sleuth uses ALL the processors. Once I limited it to a single core, it ran in reasonable time with reasonable memory   
 ## Differential splicing
 - The most direct way to evaluate differences in splicing is to use the spliced reads from the mapping.
 - These can be used for true differential splicing (changes in spliced reads *relative* to reads mapping to the gene) using DEXseq or they can simply be tested for differences in abundance, using eg; DESeq
