@@ -546,6 +546,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
                - depending on how this scales with sample size, it may still take 75 years to run on the complete dataset
            - On 32 samples, this ran in 8 hrs on 4 cores (CPU time = 22 hrs), maxvmem was 82.567G = 20G per core
            - this is actually slightly less memory than the 15 sample case, but 4x the CPU time. If this scaling holds, I will need 22 * 4 * 4 = 352 CPU hours to run the complete dataset. That's 2 days on 8 cores with 24G per core. Should be doable!
+           - the full analysis ended up running for 10 days on 5 cores before exceeding the memory limits (30G).
+               - it crashed on the "test for DE" step, which based on previous runs, is about 80% through the process, suggesting that a full run would take about 12 days (=1440 CPU hours). 
+               - I'm not sure how far I can push the memory, but I could certainly get away with 4 cores/36GB, which would take about 15 days.
+               - Alternatively, I could break up the analysis into more cores/less memory for the initial steps, followed by fewer cores/more memory for the DE test.
+               - It would be nice to break it up anyway, because it's a shame to let it go for 2 weeks and have nothing to shoe for it because it died before any output was produced.
+- An additional issue with this analysis is that it currently doesn't include any cofactors at all. Adding these gets a bit harry, and will probably show things down to some extent. Possibly a large extent. I suppose this is something that I could test on a subset of the data. 
 
 ## Kallisto
 - [This](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3) paper recommends filtering out *transcripts* with low counts, not counting bins
